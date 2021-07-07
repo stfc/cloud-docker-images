@@ -8,7 +8,7 @@ FROM jupyter/minimal-notebook
 USER root
 
 # install additional package...
-RUN sudo apt-get install --yes curl wget patch
+RUN apt-get update --yes && apt-get install --yes curl wget patch
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
