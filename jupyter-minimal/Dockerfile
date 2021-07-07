@@ -1,0 +1,8 @@
+FROM jupyter/minimal-notebook
+# Get the latest image tag at:
+# https://hub.docker.com/r/jupyter/minimal-notebook/tags/
+# Inspect the Dockerfile at:
+# https://github.com/jupyter/docker-stacks/tree/HEAD/minimal-notebook/Dockerfile
+
+# install additional package...
+RUN apt-get install curl wget patch
