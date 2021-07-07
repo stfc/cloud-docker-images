@@ -4,5 +4,11 @@ FROM jupyter/minimal-notebook
 # Inspect the Dockerfile at:
 # https://github.com/jupyter/docker-stacks/tree/HEAD/minimal-notebook/Dockerfile
 
+# Switch to root to install packages
+USER root
+
 # install additional package...
-RUN sudo apt-get install curl wget patch
+RUN sudo apt-get install --yes curl wget patch
+
+# Switch back to jovyan to avoid accidental container runs as root
+USER ${NB_UID}
