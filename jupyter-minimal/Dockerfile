@@ -5,4 +5,4 @@ FROM jupyter/minimal-notebook
 # https://github.com/jupyter/docker-stacks/tree/HEAD/minimal-notebook/Dockerfile
 
 # install additional package...
-RUN apt-get install curl wget patch
+RUN sudo apt-get install curl wget patch
