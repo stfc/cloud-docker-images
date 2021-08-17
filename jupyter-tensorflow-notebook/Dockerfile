@@ -10,7 +10,7 @@ USER root
 # install additional package...
 RUN apt-get update --yes && apt-get install --yes curl wget patch
 # install tensorflow for GPUs
-RUN mamba install tensorflow-gpu --yes --quient
+RUN mamba install tensorflow-gpu --yes --quiet
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
