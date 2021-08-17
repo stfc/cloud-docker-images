@@ -8,7 +8,7 @@ FROM jupyter/tensorflow-notebook
 USER root
 
 # install additional package...
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+RUN apt-key add --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
 RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" >> /etc/apt/sources.list
 RUN apt-get update --yes && apt-get install --yes curl wget patch cuda-toolkit nvidia-driver-470
 # install tensorflow for GPUs
