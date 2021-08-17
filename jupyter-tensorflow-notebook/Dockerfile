@@ -8,7 +8,7 @@ FROM jupyter/tensorflow-notebook
 USER root
 
 # install additional package...
-RUN apt-get update --yes && apt-get install --yes curl wget patch
+RUN apt-get update --yes && apt-get install --yes curl wget patch nvidia-cuda-toolkit
 # install tensorflow for GPUs
 RUN pip install tensorflow-gpu
 
