@@ -11,7 +11,7 @@ USER root
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub 
 #RUN apt-key add 7fa2af80.pub
 RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" >> /etc/apt/sources.list
-RUN apt-get update --yes --allow-unauthenticated && apt-get install --yes --allow-unauthenticated curl wget patch cuda-toolkit nvidia-driver-470
+RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch cuda-toolkit nvidia-driver-470
 # install tensorflow for GPUs
 RUN pip install tensorflow-gpu
 
