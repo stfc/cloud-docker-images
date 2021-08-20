@@ -16,6 +16,7 @@ RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthentic
 # install tensorflow for GPUs
 RUN pip install tensorflow-gpu
 RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
+RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
