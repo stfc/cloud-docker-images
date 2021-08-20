@@ -18,8 +18,7 @@ RUN pip install tensorflow-gpu
 RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
 RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 RUN pip install jupyter-server-proxy jupyter-tensorboard-proxy
-RUN jupyter labextension install @jupyterlab/server-proxy
-RUN jupyter lab build
+
 
 
 # Switch back to jovyan to avoid accidental container runs as root
