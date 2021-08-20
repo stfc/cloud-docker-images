@@ -15,6 +15,7 @@ RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu200
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda nvidia-driver-470
 # install tensorflow for GPUs
 RUN pip install tensorflow-gpu
+RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
