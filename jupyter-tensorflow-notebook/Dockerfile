@@ -14,9 +14,9 @@ RUN apt-key add 7fa2af80.pub
 RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" >> /etc/apt/sources.list
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda-11-1 nvidia-driver-470
 # install tensorflow for GPUs
-RUN pip install tensorflow-gpu
-RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
-RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
+RUN pip install tensorflow-gpu tensorboard=2.02
+#RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
+#RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 RUN pip install jupyter-server-proxy jupyter-tensorboard-proxy
 
 
