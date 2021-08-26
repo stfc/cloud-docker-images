@@ -15,8 +15,8 @@ RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu200
 RUN apt-get remove --yes nvidia-driver*
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda cuda-drivers
 # install tensorflow for GPUs
-RUN pip install https://files.pythonhosted.org/packages/54/b5/c26b59d86eede0eaa65c88b9021525625351501f43c19f26455f4d2ef31c/tensorflow_gpu-2.2.2-cp38-cp38-manylinux2010_x86_64.whl
-RUN pip install tensorboard==2.2.2 jupyter-server-proxy jupyter-tensorboard-proxy
+#RUN pip install https://files.pythonhosted.org/packages/54/b5/c26b59d86eede0eaa65c88b9021525625351501f43c19f26455f4d2ef31c/tensorflow_gpu-2.2.2-cp38-cp38-manylinux2010_x86_64.whl
+RUN pip install tensorflow tensorboard jupyter-server-proxy jupyter-tensorboard-proxy
 #RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
 #RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
@@ -24,4 +24,4 @@ RUN pip install tensorboard==2.2.2 jupyter-server-proxy jupyter-tensorboard-prox
 
 
 # Switch back to jovyan to avoid accidental container runs as root
-USER ${NB_UID}
+#USER ${NB_UID}
