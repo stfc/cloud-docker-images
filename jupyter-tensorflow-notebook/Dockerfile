@@ -9,7 +9,8 @@ USER root
 
 # install additional package...
 RUN apt-get remove --yes python3
-RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  gnupg python3.8
+RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  gnupg 
+#python3.8
 
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub 
 RUN apt-key add 7fa2af80.pub
