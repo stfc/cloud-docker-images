@@ -8,14 +8,14 @@ FROM jupyter/tensorflow-notebook
 USER root
 
 # install additional package...
-RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  gnupg python3.7
+RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  gnupg
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub 
 RUN apt-key add 7fa2af80.pub
 RUN echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" >> /etc/apt/sources.list
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda cuda-drivers
 # install tensorflow for GPUs
-RUN pip install pip==19.3.1
-RUN pip install tensorflow-gpu tensorboard jupyter-server-proxy jupyter-tensorboard-proxy
+RUN pip install https://files.pythonhosted.org/packages/54/b5/c26b59d86eede0eaa65c88b9021525625351501f43c19f26455f4d2ef31c/tensorflow_gpu-2.2.2-cp38-cp38-manylinux2010_x86_64.whl
+RUN pip install tensorboard==2.2.2 jupyter-server-proxy jupyter-tensorboard-proxy
 #RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
 #RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
 
