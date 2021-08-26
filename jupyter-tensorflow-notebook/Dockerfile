@@ -8,7 +8,7 @@ FROM jupyter/tensorflow-notebook
 USER root
 
 # install additional package...
-RUN apt-get remove --yes python3
+#RUN apt-get remove --yes python3
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  gnupg 
 #python3.8
 
