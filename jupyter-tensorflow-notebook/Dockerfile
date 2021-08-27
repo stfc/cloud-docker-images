@@ -1,5 +1,5 @@
   
-FROM jupyter/tensorflow-notebook
+FROM jupyter/tensorflow-notebook:python-3.8.8
 # Get the latest image tag at:
 # https://hub.docker.com/r/jupyter/minimal-notebook/tags/
 # Inspect the Dockerfile at:
@@ -17,9 +17,7 @@ RUN apt-get remove --yes nvidia* *cuda*
 #RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda-11-1 nvidia-driver-470
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch cuda-11-1
 # install tensorflow for GPUs
-RUN pip install tensorflow-gpu
-RUN pip install git+https://github.com/cliffwoolley/jupyter_tensorboard.git
-RUN pip install git+https://github.com/chaoleili/jupyterlab_tensorboard.git
+RUN pip install tensorflow-gpu==2.2.0 tensorboard==2.2.0
 RUN pip install jupyter-server-proxy jupyter-tensorboard-proxy
 
 
