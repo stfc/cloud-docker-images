@@ -17,6 +17,7 @@ RUN apt-get remove --yes nvidia* *cuda*
 #RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch libcudnn8 cuda-11-1 nvidia-driver-470
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch
 # install tensorflow for GPUs
+RUN pip uninstall tensorflow
 RUN pip install tensorflow==2.2.0 tensorflow-gpu==2.2.0 tensorboard==2.2.0
 RUN pip install jupyter-server-proxy jupyter-tensorboard-proxy
 
