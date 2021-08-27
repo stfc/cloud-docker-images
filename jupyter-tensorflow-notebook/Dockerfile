@@ -19,7 +19,7 @@ RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthentic
 # install tensorflow for GPUs
 RUN pip uninstall tensorflow tensorboard --yes
 RUN pip install tensorflow==2.2.0 tensorflow-gpu==2.2.0 tensorboard==2.2.0
-RUN pip install jupyter-server-proxy jupyter-tensorboard-proxy
+RUN pip install jupyter-server-proxy
 
 
 
