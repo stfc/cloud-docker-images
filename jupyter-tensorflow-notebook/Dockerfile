@@ -18,7 +18,7 @@ RUN apt-get remove --yes nvidia* *cuda*
 RUN apt-get  --allow-unauthenticated update --yes && apt-get --allow-unauthenticated install --yes  curl wget patch cuda-toolkit-11-1 libcudnn8
 # install tensorflow for GPUs
 RUN pip uninstall tensorflow tensorboard --yes
-RUN pip install tensorflow==2.2.2 tensorflow-gpu==2.2.2 tensorboard==2.2.2
+RUN pip install tensorflow-gpu==2.2.2 tensorboard==2.2.2
 RUN pip install jupyter-server-proxy
 RUN pip install jupyterlab --upgrade
 
