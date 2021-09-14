@@ -26,4 +26,4 @@ RUN pip install jupyterlab --upgrade
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
-ENV TENSORBOARD_PROXY_URL=/proxy/6006
+ENV TENSORBOARD_PROXY_URL=/user-redirect/proxy/6006
