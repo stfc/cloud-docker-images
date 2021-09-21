@@ -9,6 +9,8 @@ USER root
 
 # install additional package...
 RUN apt-get update --yes && apt-get install --yes curl wget patch
+RUN pip install plotly
+RUN jupyter labextension install jupyterlab-plotly plotlywidget
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
