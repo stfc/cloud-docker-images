@@ -1,3 +1,5 @@
+# The image is based on centos7
+# https://hub.docker.com/_/centos
 ARG ROOT_CONTAINER=centos:centos7
 FROM $ROOT_CONTAINER
 
@@ -11,6 +13,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 
+# Install all packages that are needed to run Jupyter
+# Install tini: init for containers
 RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y \
@@ -19,6 +23,7 @@ RUN yum install -y epel-release && \
     ca-certificates \
     sudo
 
+# Configure environment
 ENV CONDA_DIR=/opt/conda \
     SHELL=/bin/bash \
     NB_USER="${NB_USER}" \
@@ -31,12 +36,17 @@ ENV CONDA_DIR=/opt/conda \
 ENV PATH="${CONDA_DIR}/bin:${PATH}" \
     HOME="/home/${NB_USER}"
 
+# Copy a script that we will use to correct permissions after running certain commands
 COPY fix-permissions /usr/local/bin/fix-permissions
 RUN chmod a+rx /usr/local/bin/fix-permissions
 
+# Enable prompt color in the skeleton .bashrc before creating the default NB_USER
+# hadolint ignore=SC2016
 RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc && \
    echo 'eval "$(command conda shell.bash hook 2> /dev/null)"' >> /etc/skel/.bashrc
 
+# Create NB_USER with name jovyan user with UID=1000 and in the 'users' group
+# and make sure these dirs are writable by the `users` group.
 RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
     sed -i.bak -e 's/^%admin/#%admin/' /etc/sudoers && \
     sed -i.bak -e 's/^%sudo/#%sudo/' /etc/sudoers && \
@@ -50,11 +60,20 @@ RUN echo "auth requisite pam_deny.so" >> /etc/pam.d/su && \
 USER ${NB_UID}
 ARG PYTHON_VERSION=default
 
+# Setup work directory for backward-compatibility
 RUN mkdir "/home/${NB_USER}/work" && \
     fix-permissions "/home/${NB_USER}"
 
+# Install conda as jovyan and check the sha256 sum provided on the download site
 WORKDIR /tmp
 
+# ---- Miniforge installer ----
+# Check https://github.com/conda-forge/miniforge/releases
+# Package Manager and Python implementation to use (https://github.com/conda-forge/miniforge)
+# We're using Mambaforge installer, possible options:
+# - conda only: either Miniforge3 to use Python or Miniforge-pypy3 to use PyPy
+# - conda + mamba: either Mambaforge to use Python or Mambaforge-pypy3 to use PyPy
+# Installation: conda, mamba, pip
 RUN set -x && \
     miniforge_arch=$(uname -m) && \
     miniforge_installer="Mambaforge-Linux-${miniforge_arch}.sh" && \
@@ -71,6 +90,12 @@ RUN set -x && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
+# Install Jupyter Notebook, Lab, and Hub
+# Generate a notebook server config
+# Cleanup temporary files
+# Correct permissions
+# Do all this in a single RUN command to avoid duplicating all of the
+# files across image layers when the permissions change
 RUN mamba install --quiet --yes \
     'notebook' \
     'jupyterhub' \
@@ -85,17 +110,25 @@ RUN mamba install --quiet --yes \
 
 EXPOSE 8888
 
+# Configure container startup
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
+
+# Copy local files as late as possible to avoid cache busting
 COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
+# Currently need to have both jupyter_notebook_config and jupyter_server_config to support classic and lab
 COPY jupyter_notebook_config.py /etc/jupyter/
+
+# Fix permissions on /etc/jupyter as root and add jovyan to sudoers
 USER root
 
-COPY jovyan /etc/sudoers.d/
 RUN sed -re "s/c.NotebookApp/c.ServerApp/g" \
     /etc/jupyter/jupyter_notebook_config.py > /etc/jupyter/jupyter_server_config.py && \
     fix-permissions /etc/jupyter/
 
+COPY jovyan /etc/sudoers.d/
+
+# Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
 
 WORKDIR "${HOME}"
