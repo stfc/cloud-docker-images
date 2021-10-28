@@ -25,9 +25,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.HARBOR_TOKEN }}
       - name: Fild current locaiton
-        run: pwd
-      - name: list current dir
-        run: ls
+        run: | 
+        pwd
+        ls
+        cd ..
+        ls
+        pwd
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
