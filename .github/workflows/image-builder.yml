@@ -24,6 +24,8 @@ jobs:
           registry: harbor.stfc.ac.uk
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.HARBOR_TOKEN }}
+      - name: Fild current locaiton
+        run: pwd
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
