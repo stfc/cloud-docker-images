@@ -24,13 +24,11 @@ jobs:
           registry: harbor.stfc.ac.uk
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.HARBOR_TOKEN }}
-      - name: Build images
-        run: for dockerPath in $(find -name Dockerfile); do dockerImageName=$(dirname $dockerPath| xargs basename); docker build . -t harbor.stfc.ac.uk/image-builder-testing/$dockerImageName:latest -f $dockerPath; done
-
-      # - name: Build and push
-      #   id: docker_build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     file: ${{matrix.DockerFile}}
-      #     tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
-      #     push: false
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: /github/workspace/${{matrix.ImageName}}
+          # file: ${{matrix.DockerFile}}
+          tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
+          push: false
