@@ -26,6 +26,8 @@ jobs:
           password: ${{ secrets.HARBOR_TOKEN }}
       - name: Fild current locaiton
         run: pwd
+      - name: list current dir
+        run: ls
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
