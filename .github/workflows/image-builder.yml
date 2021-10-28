@@ -24,6 +24,8 @@ jobs:
           registry: harbor.stfc.ac.uk
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.HARBOR_TOKEN }}
+      - name: Checkout repo
+        uses: actions/checkout@v1
       - name: Fild current locaiton
         run: tree $GITHUB_CONTEXT
       - name: Build and push
