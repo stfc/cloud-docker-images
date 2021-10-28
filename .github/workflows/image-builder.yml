@@ -25,12 +25,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.HARBOR_TOKEN }}
       - name: Fild current locaiton
-        run: |
-          pwd
-          ls
-          cd ..
-          ls
-          pwd
+        run: Ttree $GITHUB_CONTEXT
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
