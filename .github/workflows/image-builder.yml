@@ -1,0 +1,36 @@
+name: ImageBuilderToHarbor
+on: [workflow_dispatch] # Can be changed, however for testing purposes it is set to workflow dispatch
+jobs:
+  findDockerFile: #Use python action to find dockerfiles
+    runs-on: ubuntu-latest # Will be changed to customer runner, after buildin infustructure
+    outputs:
+      matrix: ${{steps.python.outputs.myOutput}}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+      - name: Find file
+        id: python
+        uses: vovsike/FirstAction@main
+  buildDockerFile:
+    needs: findDockerFile #Needs first bit to lookup python images
+    runs-on: ubuntu-latest # Will be changed to customer runner, after buildin infustructure
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.findDockerFile.outputs.matrix) }}
+    steps: #Logins to DockerGub or any other docker registry
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: harbor.stfc.ac.uk #Harbor is used as docker registry
+          username: ${{ secrets.DOCKERHUB_USERNAME }} #SECRETS
+          password: ${{ secrets.HARBOR_TOKEN }} #SECRETS
+      - name: Checkout repo #Used to get repo files into actions
+        uses: actions/checkout@v1
+      - name: Build and push #Actual docker build using docker aciton
+        id: docker_build
+        uses: docker/build-push-action@v2
+        continue-on-error: true
+        with:
+          context: ${{matrix.ImageName}}
+          tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
+          push: true
