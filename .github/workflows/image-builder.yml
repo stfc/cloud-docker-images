@@ -29,6 +29,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: /github/workspace/${{matrix.ImageName}}/
-          # file: ${{matrix.DockerFile}}
+          file: ${{matrix.DockerFile}}
           tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
           push: false
