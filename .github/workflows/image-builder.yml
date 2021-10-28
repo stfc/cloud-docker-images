@@ -33,4 +33,4 @@ jobs:
         with:
           context: ${{matrix.ImageName}}
           tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
-          push: false
+          push: push
