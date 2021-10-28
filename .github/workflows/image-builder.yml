@@ -30,4 +30,5 @@ jobs:
         with:
           file: ${{matrix.DockerFile}}
           tags: harbor.stfc.ac.uk/image-builder-testing/${{matrix.ImageName}}:latest
+          context: .
           push: false
