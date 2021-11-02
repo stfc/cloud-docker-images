@@ -1,0 +1,20 @@
+name: GitHub Actions Docker Demo
+on: [workflow_dispatch]
+jobs:
+  findDockerFile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+      - name: Login to harbor
+        uses: docker/login-action@v1
+        with:
+          registry: harbor.stfc.ac.uk
+          username: ${{ secrets.HARBOR_USERNAME}}
+          password: ${{ secrets.HARBOR_TOKEN}}
+      - name: Build docker images
+        run: |
+          for dockerPath in $(find -name Dockerfile); do dockerImageName=$(dirname $dockerPath| xargs basename); docker build . -t harbor.stfc.ac.uk/image-builder-testing/$dockerImageName:latest -f $dockerPath; done
+      - name: Push docker images
+        run: |
+          for dockerPath in $(find -name Dockerfile); do dockerImageName=$(dirname $dockerPath| xargs basename); docker push harbor.stfc.ac.uk/image-builder-testing/$dockerImageName:latest; done
