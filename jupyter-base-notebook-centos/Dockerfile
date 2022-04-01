@@ -99,7 +99,12 @@ RUN set -x && \
 RUN mamba install --quiet --yes \
     'notebook' \
     'jupyterhub' \
-    'jupyterlab' && \
+    'jupyterlab' 'python-openstackclient'\
+    'python-magnumclient'\
+    'python-octaviaclient'\
+    'python-novaclient'\
+    'aodhclient'\
+    'openstacksdk' && \
     mamba clean --all -f -y && \
     npm cache clean --force && \
     jupyter notebook --generate-config && \
