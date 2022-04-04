@@ -99,7 +99,8 @@ RUN set -x && \
 RUN mamba install --quiet --yes \
     'notebook' \
     'jupyterhub' \
-    'jupyterlab' 'python-openstackclient'\
+    'jupyterlab' \
+    'python-openstackclient'\
     'python-magnumclient'\
     'python-octaviaclient'\
     'python-novaclient'\
