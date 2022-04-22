@@ -7,15 +7,6 @@ FROM jupyter/all-spark-notebook
 # Switch to root to install packages
 USER root
 
-RUN mamba install --quiet --yes \
-    'python-openstackclient'\
-    'python-magnumclient'\
-    'python-octaviaclient'\
-    'python-novaclient'\
-    'aodhclient'\
-    'openstacksdk' && \
-    mamba clean --all -f -y
-
 # install additional package...
 RUN apt-get update --yes && apt-get install --yes curl wget patch
 
