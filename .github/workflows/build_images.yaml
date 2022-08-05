@@ -1,6 +1,10 @@
 name: docker_images
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "14 14 * * TUE" # Every Tuesday at 14:14
 
 jobs:
   build:
