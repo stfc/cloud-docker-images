@@ -15,7 +15,8 @@ RUN apt-get update --yes \
 RUN pip uninstall tensorflow tensorboard --yes \
     && pip install --no-cache-dir tensorflow-gpu tensorboard \
     && pip install --no-cache-dir jupyter-server-proxy \
-    && pip install --no-cache-dir jupyterlab --upgrade
+    && pip install --no-cache-dir jupyterlab --upgrade \
+    && pip install --no-cache-dir graphviz --upgrade
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
