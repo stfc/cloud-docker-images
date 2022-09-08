@@ -1,13 +1,12 @@
 
-FROM jupyter/tensorflow-notebook:ubuntu-22.04
+FROM jupyter/tensorflow-notebook:ubuntu-20.04
 
 # Switch to root to install packages
 USER root
 
 RUN apt-get update --yes \
-    # Nvidia components
-    && apt-get install --yes nvidia-cuda-toolkit nvidia-cudnn \
-    # User facing components
+    # Pinned to 460.32.03 to match prod version (capped by CoreOS)
+    && apt-get install nvidia-headless-460 nvidia-cuda-toolkit nvidia-utils-460 libnvidia-gl-470-server -y --no-install-recommends \
     && apt-get install --yes curl wget patch \
     && rm -rf /var/lib/apt/lists/*
 
