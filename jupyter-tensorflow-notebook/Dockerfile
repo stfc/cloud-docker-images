@@ -6,7 +6,12 @@ USER root
 
 RUN apt-get update --yes \
     # Pinned to 460.32.03 to match prod version (capped by CoreOS)
-    && apt-get install nvidia-headless-460 nvidia-cuda-toolkit nvidia-utils-460 libnvidia-gl-470-server -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+    nvidia-headless-460 \
+    nvidia-cuda-toolkit \
+    nvidia-utils-460 \
+    libnvidia-gl-470-server \
+    libopengl0 \
     && apt-get install --yes curl wget patch \
     && rm -rf /var/lib/apt/lists/*
 
