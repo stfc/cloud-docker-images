@@ -12,4 +12,6 @@ RUN apt-get update && \
     xvfb && \
     rm -rf /var/lib/apt/lists/*
 
+ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
+
 USER ${NB_UID}
