@@ -23,6 +23,7 @@ jobs:
             jupyter-base-notebook-centos,
             jupyter-openstack-notebook,
             jupyter-scipy-notebook,
+            jupyter-opengl,
           ]
     steps:
       - name: Set up Docker Buildx
