@@ -24,6 +24,8 @@ RUN apt-get update && \
     xvfb && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir k3d
+
 ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
 
 USER ${NB_UID}
