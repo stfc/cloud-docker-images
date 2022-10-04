@@ -1,0 +1,20 @@
+name: base
+channels:
+  - conda-forge
+  - intel
+  - ccpi
+  - astra-toolbox
+  - defaults
+dependencies:
+  - cil
+  - scipy=1.7.3  # CIL prevents `GLIBCXX_3.4.30' not found
+  - tomophantom=2.0.0
+  - astra-toolbox
+  - tigre=2.2
+  - ccpi-regulariser=21.0.0
+  - xraylib # IBSim training
+  - k3d # IBSim training
+  - pip:
+    - gvxr # IBSim training
+    - xpecgen # IBSim training
+  
