@@ -14,7 +14,9 @@ dependencies:
   - ccpi-regulariser=21.0.0
   - xraylib # IBSim training
   - k3d # IBSim training
+  - pip
   - pip:
     - gvxr # IBSim training
     - xpecgen # IBSim training
+    - git+https://bitbucket.org/spekpy/spekpy_release.git
   
