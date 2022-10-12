@@ -18,5 +18,6 @@ dependencies:
   - pip:
     - gvxr # IBSim training
     - xpecgen # IBSim training
+    - simpleitk
     - git+https://bitbucket.org/spekpy/spekpy_release.git
   
