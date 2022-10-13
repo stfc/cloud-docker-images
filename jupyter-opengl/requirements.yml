@@ -16,6 +16,7 @@ dependencies:
   - k3d # IBSim training
   - pip
   - pip:
+    - cma
     - gvxr # IBSim training
     - xpecgen # IBSim training
     - simpleitk
