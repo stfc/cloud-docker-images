@@ -8,7 +8,11 @@ FROM jupyter/scipy-notebook
 USER root
 
 # install additional package...
-RUN apt-get update --yes && apt-get install --yes curl wget patch
+RUN apt-get update --yes && \
+    apt-get install --yes curl wget patch && \
+    rm -rf /var/lib/apt/lists/* && \
+    # RFI PHD 2022
+    pip install --no-cache-dir pysb
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
