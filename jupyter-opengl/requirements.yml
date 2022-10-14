@@ -16,7 +16,9 @@ dependencies:
   - k3d # IBSim training
   - pip
   - pip:
+    - cma
     - gvxr # IBSim training
     - xpecgen # IBSim training
+    - simpleitk
     - git+https://bitbucket.org/spekpy/spekpy_release.git
   
