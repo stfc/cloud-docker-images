@@ -12,7 +12,8 @@ RUN apt-get update --yes && \
     apt-get install --yes curl wget patch && \
     rm -rf /var/lib/apt/lists/* && \
     # RFI PHD 2022
-    pip install --no-cache-dir pysb
+    pip install --no-cache-dir pysb && \
+    conda install -c alubbock bionetgen
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
