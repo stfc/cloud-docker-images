@@ -46,8 +46,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v3
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           push: true
           context: "{{defaultContext}}:${{ matrix.image }}"
           tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
