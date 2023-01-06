@@ -27,7 +27,7 @@ RUN apt-get update && \
 COPY requirements.yml .
 # Downgrade ipywidgets to less than 8 to avoid https://github.com/matplotlib/ipympl/issues/460
 RUN pip install --no-cache-dir --ignore-installed "ipywidgets>=7.0,<8"
-RUN conda env update --file requirements.yml && rm requirements.yml
+RUN mamba env update --file requirements.yml && rm requirements.yml
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
 
