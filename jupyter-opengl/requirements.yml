@@ -7,7 +7,6 @@ channels:
   - defaults
 dependencies:
   - cil
-  - scipy=1.7.3  # CIL prevents `GLIBCXX_3.4.30' not found
   - tomophantom=2.0.0
   - astra-toolbox
   - tigre=2.2
