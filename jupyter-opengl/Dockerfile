@@ -9,11 +9,7 @@ RUN apt-get update --yes \
     nvidia-headless-515 \
     nvidia-utils-515 \
     libnvidia-gl-515-server \
-    libopengl0 \
-    && apt-get install --yes curl wget patch \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && \
+    libopengl0 && \
     apt-get install --no-install-recommends --yes \
     # The Nvidia cuda toolkit has to be installed after the driver to allow
     # apt to select the correct one
@@ -26,7 +22,7 @@ RUN apt-get update && \
     xvfb && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.yml .
+# COPY requirements.yml .
 # RUN mamba env update --file requirements.yml && rm requirements.yml
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
