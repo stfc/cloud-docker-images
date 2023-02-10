@@ -1,16 +1,15 @@
 
-FROM jupyter/tensorflow-notebook:ubuntu-20.04
+FROM jupyter/tensorflow-notebook:ubuntu-22.04
 
 # Switch to root to install packages
 USER root
 
 RUN apt-get update --yes \
-    # Pinned to 460.32.03 to match prod version (capped by CoreOS)
     && apt-get install -y --no-install-recommends \
-    nvidia-headless-460 \
+    nvidia-headless-515 \
     nvidia-cuda-toolkit \
-    nvidia-utils-460 \
-    libnvidia-gl-470-server \
+    nvidia-utils-515 \
+    libnvidia-gl-515-server \
     libopengl0 \
     && apt-get install --yes curl wget patch \
     && rm -rf /var/lib/apt/lists/*
