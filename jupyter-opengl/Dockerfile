@@ -27,7 +27,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.yml .
-RUN mamba env update --file requirements.yml && rm requirements.yml
+# RUN mamba env update --file requirements.yml && rm requirements.yml
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
 
