@@ -22,9 +22,6 @@ RUN apt-get update --yes \
     xvfb && \
     rm -rf /var/lib/apt/lists/*
 
-# COPY requirements.yml .
-# RUN mamba env update --file requirements.yml && rm requirements.yml
-
 ENV NVIDIA_DRIVER_CAPABILITIES compute,graphics,utility,video
 
 USER ${NB_UID}
