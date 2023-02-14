@@ -1,0 +1,9 @@
+pandas
+regex
+plotly
+geopandas
+ipywidgets>=7.6
+matplotlib
+pyjanitor
+scikit-learn>=1.0.0
+scipy
