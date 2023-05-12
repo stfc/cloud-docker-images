@@ -15,16 +15,9 @@ jobs:
         image:
           [
             hartree-notebook,
-            jupyter-datascience-notebook,
-            jupyter-openstack-notebook-centos,
-            jupyter-tensorflow-notebook,
-            jupyter-all-spark-notebook,
-            jupyter-minimal,
-            jupyter-r-notebook,
-            jupyter-base-notebook-centos,
-            jupyter-openstack-notebook,
-            jupyter-scipy-notebook,
             jupyter-opengl,
+            jupyter-openstack-notebook,
+            jupyter-tensorflow-notebook,
           ]
     steps:
       - name: Set up Docker Buildx
