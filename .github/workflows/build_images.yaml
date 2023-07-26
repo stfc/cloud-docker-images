@@ -1,72 +1,63 @@
 name: docker_images
-
 on:
   push:
   pull_request:
-  schedule:
-    - cron: "14 14 * * TUE" # Every Tuesday at 14:14
-
+  schedule: [{cron: "14 14 * * TUE"}] # Every Tuesday at 14:14
 jobs:
+  setup:
+    if: github.event_name != 'pull_request' || !contains('OWNER,MEMBER,COLLABORATOR', github.event.pull_request.author_association)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.ref }} # fix SHA
+    - name: List all images
+      id: metadata
+      run: |
+        echo "images=$(
+          find -name Dockerfile -print0 | xargs -0 -II dirname "I" | sed 's#./##g' | jq -Rsc 'split("\n")[:-1]'
+        )" >> $GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    outputs:
+      images: ${{ steps.metadata.outputs.images }}
+      sha: ${{ steps.metadata.outputs.sha_short }}
   build:
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false # Build all images so we can see which fail
+      fail-fast: false
       matrix:
-        image:
-          [
-            hartree-notebook,
-            jupyter-datascience-notebook,
-            jupyter-openstack-notebook-centos,
-            jupyter-tensorflow-notebook,
-            jupyter-all-spark-notebook,
-            jupyter-minimal,
-            jupyter-r-notebook,
-            jupyter-base-notebook-centos,
-            jupyter-openstack-notebook,
-            jupyter-scipy-notebook,
-            jupyter-opengl,
-          ]
+        image: ${{ fromJson(needs.setup.outputs.images) }}
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Login to Harbor
-        uses: docker/login-action@v2
-        with:
-          registry: harbor.stfc.ac.uk
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_TOKEN }}
-
-      - name: Build notebook and push to prod
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          context: "{{defaultContext}}:${{ matrix.image }}"
-          tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
-
-      - name: Set commit SHA for later
-        id: commit_sha
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Build notebook and push to staging
-        if: ${{ github.ref != 'refs/heads/master' }}
-        uses: docker/build-push-action@v3
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: true
-          context: "{{defaultContext}}:${{ matrix.image }}"
-          tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ steps.commit_sha.outputs.sha_short }}"
-
-      - name: Inform of tagged name
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: echo "Image published to harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ steps.commit_sha.outputs.sha_short }}"
+    - uses: actions/checkout@v3
+    - uses: docker/setup-buildx-action@v2
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to Harbor
+      uses: docker/login-action@v2
+      with:
+        registry: harbor.stfc.ac.uk
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
+    - name: Build & push to prod
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        context: "{{defaultContext}}:${{ matrix.image }}"
+        tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
+    - name: Build & push to staging
+      if: ${{ github.ref != 'refs/heads/master' }}
+      uses: docker/build-push-action@v3
+      with:
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        push: true
+        context: "{{defaultContext}}:${{ matrix.image }}"
+        tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+    - name: Inform of tagged name
+      if: ${{ github.ref != 'refs/heads/master' }}
+      run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
