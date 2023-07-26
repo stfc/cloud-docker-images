@@ -4,6 +4,8 @@
 
 ## CI and Automated Builds
 
+[![CI](https://img.shields.io/github/actions/workflow/status/stfc/cloud-docker-images/build_images.yaml?logo=docker)](https://github.com/stfc/cloud-docker-images/actions/workflows/build_images.yaml?query=branch%3Amaster)
+
 Images are built:
 
 - On Pull Requests
