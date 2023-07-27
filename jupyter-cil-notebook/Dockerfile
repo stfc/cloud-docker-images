@@ -6,7 +6,7 @@ FROM jupyter/tensorflow-notebook:ubuntu-20.04
 
 RUN mamba install -y -c conda-forge -c intel -c ccpi \
   cil=23.0.1 astra-toolbox tigre ccpi-regulariser tomophantom "ipywidgets<8" \
-  cudatoolkit jupyter-server-proxy \
+  jupyter-server-proxy \
   && mamba clean -a -y -f \
   && fix-permissions "${CONDA_DIR}" \
   && fix-permissions "/home/${NB_USER}"
