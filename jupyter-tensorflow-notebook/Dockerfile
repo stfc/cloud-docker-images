@@ -6,7 +6,16 @@ USER root
 
 RUN apt-get update --yes \
     && apt-get install -y --no-install-recommends \
-    && apt-get install --yes nvidia-cuda-toolkit
+    nvidia-headless-515 \
+    nvidia-utils-515 \
+    libnvidia-gl-515-server \
+    libopengl0 \
+    && apt-get install --yes \
+    curl \
+    wget \
+    patch  \
+    nvidia-cuda-toolkit \
+    && rm -rf /var/lib/apt/lists/*
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
