@@ -1,8 +1,26 @@
 
-FROM jupyter/tensorflow-notebook:ubuntu-22.04
+# Use a GPU-enabled base image based on the recommendation from
+# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#gpu-accelerated-notebooks
+# As this combines the tensorflow-notebook and the cuda-notebook, so we only
+# need to install the additional packages for each course.
+FROM cschranz/gpu-jupyter:v1.5_cuda-11.6_ubuntu-20.04_python-only
 
-RUN pip install jupyter-server-proxy tensorflow tensorboard --no-cache-dir
-RUN pip install gym==0.25.2 pygame --no-cache-dir
+USER root
+# The base image only gets updated when a new version of CUDA is released.
+# We need to update the base image to get the latest security updates.
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+
+RUN pip install --user --no-cache-dir \
+    # SciML requirements
+    gym==0.25.2 \
+    pygame && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
 
 # Note, the trailing slash is important!
 ENV TENSORBOARD_PROXY_URL=/user-redirect/proxy/6006/
