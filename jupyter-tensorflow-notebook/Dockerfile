@@ -15,8 +15,15 @@ RUN apt-get update && \
 
 USER ${NB_UID}
 
+# Required for Tensorboard on a remote container
+RUN mamba install --yes \
+    'jupyter-server-proxy' && \
+    mamba clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# SciML requirements
 RUN pip install --user --no-cache-dir \
-    # SciML requirements
     gym==0.25.2 \
     pygame && \
     fix-permissions "${CONDA_DIR}" && \
