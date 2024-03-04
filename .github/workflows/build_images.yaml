@@ -42,6 +42,12 @@ jobs:
         registry: harbor.stfc.ac.uk
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_TOKEN }}
+    - name: Login to Test Harbor
+      uses: docker/login-action@v2
+      with:
+        registry: test.harbor.stfc.ac.uk
+        username: ${{ secrets.TEST_HARBOR_USERNAME }}
+        password: ${{ secrets.TEST_HARBOR_TOKEN }}
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/build-push-action@v3
@@ -57,10 +63,10 @@ jobs:
         cache-to: type=gha,mode=max
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
-        tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+        tags: "test.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
     - name: Inform of tagged name
       if: ${{ github.ref != 'refs/heads/master' }}
-      run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+      run: echo "::notice title=published::test.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
   finished: # convenient single job name to apply branch protection to
     needs: build
     runs-on: ubuntu-latest
