@@ -3,6 +3,7 @@ gymnasium
 ipywidgets
 matplotlib
 pandas
+plotly
 pygame
 pyjanitor
 regex
