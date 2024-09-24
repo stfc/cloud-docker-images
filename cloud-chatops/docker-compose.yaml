@@ -1,0 +1,11 @@
+services:
+  cloud_chatops:
+    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops
+    volumes:
+      - $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME/.docker/config.json:/config.json
+    command: --interval 60

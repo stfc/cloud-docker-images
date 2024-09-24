@@ -1,0 +1,120 @@
+name: Cloud Chatops
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/cloud_chatops.yaml"
+      - "cloud_chatops/**"
+
+jobs:
+  test_and_lint:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-20.04','ubuntu-22.04']
+        python-version: [ "3.12", "3.x" ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          cd cloud_chatops
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Analyse with pylint
+        run: |
+          cd cloud_chatops
+          pylint . --recursive=true --rcfile=.pylintrc
+
+      - name: Run tests
+        run: |
+          cd cloud_chatops
+          python3 -m pytest tests
+
+      - name: Run tests and collect coverage
+        run: |
+          cd cloud_chatops
+          python3 -m pytest tests --cov-report xml:coverage.xml --cov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: cloud_chatops/coverage.xml
+
+  push_dev_image_harbor:
+    runs-on: ubuntu-latest
+    needs: test_and_lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.stfc.ac.uk
+          username: ${{ secrets.STAGING_HARBOR_USERNAME }}
+          password: ${{ secrets.STAGING_HARBOR_TOKEN }}
+
+      - name: Set commit SHA for later
+        id: commit_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push to staging project
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          context: "{{defaultContext}}:cloud_chatops"
+          tags: "harbor.stfc.ac.uk/stfc-cloud-staging/cloud-chatops:${{ steps.commit_sha.outputs.sha_short }}"
+
+  push_prod_image_harbor:
+    runs-on: ubuntu-latest
+    needs: test_and_lint
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: harbor.stfc.ac.uk
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_TOKEN }}
+
+      - name: Get release tag for later
+        id: release_tag
+        run: echo "version=$(cat cloud_chatops/version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Check if release file has updated
+        uses: dorny/paths-filter@v2
+        id: release_updated
+        with:
+          filters: |
+            version:
+              - 'cloud_chatops/version.txt'
+
+      - name: Build and push on version change
+        uses: docker/build-push-action@v6
+        if: steps.release_updated.outputs.version == 'true'
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          context: "{{defaultContext}}:cloud_chatops"
+          tags: "harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:${{ steps.release_tag.outputs.version }}"
