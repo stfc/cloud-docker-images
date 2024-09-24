@@ -7,7 +7,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/cloud_chatops.yaml"
-      - "cloud_chatops/**"
+      - "cloud-chatops/**"
 
 jobs:
   test_and_lint:
@@ -26,30 +26,30 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd cloud_chatops
+          cd cloud-chatops
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Analyse with pylint
         run: |
-          cd cloud_chatops
+          cd cloud-chatops
           pylint . --recursive=true --rcfile=.pylintrc
 
       - name: Run tests
         run: |
-          cd cloud_chatops
+          cd cloud-chatops
           python3 -m pytest tests
 
       - name: Run tests and collect coverage
         run: |
-          cd cloud_chatops
+          cd cloud-chatops
           python3 -m pytest tests --cov-report xml:coverage.xml --cov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{secrets.CODECOV_TOKEN}}
-          files: cloud_chatops/coverage.xml
+          files: cloud-chatops/coverage.xml
 
   push_dev_image_harbor:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
-          context: "{{defaultContext}}:cloud_chatops"
+          context: "{{defaultContext}}:cloud-chatops"
           tags: "harbor.stfc.ac.uk/stfc-cloud-staging/cloud-chatops:${{ steps.commit_sha.outputs.sha_short }}"
 
   push_prod_image_harbor:
@@ -99,7 +99,7 @@ jobs:
 
       - name: Get release tag for later
         id: release_tag
-        run: echo "version=$(cat cloud_chatops/version.txt)" >> $GITHUB_OUTPUT
+        run: echo "version=$(cat cloud-chatops/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Check if release file has updated
         uses: dorny/paths-filter@v2
@@ -107,7 +107,7 @@ jobs:
         with:
           filters: |
             version:
-              - 'cloud_chatops/version.txt'
+              - 'cloud-chatops/version.txt'
 
       - name: Build and push on version change
         uses: docker/build-push-action@v6
@@ -116,5 +116,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
-          context: "{{defaultContext}}:cloud_chatops"
+          context: "{{defaultContext}}:cloud-chatops"
           tags: "harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:${{ steps.release_tag.outputs.version }}"
