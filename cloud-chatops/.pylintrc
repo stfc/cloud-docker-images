@@ -1,0 +1,12 @@
+[FORMAT]
+# Black will enforce 88 chars on Python code
+# this will enforce 120 chars on docs / comments
+max-line-length=120
+
+# Disable various warnings:
+# R0801 - Duplicate Code - Ignored to be fixed in future PRs
+
+disable=R0801
+
+[MASTER]
+init-hook='import sys; sys.path.append("src")'
