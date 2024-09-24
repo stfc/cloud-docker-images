@@ -2,6 +2,7 @@
 
 from typing import List
 from datetime import datetime, timedelta
+from dateutil import parser as datetime_parser
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from enum_states import PRsFoundState
@@ -64,7 +65,9 @@ class PostToDMs:
         prs_posted = PRsFoundState.NONE_FOUND
         for pr in prs:
             checked_pr = self.check_pr(pr)
-            prs_posted = self.filter_thread_message(checked_pr, post_all)
+            post_status = self.filter_thread_message(checked_pr, post_all)
+            if post_status == PRsFoundState.PRS_FOUND:
+                prs_posted = PRsFoundState.PRS_FOUND
 
         if prs_posted == PRsFoundState.NONE_FOUND:
             self.send_no_prs()
@@ -110,7 +113,7 @@ class PostToDMs:
             info.user = DEFAULT_AUTHOR
         else:
             info.user = self._github_to_slack_username(info.user)
-        opened_date = datetime.fromisoformat(info.created_at).replace(tzinfo=None)
+        opened_date = datetime_parser.parse(info.created_at).replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=30 * 6)
         if opened_date < time_cutoff:

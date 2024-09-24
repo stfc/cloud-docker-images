@@ -3,6 +3,7 @@ schedule
 slack-bolt
 aiohttp
 requests
+python-dateutil
 pytest
 pytest-cov
 pylint
