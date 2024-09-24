@@ -29,6 +29,7 @@ class PostToDMs:
         self.prs = GetGitHubPRs(get_repos(), "stfc").run()
         self.channel = DEFAULT_CHANNEL
         self.thread_ts = None
+        self.user = None
 
     def run(self, channel: str, post_all: bool) -> None:
         """
@@ -37,6 +38,7 @@ class PostToDMs:
         :param post_all: To post all PRs found or only ones authored by the user.
         """
         self.channel = channel
+        self.user = channel
         self.post_reminder_message()
         self.post_thread_messages(self.prs, post_all)
 
@@ -77,11 +79,10 @@ class PostToDMs:
         :return: Returns an Enum state.
         """
         pr_author = info.user
-        slack_member = self.channel
         if post_all:
             self.send_thread(info)
             return PRsFoundState.PRS_FOUND
-        if not post_all and pr_author == slack_member:
+        if not post_all and pr_author == self.user:
             self.send_thread(info)
             return PRsFoundState.PRS_FOUND
         return PRsFoundState.NONE_FOUND
