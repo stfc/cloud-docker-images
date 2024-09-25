@@ -83,7 +83,7 @@ jobs:
   push_prod_image_harbor:
     runs-on: ubuntu-latest
     needs: test_and_lint
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
 
