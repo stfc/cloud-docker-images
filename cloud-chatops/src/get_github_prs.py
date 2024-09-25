@@ -79,15 +79,6 @@ class HTTPHandler:
 
     def make_request(self, url: str) -> List[Dict]:
         """
-        This method gets the HTTP response from the URL given and returns the response as a list.
-        :param url: The URL to make the HTTP request to.
-        :return: List of PRs.
-        """
-        response = self.get_http_response(url)
-        return [response] if isinstance(response, dict) else response
-
-    def get_http_response(self, url: str) -> List[Dict]:
-        """
         This method sends a HTTP request to the GitHub Rest API endpoint and returns all open PRs from that repository.
         :param url: The URL to make the request to
         :return: The response in JSON form
@@ -95,7 +86,8 @@ class HTTPHandler:
         headers = {"Authorization": "token " + get_token("GITHUB_TOKEN")}
         response = requests.get(url, headers=headers, timeout=60)
         self._validate_response(response)
-        return response.json()
+        json_response = response.json()
+        return [json_response] if isinstance(json_response, dict) else json_response
 
     @staticmethod
     def _validate_response(response: requests.get) -> None:
