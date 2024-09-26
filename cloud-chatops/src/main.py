@@ -51,14 +51,14 @@ async def schedule_jobs() -> None:
     This function schedules tasks for the async loop to run.
     """
 
-    def run_pr(channel, mention=False) -> None:
+    def run_pr(channel) -> None:
         """
         This is a placeholder function for the schedule to accept.
         """
-        PostPRsToSlack(mention=mention).run(channel=channel)
+        PostPRsToSlack().run(channel=channel)
 
     schedule.every().monday.at("09:00").do(
-        run_pr, mention=True, channel="pull-requests"
+        run_pr, mention=True, channel="C03RT2F6WHZ"  # "pull-requests" channel
     )
 
     while True:
