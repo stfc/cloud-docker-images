@@ -31,7 +31,7 @@ def validate_required_files() -> None:
     if not repos:
         raise RepositoriesNotGiven("repos.csv does not contain any repositories.")
 
-    tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN", "INFLUX_TOKEN"]
+    tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]
     for token in tokens:
         temp = get_token(token)
         if not temp:
