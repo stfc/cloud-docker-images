@@ -10,10 +10,10 @@ from custom_exceptions import (
     TokensNotGiven,
 )
 
-PATH = "/usr/src/app/cloud_chatops_secrets/"
+PATH = "/usr/src/app/dev_cloud_chatops_secrets/"
 try:
     if sys.argv[1] == "local":
-        PATH = f"{os.environ['HOME']}/cloud_chatops_secrets/"
+        PATH = f"{os.environ['HOME']}/dev_cloud_chatops_secrets/"
 except IndexError:
     pass
 except KeyError:
