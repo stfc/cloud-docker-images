@@ -8,7 +8,7 @@ from pr_dataclass import PrData
 
 class PostPRsToSlack(BaseFeature):
     # pylint: disable=R0903
-    # Disabling this as there only needs to be one entry point.
+    # Each feature should have only one entry point called run
     """
     This class handles the Slack posting.
     """
