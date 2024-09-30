@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from dataclasses import replace
 
 # If the PR author is not in the Slack ID mapping
-# then we set the default user as the author.
+# then we set the author as a default value.
 DEFAULT_AUTHOR = "U01JG0LKU3W"  # David Fairbrother
 DEFAULT_CHANNEL = "C06U37Y02R4"  # "dev-chatops" channel as default
 DEFAULT_REPO_OWNER = "stfc"  # Our repos are owned by "stfc"
