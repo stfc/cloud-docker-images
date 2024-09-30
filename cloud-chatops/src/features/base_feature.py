@@ -2,6 +2,7 @@
 This module is the feature base class.
 All features should inherit this class to reduce code duplication.
 """
+from typing import Dict, List
 from datetime import datetime, timedelta
 from dataclasses import replace
 from slack_sdk import WebClient
@@ -33,26 +34,12 @@ class BaseFeature:
         self.slack_ids = get_user_map()
 
     def _github_to_slack_username(self, user: str) -> str:
-        """
-        This method translates the Slack member id to GitHub user.
-        :param user: GitHub username to check for
-        :return: Slack ID or GitHub username
-        """
-        return self.slack_ids[user] if user in self.slack_ids else user
+        """Makes a call to the global method"""
+        return _github_to_slack_username(self.slack_ids, user)
 
     def _slack_to_human_username(self, slack_member_id: str) -> str:
-        """
-        This method gets the display username from a Slack member ID
-        :param slack_member_id: The Slack member ID to look for
-        :return: Returns the real name or if not found the name originally parsed in
-        """
-        try:
-            name = self.client.users_profile_get(user=slack_member_id)["profile"][
-                "real_name"
-            ]
-        except SlackApiError:
-            name = slack_member_id
-        return name
+        """Makes a call to the global method"""
+        return _slack_to_human_username(self.client, slack_member_id)
 
     def _post_reminder_message(self) -> str:
         """
@@ -113,32 +100,40 @@ class BaseFeature:
             )
             assert react_response["ok"]
 
+    @staticmethod
+    def _format_prs(prs: List[PrData]) -> List[PrData]:
+        """This method runs checks against the prs given and changes values such as old and author."""
+        formatted_prs = []
+        for pr in prs:
+            formatted_prs.append(PRMessageBuilder().check_pr(pr))
+        return formatted_prs
 
-class PRMessageBuilder(BaseFeature):
+
+class PRMessageBuilder:
     """This class handles constructing the PR messages to be sent."""
 
-    # pylint: disable=R0903
-    # Disabling this as there only needs to be one entry point.
     def make_message(self, pr_data: PrData) -> str:
         """
         This method checks the pr data and makes a string message from it.
         :param pr_data: The PR info
         :return: The message to post
         """
-        checked_info = self._check_pr_info(pr_data)
+        checked_info = self.check_pr(pr_data)
         return self._construct_string(checked_info)
 
-    def _construct_string(self, pr_data: PrData) -> str:
+    @staticmethod
+    def _construct_string(pr_data: PrData) -> str:
         """
         This method constructs the PR message depending on if the PR is old and if the message should mention or not.
         :param pr_data: The data class containing the info about the PR.
         :return: The message as a single string.
         """
+        client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
         message = []
         if pr_data.old:
             message.append("*This PR is older than 6 months. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
-        name = self._slack_to_human_username(pr_data.user)
+        name = _slack_to_human_username(client, pr_data.user)
         message.append(f"Author: {name}")
         return "\n".join(message)
 
@@ -154,15 +149,40 @@ class PRMessageBuilder(BaseFeature):
         time_cutoff = datetime_now - timedelta(days=30 * 6)
         return opened_date < time_cutoff
 
-    def _check_pr_info(self, info: PrData) -> PrData:
+    def check_pr(self, info: PrData) -> PrData:
         """
         This method validates certain information in the PR data such as who authored the PR and if it's old or not.
         :param info: The information to validate.
         :return: The validated information.
         """
+        slack_ids = get_user_map()
         new_info = replace(
             info,
-            user=self._github_to_slack_username(info.user),
+            user=_github_to_slack_username(slack_ids, info.user),
             old=self._check_pr_age(info.created_at),
         )
         return new_info
+
+
+def _slack_to_human_username(client: WebClient, slack_member_id: str) -> str:
+    """
+    This method gets the display username from a Slack member ID
+    :param slack_member_id: The Slack member ID to look for
+    :return: Returns the real name or if not found the name originally parsed in
+    """
+    try:
+        name = client.users_profile_get(user=slack_member_id)["profile"][
+            "real_name"
+        ]
+    except SlackApiError:
+        name = slack_member_id
+    return name
+
+
+def _github_to_slack_username(slack_ids: Dict, user: str) -> str:
+    """
+    This method GitHub username into Slack member ID.
+    :param user: GitHub username to check for
+    :return: Slack ID or GitHub username
+    """
+    return slack_ids[user] if user in slack_ids else user

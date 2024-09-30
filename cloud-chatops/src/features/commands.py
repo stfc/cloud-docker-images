@@ -26,6 +26,7 @@ class PostToDMs(BaseFeature):
         """
         self.channel = channel
         self.user = channel
+        self.prs = self._format_prs(self.prs)
         reminder_thread_ts = self._post_reminder_message()
         self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 

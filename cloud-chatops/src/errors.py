@@ -27,3 +27,7 @@ class BadGitHubToken(RuntimeError):
 
 class ChannelNotFound(LookupError):
     """Error: The channel was not found."""
+
+
+class UserNotFound(LookupError):
+    """Error: The Slack member was not found in the user map"""
