@@ -58,6 +58,7 @@ class BaseFeature:
             channel=self.channel,
             text="Here are the outstanding PRs as of today:",
         )
+        assert reminder["ok"]
         return reminder.data["ts"]
 
     def _send_no_prs_found(self, thread_ts) -> None:
@@ -65,12 +66,13 @@ class BaseFeature:
         This method sends a message to the chat that there are no PRs.
         :param thread_ts: Timestamp of reminder message
         """
-        self.client.chat_postMessage(
+        response = self.client.chat_postMessage(
             text="There are no outstanding pull requests open.",
             channel=self.channel,
             thread_ts=thread_ts,
             unfurl_links=False,
         )
+        assert response["ok"]
 
     def _send_thread(self, pr_data: PrData, thread_ts: str) -> WebClient.chat_postMessage:
         """
