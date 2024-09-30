@@ -40,5 +40,5 @@ class PostPRsToSlack(BaseFeature):
             response = self._send_thread(pr, thread_ts)
             self._send_thread_react(pr, response.data["channel"], response.data["ts"])
 
-        if not prs_found:
+        if prs_found == PRsFoundState.NONE_FOUND:
             self._send_no_prs_found(thread_ts)
