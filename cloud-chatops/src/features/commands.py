@@ -60,13 +60,9 @@ class PostToDMs(BaseFeature):
         :param thread_ts: Timestamp of reminder message
         :return: Returns an Enum state.
         """
-        pr_author = pr.user
-        if post_all:
+        if post_all or (not post_all and pr.user == self.user):
             response = self._send_thread(pr, thread_ts)
             self._send_thread_react(pr, response.data["channel"], response.data["ts"])
             return PRsFoundState.PRS_FOUND
-        if not post_all and pr_author == self.user:
-            response = self._send_thread(pr, thread_ts)
-            self._send_thread_react(pr, response.data["channel"], response.data["ts"])
-            return PRsFoundState.PRS_FOUND
+
         return PRsFoundState.NONE_FOUND
