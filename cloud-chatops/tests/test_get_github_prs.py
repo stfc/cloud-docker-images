@@ -2,7 +2,7 @@ from unittest.mock import patch, NonCallableMock
 import pytest
 from get_github_prs import GetGitHubPRs, HTTPHandler
 from pr_dataclass import PrData
-from custom_exceptions import BadGitHubToken, RepoNotFound, UnknownHTTPError
+from errors import BadGitHubToken, RepoNotFound, UnknownHTTPError
 
 
 @pytest.fixture(name="instance_GetGitHubPRs", scope="function")
