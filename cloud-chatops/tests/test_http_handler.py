@@ -1,4 +1,5 @@
 """Tests for get_github_prs.HTTPHandler"""
+
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import patch, NonCallableMock

@@ -1,4 +1,5 @@
 """Tests for get_github_prs.GetGitHubPRs"""
+
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import patch
@@ -17,9 +18,7 @@ def instance_fixture():
 
 @patch("get_github_prs.GetGitHubPRs._request_all_repos_http")
 @patch("get_github_prs.GetGitHubPRs._parse_pr_to_dataclass")
-def test_run(
-    mock_parse_pr_to_dataclass, mock_request_all_repos_http, instance
-):
+def test_run(mock_parse_pr_to_dataclass, mock_request_all_repos_http, instance):
     """Tests the run method returns the correct object"""
     res = instance.run()
     mock_request_all_repos_http.assert_called_once_with()

@@ -2,6 +2,7 @@
 This module is the feature base class.
 All features should inherit this class to reduce code duplication.
 """
+
 from typing import Dict, List
 from datetime import datetime, timedelta
 from dataclasses import replace
@@ -13,7 +14,6 @@ from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
 
 
-
 # If the PR author is not in the Slack ID mapping
 # then we set the author as a default value.
 DEFAULT_AUTHOR = "U01JG0LKU3W"  # David Fairbrother
@@ -23,6 +23,7 @@ DEFAULT_REPO_OWNER = "stfc"  # Our repos are owned by "stfc"
 
 class BaseFeature:
     """This base class provides universal methods for features."""
+
     # pylint: disable=R0903
     # This is a base feature and not intended to be used on its own
     channel: str
@@ -171,9 +172,7 @@ def _slack_to_human_username(client: WebClient, slack_member_id: str) -> str:
     :return: Returns the real name or if not found the name originally parsed in
     """
     try:
-        name = client.users_profile_get(user=slack_member_id)["profile"][
-            "real_name"
-        ]
+        name = client.users_profile_get(user=slack_member_id)["profile"]["real_name"]
     except SlackApiError:
         name = slack_member_id
     return name
