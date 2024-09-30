@@ -13,10 +13,6 @@ class PostPRsToSlack(BaseFeature):
     This class handles the Slack posting.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.message_builder = PRMessageBuilder()
-
     def run(self, channel=None) -> None:
         """
         This method sets class attributes then cals the reminder and thread post methods.
