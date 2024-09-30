@@ -1,3 +1,6 @@
+"""Tests for features.base_feature.BaseFeature"""
+# pylint: disable=W0212
+# Disabling this as we need to access protected methods to test them
 import pytest
 from unittest.mock import NonCallableMock, patch, MagicMock
 from slack_sdk.errors import SlackApiError
@@ -10,7 +13,7 @@ from features.base_feature import BaseFeature
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_repos")
 @patch("features.base_feature.get_user_map")
-def instance(
+def instance_fixture(
     mock_get_user_map,
     mock_get_repos,
     mock_get_token,

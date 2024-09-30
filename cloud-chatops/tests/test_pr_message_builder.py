@@ -1,3 +1,6 @@
+"""Tests for features.base_feature.PRMessageBuilder"""
+# pylint: disable=W0212
+# Disabling this as we need to access protected methods to test them
 import pytest
 from unittest.mock import NonCallableMock, patch
 from features.base_feature import PRMessageBuilder
@@ -10,7 +13,7 @@ from pr_dataclass import PrData
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_repos")
 @patch("features.base_feature.get_user_map")
-def instance(_, _2, _3, _4, _5):
+def instance_fixture(_, _2, _3, _4, _5):
     """Provides a class instance for the tests"""
     return PRMessageBuilder()
 
