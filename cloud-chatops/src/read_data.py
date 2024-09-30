@@ -4,7 +4,7 @@ from typing import List, Dict
 import sys
 import os
 import json
-from custom_exceptions import (
+from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
     TokensNotGiven,

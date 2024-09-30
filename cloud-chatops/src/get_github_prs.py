@@ -7,7 +7,7 @@ from typing import List, Dict
 import requests
 from read_data import get_token
 from pr_dataclass import PrData
-from custom_exceptions import (
+from errors import (
     RepoNotFound,
     UnknownHTTPError,
     BadGitHubToken,
