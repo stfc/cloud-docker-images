@@ -142,7 +142,3 @@ def test_send_thread_react_with_reactions(instance):
     instance._send_thread_react(mock_pr_data, "mock_channel", "100")
     instance.client.reactions_add.assert_any_call(channel="mock_channel", name="alarm_clock", timestamp="100")
     instance.client.reactions_add.assert_any_call(channel="mock_channel", name="scroll", timestamp="100")
-
-
-
-
