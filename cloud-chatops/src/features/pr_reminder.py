@@ -2,7 +2,7 @@
 
 from typing import List
 from enum_states import PRsFoundState
-from features.base_feature import BaseFeature, PRMessageBuilder
+from features.base_feature import BaseFeature
 from pr_dataclass import PrData
 
 

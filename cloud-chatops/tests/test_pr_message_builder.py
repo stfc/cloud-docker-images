@@ -1,8 +1,8 @@
 """Tests for features.base_feature.PRMessageBuilder"""
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
-import pytest
 from unittest.mock import NonCallableMock, patch
+import pytest
 from features.base_feature import PRMessageBuilder
 from pr_dataclass import PrData
 
@@ -54,10 +54,10 @@ def test_construct_string(mock_name_translate, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     mock_name_translate.assert_called_once_with("mock_user")
-    assert (
-        res
-        == f"*This PR is older than 6 months. Consider closing it:*\nPull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}"
-    )
+    expected = (f"*This PR is older than 6 months. Consider closing it:*\n"
+                f"Pull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}")
+    assert res == expected
+
 
 
 @patch("features.base_feature.replace")
@@ -65,7 +65,7 @@ def test_construct_string(mock_name_translate, instance):
 @patch("features.base_feature.datetime")
 @patch("features.base_feature.datetime_parser")
 def test_check_pr_age_not_old(
-    mock_datetime_parser, mock_datetime, mock_timedelta, mock_replace, instance
+    mock_datetime_parser, mock_datetime, mock_timedelta, _, instance
 ):
     """Test returns false since PR is not old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100

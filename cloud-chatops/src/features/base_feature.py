@@ -2,15 +2,16 @@
 This module is the feature base class.
 All features should inherit this class to reduce code duplication.
 """
-
+from datetime import datetime, timedelta
+from dataclasses import replace
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from dateutil import parser as datetime_parser
 from read_data import get_token, get_repos, get_user_map
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
-from slack_sdk import WebClient
-from datetime import datetime, timedelta
-from dataclasses import replace
+
+
 
 # If the PR author is not in the Slack ID mapping
 # then we set the author as a default value.
@@ -21,7 +22,8 @@ DEFAULT_REPO_OWNER = "stfc"  # Our repos are owned by "stfc"
 
 class BaseFeature:
     """This base class provides universal methods for features."""
-
+    # pylint: disable=R0903
+    # This is a base feature and not intended to be used on its own
     channel: str
 
     def __init__(self):

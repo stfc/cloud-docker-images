@@ -10,7 +10,8 @@ class PostToDMs(BaseFeature):
     """
     This class handles the Slack posting.
     """
-
+    # pylint: disable=R0903
+    # This is a base feature and not intended to be used on its own
     def __init__(self):
         super().__init__()
         self.thread_ts = None

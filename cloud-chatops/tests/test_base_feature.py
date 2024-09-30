@@ -1,8 +1,8 @@
 """Tests for features.base_feature.BaseFeature"""
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
-import pytest
 from unittest.mock import NonCallableMock, patch, MagicMock
+import pytest
 from slack_sdk.errors import SlackApiError
 from features.base_feature import BaseFeature
 
@@ -122,7 +122,7 @@ def test_send_thread_fails(_, instance):
     """Test a message is not sent"""
     instance.client.chat_postMessage.return_value = {"ok": False}
     with pytest.raises(AssertionError):
-        res = instance._send_thread(NonCallableMock(), "100")
+        instance._send_thread(NonCallableMock(), "100")
 
 
 def test_send_thread_react_no_reactions(instance):

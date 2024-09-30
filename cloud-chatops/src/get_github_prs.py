@@ -16,7 +16,7 @@ from errors import (
 
 class GetGitHubPRs:
     # pylint: disable=R0903
-    # Disabling this as in the future there is likely to be more public functions.
+    # Disabling this as we only need one public method
     """
     This class handles getting the open PRs from the GitHub Rest API.
     """
@@ -73,6 +73,8 @@ class GetGitHubPRs:
 
 
 class HTTPHandler:
+    # pylint: disable=R0903
+    # Disabling this as we only need one public method
     """
     This class makes the HTTP requests to the GitHub REST API.
     """

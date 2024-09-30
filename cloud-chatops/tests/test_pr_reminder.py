@@ -1,5 +1,8 @@
-import pytest
+"""Tests for features.pr_reminder"""
+# pylint: disable=W0212
+# Disabling this as we need to access protected methods to test them
 from unittest.mock import NonCallableMock, patch
+import pytest
 from features.pr_reminder import PostPRsToSlack
 from features.base_feature import DEFAULT_CHANNEL
 
@@ -10,7 +13,7 @@ from features.base_feature import DEFAULT_CHANNEL
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_repos")
 @patch("features.base_feature.get_user_map")
-def instance(
+def instance_fixture(
     mock_get_user_map,
     mock_get_repos,
     mock_get_token,

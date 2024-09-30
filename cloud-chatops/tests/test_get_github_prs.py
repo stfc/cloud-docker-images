@@ -1,4 +1,6 @@
 """Tests for get_github_prs.GetGitHubPRs"""
+# pylint: disable=W0212
+# Disabling this as we need to access protected methods to test them
 from unittest.mock import patch
 import pytest
 from get_github_prs import GetGitHubPRs
@@ -96,6 +98,3 @@ def test_parse_pr_to_dataclass_none(instance):
     """Test nothing is returned when no dictionaries are given"""
     res = instance._parse_pr_to_dataclass([])
     assert res == []
-
-
-
