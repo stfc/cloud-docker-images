@@ -11,7 +11,11 @@ from features.base_feature import DEFAULT_CHANNEL
 @patch("features.base_feature.get_repos")
 @patch("features.base_feature.get_user_map")
 def instance(
-        mock_get_user_map, mock_get_repos, mock_get_token, mock_get_github_prs, mock_web_client
+    mock_get_user_map,
+    mock_get_repos,
+    mock_get_token,
+    mock_get_github_prs,
+    mock_web_client,
 ):
     """This fixture provides a class instance for the tests"""
     mock_get_user_map.return_value = {"mock_github": "mock_slack"}
@@ -66,4 +70,3 @@ def test_post_thread_messages(_, mock_send_thread_react, mock_send_thread, insta
     mock_send_thread.assert_any_call("mock2", "100")
     mock_send_thread_react.assert_any_call("mock1", "mock_channel", "100")
     mock_send_thread_react.assert_any_call("mock2", "mock_channel", "100")
-

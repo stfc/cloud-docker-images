@@ -2,6 +2,7 @@
 This module is the feature base class.
 All features should inherit this class to reduce code duplication.
 """
+
 from slack_sdk.errors import SlackApiError
 from dateutil import parser as datetime_parser
 from read_data import get_token, get_repos, get_user_map
@@ -44,7 +45,9 @@ class BaseFeature:
         :return: Returns the real name or if not found the name originally parsed in
         """
         try:
-            name = self.client.users_profile_get(user=slack_member_id)["profile"]["real_name"]
+            name = self.client.users_profile_get(user=slack_member_id)["profile"][
+                "real_name"
+            ]
         except SlackApiError:
             name = slack_member_id
         return name
@@ -74,7 +77,9 @@ class BaseFeature:
         )
         assert response["ok"]
 
-    def _send_thread(self, pr_data: PrData, thread_ts: str) -> WebClient.chat_postMessage:
+    def _send_thread(
+        self, pr_data: PrData, thread_ts: str
+    ) -> WebClient.chat_postMessage:
         """
         This method sends the message and returns the response.
         :param pr_data: The PR data as a dataclass
@@ -156,6 +161,6 @@ class PRMessageBuilder(BaseFeature):
         new_info = replace(
             info,
             user=self._github_to_slack_username(info.user),
-            old=self._check_pr_age(info.created_at)
+            old=self._check_pr_age(info.created_at),
         )
         return new_info

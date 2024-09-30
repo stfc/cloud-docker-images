@@ -1,4 +1,5 @@
 """This module handles the posting of messages to Slack using the Slack SDK WebClient class."""
+
 from typing import List
 from enum_states import PRsFoundState
 from features.base_feature import BaseFeature, PRMessageBuilder
@@ -9,6 +10,7 @@ class PostToDMs(BaseFeature):
     """
     This class handles the Slack posting.
     """
+
     def __init__(self):
         super().__init__()
         self.thread_ts = None
@@ -26,7 +28,9 @@ class PostToDMs(BaseFeature):
         reminder_thread_ts = self._post_reminder_message()
         self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 
-    def _post_thread_messages(self, prs: List[PrData], thread_ts: str, post_all: bool) -> None:
+    def _post_thread_messages(
+        self, prs: List[PrData], thread_ts: str, post_all: bool
+    ) -> None:
         """
         This method iterates through each PR and calls the post method for them.
         :param post_all: To post all prs or user only prs.
@@ -42,7 +46,9 @@ class PostToDMs(BaseFeature):
         if prs_posted == PRsFoundState.NONE_FOUND:
             self._send_no_prs_found(thread_ts)
 
-    def _filter_thread_message(self, pr: PrData, thread_ts: str, post_all: bool) -> PRsFoundState:
+    def _filter_thread_message(
+        self, pr: PrData, thread_ts: str, post_all: bool
+    ) -> PRsFoundState:
         """
         This method filters which pull requests to send to the thread dependent on the value of personal_thread.
         If personal_thread holds a value, only PRs authored by that user will be sent to the thread.

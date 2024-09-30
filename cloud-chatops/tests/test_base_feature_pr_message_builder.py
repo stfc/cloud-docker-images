@@ -35,7 +35,10 @@ def test_construct_string_not_old(mock_name_translate, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     mock_name_translate.assert_called_once_with("mock_user")
-    assert res == f"Pull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}"
+    assert (
+        res
+        == f"Pull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}"
+    )
 
 
 @patch("features.base_feature.PRMessageBuilder._slack_to_human_username")
@@ -48,24 +51,29 @@ def test_construct_string(mock_name_translate, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     mock_name_translate.assert_called_once_with("mock_user")
-    assert res == f"*This PR is older than 6 months. Consider closing it:*\nPull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}"
+    assert (
+        res
+        == f"*This PR is older than 6 months. Consider closing it:*\nPull Request: <mock_url|mock_title>\nAuthor: {mock_name_translate.return_value}"
+    )
 
 
 @patch("features.base_feature.replace")
 @patch("features.base_feature.timedelta")
 @patch("features.base_feature.datetime")
 @patch("features.base_feature.datetime_parser")
-def test_check_pr_age_not_old(mock_datetime_parser, mock_datetime, mock_timedelta, mock_replace, instance):
+def test_check_pr_age_not_old(
+    mock_datetime_parser, mock_datetime, mock_timedelta, mock_replace, instance
+):
     """Test returns false since PR is not old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
     mock_datetime.now.return_value.replace.return_value = 200
-    mock_timedelta.return_value = 30*6
+    mock_timedelta.return_value = 30 * 6
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30*6)
+    mock_timedelta.assert_called_once_with(days=30 * 6)
     assert not res
 
 
@@ -73,17 +81,19 @@ def test_check_pr_age_not_old(mock_datetime_parser, mock_datetime, mock_timedelt
 @patch("features.base_feature.timedelta")
 @patch("features.base_feature.datetime")
 @patch("features.base_feature.datetime_parser")
-def test_check_pr_age_old(mock_datetime_parser, mock_datetime, mock_timedelta, _, instance):
+def test_check_pr_age_old(
+    mock_datetime_parser, mock_datetime, mock_timedelta, _, instance
+):
     """Test returns false since PR is  old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
     mock_datetime.now.return_value.replace.return_value = 300
-    mock_timedelta.return_value = 30*6
+    mock_timedelta.return_value = 30 * 6
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30*6)
+    mock_timedelta.assert_called_once_with(days=30 * 6)
     assert res
 
 
@@ -104,4 +114,3 @@ def test_check_pr_info(mock_translate_name, mock_check_pr_age, instance):
     res = instance._check_pr_info(mock_data)
     assert res.user == "mock_changed_user"
     assert res.old
-
