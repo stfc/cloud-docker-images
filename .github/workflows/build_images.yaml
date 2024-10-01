@@ -37,18 +37,19 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Login to Harbor
+      if: ${{ github.ref != 'refs/heads/master' }}
+      uses: docker/login-action@v3
+      with:
+        registry: harbor.stfc.ac.uk
+        username: ${{ secrets.STAGING_HARBOR_USERNAME }}
+        password: ${{ secrets.STAGING_HARBOR_TOKEN }}
+    - name: Login to Harbor
+      if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/login-action@v3
       with:
         registry: harbor.stfc.ac.uk
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_TOKEN }}
-    - name: Build & push to prod
-      if: ${{ github.ref == 'refs/heads/master' }}
-      uses: docker/build-push-action@v3
-      with:
-        push: true
-        context: "{{defaultContext}}:${{ matrix.image }}"
-        tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
     - name: Build & push to staging
       if: ${{ github.ref != 'refs/heads/master' }}
       uses: docker/build-push-action@v3
@@ -58,10 +59,18 @@ jobs:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
         tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+    - name: Build & push to prod
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        context: "{{defaultContext}}:${{ matrix.image }}"
+        tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
     - name: Inform of tagged name
       if: ${{ github.ref != 'refs/heads/master' }}
       run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
-  finished: # convenient single job name to apply branch protection to
-    needs: build
-    runs-on: ubuntu-latest
-    steps: [{run: true}]
+      finished: # convenient single job name to apply branch protection to
+        needs: build-prod
+        runs-on: ubuntu-latest
+        steps: [{run: true}]
+    
