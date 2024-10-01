@@ -52,7 +52,7 @@ jobs:
         password: ${{ secrets.HARBOR_TOKEN }}
     - name: Build & push to staging
       if: ${{ github.ref != 'refs/heads/master' }}
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         cache-from: type=gha
         cache-to: type=gha,mode=max
@@ -61,7 +61,7 @@ jobs:
         tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v6
       with:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
