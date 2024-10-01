@@ -60,6 +60,9 @@ async def schedule_jobs() -> None:
     schedule.every().monday.at("09:00").do(
         run_pr, mention=True, channel="pull-requests"
     )
+    schedule.every().wednesday.at("09:00").do(
+        run_pr, mention=False, channel="pull-requests"
+    )
 
     while True:
         schedule.run_pending()
