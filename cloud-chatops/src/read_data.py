@@ -10,6 +10,9 @@ from errors import (
     TokensNotGiven,
 )
 
+# Using dev secrets here for local testing as it runs the application
+# in a separate Slack Workspace than the production application.
+# This means the slash commands won't be picked up by the production application.
 PATH = "/usr/src/app/dev_cloud_chatops_secrets/"
 try:
     if sys.argv[1] == "local":

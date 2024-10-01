@@ -1,3 +1,5 @@
 [run]
 omit =
+    # Omitting this directory as sometimes it's included in the coverage.
+    # This is likely due to messy Python Paths and environments
     /usr/lib/**

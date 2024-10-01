@@ -3,6 +3,7 @@ This module is the feature base class.
 All features should inherit this class to reduce code duplication.
 """
 
+from abc import ABC
 from typing import Dict, List
 from datetime import datetime, timedelta
 from dataclasses import replace
@@ -21,8 +22,8 @@ DEFAULT_CHANNEL = "C06U37Y02R4"  # "dev-chatops" channel as default
 DEFAULT_REPO_OWNER = "stfc"  # Our repos are owned by "stfc"
 
 
-class BaseFeature:
-    """This base class provides universal methods for features."""
+class BaseFeature(ABC):
+    """This base abstract class provides universal methods for features."""
 
     # pylint: disable=R0903
     # This is a base feature and not intended to be used on its own
@@ -94,7 +95,7 @@ class BaseFeature:
         if pr.old:
             react_with.append("alarm_clock")
         if pr.draft:
-            react_with.append("scroll")
+            react_with.append("building_construction")
         for react in react_with:
             react_response = self.client.reactions_add(
                 channel=channel, name=react, timestamp=thread_ts
