@@ -7,7 +7,7 @@ from typing import List, Dict
 import requests
 from read_data import get_token
 from pr_dataclass import PrData
-from custom_exceptions import (
+from errors import (
     RepoNotFound,
     UnknownHTTPError,
     BadGitHubToken,
@@ -16,7 +16,7 @@ from custom_exceptions import (
 
 class GetGitHubPRs:
     # pylint: disable=R0903
-    # Disabling this as in the future there is likely to be more public functions.
+    # Disabling this as we only need one public method
     """
     This class handles getting the open PRs from the GitHub Rest API.
     """
@@ -73,20 +73,13 @@ class GetGitHubPRs:
 
 
 class HTTPHandler:
+    # pylint: disable=R0903
+    # Disabling this as we only need one public method
     """
     This class makes the HTTP requests to the GitHub REST API.
     """
 
     def make_request(self, url: str) -> List[Dict]:
-        """
-        This method gets the HTTP response from the URL given and returns the response as a list.
-        :param url: The URL to make the HTTP request to.
-        :return: List of PRs.
-        """
-        response = self.get_http_response(url)
-        return [response] if isinstance(response, dict) else response
-
-    def get_http_response(self, url: str) -> List[Dict]:
         """
         This method sends a HTTP request to the GitHub Rest API endpoint and returns all open PRs from that repository.
         :param url: The URL to make the request to
@@ -95,7 +88,8 @@ class HTTPHandler:
         headers = {"Authorization": "token " + get_token("GITHUB_TOKEN")}
         response = requests.get(url, headers=headers, timeout=60)
         self._validate_response(response)
-        return response.json()
+        json_response = response.json()
+        return [json_response] if isinstance(json_response, dict) else json_response
 
     @staticmethod
     def _validate_response(response: requests.get) -> None:
