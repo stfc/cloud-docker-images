@@ -59,16 +59,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 'master'
-          path: '/app/main'
+          path: 'main'
 
       - name: Checkout current working branch
         uses: actions/checkout@v4
         with:
-          path: '/app/branch'
+          path: 'branch'
 
       - name: Compare versions
         if: ${{ github.ref != 'refs/heads/master' }}
-        uses: khalford/check-version-action@dev
+        uses: khalford/check-version-action@main
         with:
           app_version_path: "cloud-chatops/version.txt"
           docker_compose_path: "cloud-chatops/docker-compose.yaml"
