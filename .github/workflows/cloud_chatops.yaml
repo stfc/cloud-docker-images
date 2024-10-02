@@ -51,6 +51,38 @@ jobs:
           token: ${{secrets.CODECOV_TOKEN}}
           files: cloud-chatops/coverage.xml
 
+
+  check_version_update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          path: 'main'
+
+      - name: Checkout current working branch
+        uses: actions/checkout@v4
+        with:
+          path: 'branch'
+
+      - name: Compare versions
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: khalford/check-version-action@main
+        with:
+          app_version_path: "cloud-chatops/version.txt"
+          docker_compose_path: "cloud-chatops/docker-compose.yaml"
+
+      - name: Log App Success
+        if: ${{ env.app_updated == 'true' }}
+        run: |
+          echo "App version has been updated correctly!"
+
+      - name: Log Compose Success
+        if: ${{ env.compose_updated == 'true' }}
+        run: |
+          echo "Compose version has been updated correctly!"
+
   push_dev_image_harbor:
     runs-on: ubuntu-latest
     needs: test_and_lint
