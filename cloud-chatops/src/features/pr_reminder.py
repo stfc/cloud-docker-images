@@ -1,7 +1,6 @@
 """This module handles the posting of messages to Slack using the Slack SDK WebClient class."""
 
 from typing import List
-from enum_states import PRsFoundState
 from features.base_feature import BaseFeature
 from pr_dataclass import PrData
 
@@ -30,11 +29,9 @@ class PostPRsToSlack(BaseFeature):
         :param prs: A list of PRs from GitHub
         :param thread_ts: Timestamp of reminder message
         """
-        prs_found = PRsFoundState.NONE_FOUND
+        if not prs:
+            self._send_no_prs_found(thread_ts)
+
         for pr in prs:
-            prs_found = PRsFoundState.PRS_FOUND
             response = self._send_thread(pr, thread_ts)
             self._send_thread_react(pr, response.data["channel"], response.data["ts"])
-
-        if prs_found == PRsFoundState.NONE_FOUND:
-            self._send_no_prs_found(thread_ts)

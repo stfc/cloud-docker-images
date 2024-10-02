@@ -31,3 +31,7 @@ class ChannelNotFound(LookupError):
 
 class UserNotFound(LookupError):
     """Error: The Slack member was not found in the user map"""
+
+
+class FailedToPostMessage(RuntimeError):
+    """Error: Failed to post message to Slack."""

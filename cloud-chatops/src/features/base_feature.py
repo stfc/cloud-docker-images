@@ -4,7 +4,7 @@ All features should inherit this class to reduce code duplication.
 """
 
 from abc import ABC
-from typing import Dict, List
+from typing import List
 from datetime import datetime, timedelta
 from dataclasses import replace
 from slack_sdk import WebClient
@@ -13,6 +13,7 @@ from dateutil import parser as datetime_parser
 from read_data import get_token, get_repos, get_user_map
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
+from errors import FailedToPostMessage
 
 
 # If the PR author is not in the Slack ID mapping
@@ -35,14 +36,6 @@ class BaseFeature(ABC):
         self.prs = GetGitHubPRs(get_repos(), DEFAULT_REPO_OWNER).run()
         self.slack_ids = get_user_map()
 
-    def _github_to_slack_username(self, user: str) -> str:
-        """Makes a call to the global method"""
-        return _github_to_slack_username(self.slack_ids, user)
-
-    def _slack_to_human_username(self, slack_member_id: str) -> str:
-        """Makes a call to the global method"""
-        return _slack_to_human_username(self.client, slack_member_id)
-
     def _post_reminder_message(self) -> str:
         """
         This method posts the main reminder message to start the thread of PR notifications.
@@ -52,7 +45,10 @@ class BaseFeature(ABC):
             channel=self.channel,
             text="Here are the outstanding PRs as of today:",
         )
-        assert reminder["ok"]
+        if not reminder["ok"]:
+            raise FailedToPostMessage(
+                '"ok" must be True otherwise message failed. Same as HTTP 200'
+            )
         return reminder.data["ts"]
 
     def _send_no_prs_found(self, thread_ts) -> None:
@@ -66,7 +62,10 @@ class BaseFeature(ABC):
             thread_ts=thread_ts,
             unfurl_links=False,
         )
-        assert response["ok"]
+        if not response["ok"]:
+            raise FailedToPostMessage(
+                '"ok" must be True otherwise message failed. Same as HTTP 200'
+            )
 
     def _send_thread(
         self, pr_data: PrData, thread_ts: str
@@ -84,7 +83,10 @@ class BaseFeature(ABC):
             thread_ts=thread_ts,
             unfurl_links=False,
         )
-        assert response["ok"]
+        if not response["ok"]:
+            raise FailedToPostMessage(
+                '"ok" must be True otherwise message failed. Same as HTTP 200'
+            )
         return response
 
     def _send_thread_react(self, pr: PrData, channel: str, thread_ts: str) -> None:
@@ -100,7 +102,10 @@ class BaseFeature(ABC):
             react_response = self.client.reactions_add(
                 channel=channel, name=react, timestamp=thread_ts
             )
-            assert react_response["ok"]
+            if not react_response["ok"]:
+                raise FailedToPostMessage(
+                    '"ok" must be True otherwise message failed. Same as HTTP 200'
+                )
 
     @staticmethod
     def _format_prs(prs: List[PrData]) -> List[PrData]:
@@ -131,11 +136,15 @@ class PRMessageBuilder:
         :return: The message as a single string.
         """
         client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
+        try:
+            name = client.users_profile_get(user=pr_data.user)["profile"]["real_name"]
+        except SlackApiError:
+            name = pr_data.user
+
         message = []
         if pr_data.old:
             message.append("*This PR is older than 6 months. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
-        name = _slack_to_human_username(client, pr_data.user)
         message.append(f"Author: {name}")
         return "\n".join(message)
 
@@ -160,29 +169,7 @@ class PRMessageBuilder:
         slack_ids = get_user_map()
         new_info = replace(
             info,
-            user=_github_to_slack_username(slack_ids, info.user),
+            user=slack_ids.get(info.user, info.user),
             old=self._check_pr_age(info.created_at),
         )
         return new_info
-
-
-def _slack_to_human_username(client: WebClient, slack_member_id: str) -> str:
-    """
-    This method gets the display username from a Slack member ID
-    :param slack_member_id: The Slack member ID to look for
-    :return: Returns the real name or if not found the name originally parsed in
-    """
-    try:
-        name = client.users_profile_get(user=slack_member_id)["profile"]["real_name"]
-    except SlackApiError:
-        name = slack_member_id
-    return name
-
-
-def _github_to_slack_username(slack_ids: Dict, user: str) -> str:
-    """
-    This method GitHub username into Slack member ID.
-    :param user: GitHub username to check for
-    :return: Slack ID or GitHub username
-    """
-    return slack_ids[user] if user in slack_ids else user

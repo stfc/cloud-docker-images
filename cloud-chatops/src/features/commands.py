@@ -1,6 +1,6 @@
 """This module handles the posting of messages to Slack using the Slack SDK WebClient class."""
 
-from typing import List
+from typing import List, Union
 from enum_states import PRsFoundState
 from features.base_feature import BaseFeature, PRMessageBuilder
 from pr_dataclass import PrData
@@ -40,18 +40,18 @@ class PostToDMs(BaseFeature):
         :param thread_ts: Timestamp of reminder message
         :param prs: A list of PRs from GitHub
         """
-        prs_posted = PRsFoundState.NONE_FOUND
-        for pr in prs:
-            post_status = self._filter_thread_message(pr, thread_ts, post_all)
-            if post_status == PRsFoundState.PRS_FOUND:
-                prs_posted = PRsFoundState.PRS_FOUND
+        prs_posted = any(
+            self._filter_thread_message(pr, thread_ts, post_all)
+            == PRsFoundState.PRS_FOUND
+            for pr in prs
+        )
 
-        if prs_posted == PRsFoundState.NONE_FOUND:
+        if not prs_posted:
             self._send_no_prs_found(thread_ts)
 
     def _filter_thread_message(
         self, pr: PrData, thread_ts: str, post_all: bool
-    ) -> PRsFoundState:
+    ) -> Union[PRsFoundState, bool]:
         """
         This method filters which pull requests to send to the thread dependent on the value of personal_thread.
         If personal_thread holds a value, only PRs authored by that user will be sent to the thread.
@@ -61,9 +61,8 @@ class PostToDMs(BaseFeature):
         :param thread_ts: Timestamp of reminder message
         :return: Returns an Enum state.
         """
-        if post_all or (not post_all and pr.user == self.user):
+        if post_all or pr.user == self.user:
             response = self._send_thread(pr, thread_ts)
             self._send_thread_react(pr, response.data["channel"], response.data["ts"])
             return PRsFoundState.PRS_FOUND
-
-        return PRsFoundState.NONE_FOUND
+        return False
