@@ -40,12 +40,14 @@ class PostToDMs(BaseFeature):
         :param thread_ts: Timestamp of reminder message
         :param prs: A list of PRs from GitHub
         """
+        # pylint: disable=R1729
+        # Disabling this we need to evaluate all occurrences in the list even if we encounter a True statement
         prs_posted = any(
             [self._filter_thread_message(pr, thread_ts, post_all)
              == PRsFoundState.PRS_FOUND
              for pr in prs]
         )
-
+        # We cannot evaluate with prs itself here as there is a chance that the list has PRs but none match the user
         if not prs_posted:
             self._send_no_prs_found(thread_ts)
 
