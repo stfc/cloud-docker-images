@@ -55,10 +55,10 @@ jobs:
   check_version_update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout master
         uses: actions/checkout@v4
         with:
-          ref: 'main'
+          ref: 'master'
           path: 'main'
 
       - name: Checkout current working branch
@@ -67,7 +67,7 @@ jobs:
           path: 'branch'
 
       - name: Compare versions
-        if: ${{ github.ref != 'refs/heads/main' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         uses: khalford/check-version-action@main
         with:
           app_version_path: "cloud-chatops/version.txt"
