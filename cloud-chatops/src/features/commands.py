@@ -32,7 +32,7 @@ class PostToDMs(BaseFeature):
         self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 
     def _post_thread_messages(
-        self, prs: List[PrData], thread_ts: str, post_all: bool
+            self, prs: List[PrData], thread_ts: str, post_all: bool
     ) -> None:
         """
         This method iterates through each PR and calls the post method for them.
@@ -41,16 +41,16 @@ class PostToDMs(BaseFeature):
         :param prs: A list of PRs from GitHub
         """
         prs_posted = any(
-            self._filter_thread_message(pr, thread_ts, post_all)
-            == PRsFoundState.PRS_FOUND
-            for pr in prs
+            [self._filter_thread_message(pr, thread_ts, post_all)
+             == PRsFoundState.PRS_FOUND
+             for pr in prs]
         )
 
         if not prs_posted:
             self._send_no_prs_found(thread_ts)
 
     def _filter_thread_message(
-        self, pr: PrData, thread_ts: str, post_all: bool
+            self, pr: PrData, thread_ts: str, post_all: bool
     ) -> Union[PRsFoundState, bool]:
         """
         This method filters which pull requests to send to the thread dependent on the value of personal_thread.
