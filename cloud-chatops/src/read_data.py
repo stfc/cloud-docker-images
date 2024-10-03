@@ -4,16 +4,20 @@ from typing import List, Dict
 import sys
 import os
 import json
-from custom_exceptions import (
+from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
     TokensNotGiven,
 )
 
+# Production secret path
 PATH = "/usr/src/app/cloud_chatops_secrets/"
 try:
     if sys.argv[1] == "local":
-        PATH = f"{os.environ['HOME']}/cloud_chatops_secrets/"
+        # Using dev secrets here for local testing as it runs the application
+        # in a separate Slack Workspace than the production application.
+        # This means the slash commands won't be picked up by the production application.
+        PATH = f"{os.environ['HOME']}/dev_cloud_chatops_secrets/"
 except IndexError:
     pass
 except KeyError:
@@ -31,7 +35,7 @@ def validate_required_files() -> None:
     if not repos:
         raise RepositoriesNotGiven("repos.csv does not contain any repositories.")
 
-    tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN", "INFLUX_TOKEN"]
+    tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]
     for token in tokens:
         temp = get_token(token)
         if not temp:
