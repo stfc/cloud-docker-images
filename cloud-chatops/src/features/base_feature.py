@@ -131,7 +131,7 @@ class PRMessageBuilder:
     @staticmethod
     def _construct_string(pr_data: PrData) -> str:
         """
-        This method constructs the PR message depending on if the PR is old and if the message should mention or not.
+        This method constructs the PR message.
         :param pr_data: The data class containing the info about the PR.
         :return: The message as a single string.
         """
