@@ -13,6 +13,7 @@ from features.commands import PostToDMs
 from read_data import get_token, validate_required_files
 
 
+PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
 logging.basicConfig(level=logging.DEBUG)
 app = AsyncApp(token=get_token("SLACK_BOT_TOKEN"))
 
@@ -58,10 +59,10 @@ async def schedule_jobs() -> None:
         PostPRsToSlack().run(channel=channel)
 
     schedule.every().monday.at("09:00").do(
-        run_pr, channel="C03RT2F6WHZ"  # "pull-requests" channel
+        run_pr, channel=PULL_REQUESTS_CHANNEL
     )
     schedule.every().wednesday.at("09:00").do(
-        run_pr, channel="pull-requests"
+        run_pr, channel=PULL_REQUESTS_CHANNEL
     )
 
     while True:
