@@ -3,7 +3,7 @@
 from unittest.mock import NonCallableMock, patch, MagicMock
 import pytest
 from features.base_feature import BaseFeature
-from errors import FailedToPostMessage
+from errors import FailedToPostMessage, UserNotFound
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -167,3 +167,16 @@ def test_format_prs(mock_pr_message_builder, instance):
     mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr1)
     mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr2)
     assert res == ["format_mock_1", "format_mock_2"]
+
+
+def test_validate_user(instance):
+    """Test the validate user method."""
+    instance.validate_user("mock_user")
+    instance.client.users_profile_get.assert_called_once_with(user="mock_user")
+
+
+def test_validate_user_fails(instance):
+    """Test the validate user method raises an exception."""
+    instance.client.users_profile_get.side_effect = UserNotFound()
+    with pytest.raises(UserNotFound):
+        instance.validate_user("mock_user")

@@ -1,4 +1,4 @@
-"""This module handles the posting of messages to Slack using the Slack SDK WebClient class."""
+"""This module posts a PR reminder message to the pull-requests channel."""
 
 from typing import List
 from features.base_feature import BaseFeature
