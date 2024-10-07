@@ -63,7 +63,7 @@ def test_construct_string_old(mock_web_client, mock_get_token, instance):
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
     expected = (
-        "*This PR is older than 6 months. Consider closing it:*\n"
+        "*This PR is older than 90 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_real_name"
     )
     assert res == expected
@@ -81,7 +81,7 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     expected = (
-        "*This PR is older than 6 months. Consider closing it:*\n"
+        "*This PR is older than 90 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_user"
     )
     assert res == expected
@@ -96,14 +96,14 @@ def test_check_pr_age_not_old(
 ):
     """Test returns false since PR is not old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
-    mock_datetime.now.return_value.replace.return_value = 200
-    mock_timedelta.return_value = 30 * 6
+    mock_datetime.now.return_value.replace.return_value = 190
+    mock_timedelta.return_value = 90
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30 * 6)
+    mock_timedelta.assert_called_once_with(days=90)
     assert not res
 
 
@@ -117,13 +117,13 @@ def test_check_pr_age_old(
     """Test returns false since PR is  old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
     mock_datetime.now.return_value.replace.return_value = 300
-    mock_timedelta.return_value = 30 * 6
+    mock_timedelta.return_value = 90
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30 * 6)
+    mock_timedelta.assert_called_once_with(days=90)
     assert res
 
 
