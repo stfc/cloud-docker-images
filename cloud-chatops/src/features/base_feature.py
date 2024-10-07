@@ -119,10 +119,10 @@ class BaseFeature(ABC):
         """Validate that the given user is in the workspace."""
         try:
             self.client.users_profile_get(user=user)
-        except SlackApiError:
+        except SlackApiError as exc:
             raise UserNotFound(
                 f"The user with member ID {user} is not in this workspace."
-            )
+            ) from exc
 
 
 class PRMessageBuilder:
