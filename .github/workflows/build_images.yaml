@@ -1,6 +1,9 @@
 name: docker_images
 on:
   push:
+    paths-ignore:
+        - 'cloud-chatops/**'
+        - '.github/workflows/cloud_chatops.yaml'
   pull_request:
     paths-ignore:
       - 'cloud-chatops/**'
