@@ -13,7 +13,7 @@ from dateutil import parser as datetime_parser
 from read_data import get_token, get_repos, get_user_map
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
-from errors import FailedToPostMessage
+from errors import FailedToPostMessage, UserNotFound
 
 
 # If the PR author is not in the Slack ID mapping
@@ -114,6 +114,13 @@ class BaseFeature(ABC):
         for pr in prs:
             formatted_prs.append(PRMessageBuilder().check_pr(pr))
         return formatted_prs
+
+    def validate_user(self, user: str) -> None:
+        """Validate that the given user is in the workspace."""
+        try:
+            self.client.users_profile_get(user=user)
+        except SlackApiError:
+            raise UserNotFound(f"The user with member ID {user} is not in this workspace.")
 
 
 class PRMessageBuilder:

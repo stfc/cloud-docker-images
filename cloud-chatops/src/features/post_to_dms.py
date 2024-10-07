@@ -1,9 +1,10 @@
-"""This module handles the posting of messages to Slack using the Slack SDK WebClient class."""
+"""This module posts the PR reminder to a users personal messages."""
 
 from typing import List, Union
 from enum_states import PRsFoundState
 from features.base_feature import BaseFeature, PRMessageBuilder
 from pr_dataclass import PrData
+from errors import NoUsersGiven
 
 
 class PostToDMs(BaseFeature):
@@ -19,17 +20,22 @@ class PostToDMs(BaseFeature):
         self.user = None
         self.message_builder = PRMessageBuilder()
 
-    def run(self, channel: str, post_all: bool) -> None:
+    def run(self, users: List[str], post_all: bool) -> None:
         """
         This method calls the functions to post the reminder message and further PR messages.
-        :param channel: The users channel ID to post to.
+        :param users: The users' channel IDs to post to.
         :param post_all: To post all PRs found or only ones authored by the user.
         """
-        self.channel = channel
-        self.user = channel
         self.prs = self._format_prs(self.prs)
-        reminder_thread_ts = self._post_reminder_message()
-        self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
+        if not users:
+            raise NoUsersGiven("No users were parsed to the function. Please specify users to message.")
+
+        for user in users:
+            self.validate_user(user)
+            self.channel = user
+            self.user = user
+            reminder_thread_ts = self._post_reminder_message()
+            self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 
     def _post_thread_messages(
             self, prs: List[PrData], thread_ts: str, post_all: bool

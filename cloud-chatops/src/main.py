@@ -9,8 +9,8 @@ from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 import schedule
 from features.pr_reminder import PostPRsToSlack
-from features.commands import PostToDMs
-from read_data import get_token, validate_required_files
+from features.post_to_dms import PostToDMs
+from read_data import get_token, validate_required_files, get_user_map
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -32,13 +32,13 @@ async def remind_prs(ack, respond, command):
     :param respond: Slacks respond command to respond to the command in chat.
     """
     await ack()
-    channel = command["user_id"]
+    user_id = command["user_id"]
     if command["text"] == "mine":
         await respond("Gathering the PRs...")
-        PostToDMs().run(channel, False)
+        PostToDMs().run([user_id], False)
     elif command["text"] == "all":
         await respond("Gathering the PRs...")
-        PostToDMs().run(channel, True)
+        PostToDMs().run([user_id], True)
     else:
         await respond("Please provide the correct argument: 'mine' or 'all'.")
         return
@@ -51,18 +51,26 @@ async def schedule_jobs() -> None:
     This function schedules tasks for the async loop to run.
     """
 
-    def run_pr(channel) -> None:
+    def run_global_reminder(channel) -> None:
         """
         This is a placeholder function for the schedule to accept.
         """
         PostPRsToSlack().run(channel=channel)
 
+    def run_personal_reminder() -> None:
+        """This is a placeholder function for the schedule to accept."""
+        users = list(get_user_map().values())
+        PostToDMs().run(users=users, post_all=False)
+
     schedule.every().monday.at("09:00").do(
-        run_pr, channel="C03RT2F6WHZ"  # "pull-requests" channel
+        run_global_reminder, channel="C03RT2F6WHZ"  # "pull-requests" channel
     )
+
     schedule.every().wednesday.at("09:00").do(
-        run_pr, channel="pull-requests"
+        run_global_reminder, channel="pull-requests"
     )
+
+    schedule.every().monday.at("09:00").do(run_personal_reminder)
 
     while True:
         schedule.run_pending()
