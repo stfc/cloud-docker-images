@@ -28,7 +28,9 @@ class PostToDMs(BaseFeature):
         """
         self.prs = self._format_prs(self.prs)
         if not users:
-            raise NoUsersGiven("No users were parsed to the function. Please specify users to message.")
+            raise NoUsersGiven(
+                "No users were parsed to the function. Please specify users to message."
+            )
 
         for user in users:
             self.validate_user(user)
@@ -38,7 +40,7 @@ class PostToDMs(BaseFeature):
             self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 
     def _post_thread_messages(
-            self, prs: List[PrData], thread_ts: str, post_all: bool
+        self, prs: List[PrData], thread_ts: str, post_all: bool
     ) -> None:
         """
         This method iterates through each PR and calls the post method for them.
@@ -49,16 +51,18 @@ class PostToDMs(BaseFeature):
         # pylint: disable=R1729
         # Disabling this we need to evaluate all occurrences in the list even if we encounter a True statement
         prs_posted = any(
-            [self._filter_thread_message(pr, thread_ts, post_all)
-             == PRsFoundState.PRS_FOUND
-             for pr in prs]
+            [
+                self._filter_thread_message(pr, thread_ts, post_all)
+                == PRsFoundState.PRS_FOUND
+                for pr in prs
+            ]
         )
         # We cannot evaluate with prs itself here as there is a chance that the list has PRs but none match the user
         if not prs_posted:
             self._send_no_prs_found(thread_ts)
 
     def _filter_thread_message(
-            self, pr: PrData, thread_ts: str, post_all: bool
+        self, pr: PrData, thread_ts: str, post_all: bool
     ) -> Union[PRsFoundState, bool]:
         """
         This method filters which pull requests to send to the thread dependent on the value of personal_thread.

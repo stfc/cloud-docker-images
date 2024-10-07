@@ -120,7 +120,9 @@ class BaseFeature(ABC):
         try:
             self.client.users_profile_get(user=user)
         except SlackApiError:
-            raise UserNotFound(f"The user with member ID {user} is not in this workspace.")
+            raise UserNotFound(
+                f"The user with member ID {user} is not in this workspace."
+            )
 
 
 class PRMessageBuilder:
