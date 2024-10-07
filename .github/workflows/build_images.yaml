@@ -1,7 +1,13 @@
 name: docker_images
 on:
   push:
+    paths-ignore:
+        - 'cloud-chatops/**'
+        - '.github/workflows/cloud_chatops.yaml'
   pull_request:
+    paths-ignore:
+      - 'cloud-chatops/**'
+      - '.github/workflows/cloud_chatops.yaml'
   schedule: [{cron: "14 14 * * TUE"}] # Every Tuesday at 14:14
 jobs:
   setup:

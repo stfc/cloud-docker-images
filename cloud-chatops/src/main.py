@@ -13,6 +13,7 @@ from features.post_to_dms import PostToDMs
 from read_data import get_token, validate_required_files, get_user_map
 
 
+PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
 logging.basicConfig(level=logging.DEBUG)
 app = AsyncApp(token=get_token("SLACK_BOT_TOKEN"))
 
@@ -63,11 +64,11 @@ async def schedule_jobs() -> None:
         PostToDMs().run(users=users, post_all=False)
 
     schedule.every().monday.at("09:00").do(
-        run_global_reminder, channel="C03RT2F6WHZ"  # "pull-requests" channel
+        run_global_reminder, channel=PULL_REQUESTS_CHANNEL
     )
 
     schedule.every().wednesday.at("09:00").do(
-        run_global_reminder, channel="pull-requests"
+        run_global_reminder, channel=PULL_REQUESTS_CHANNEL
     )
 
     schedule.every().monday.at("09:00").do(run_personal_reminder)

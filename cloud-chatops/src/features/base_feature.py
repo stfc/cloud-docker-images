@@ -152,7 +152,7 @@ class PRMessageBuilder:
 
         message = []
         if pr_data.old:
-            message.append("*This PR is older than 6 months. Consider closing it:*")
+            message.append("*This PR is older than 90 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
         message.append(f"Author: {name}")
         return "\n".join(message)
@@ -166,7 +166,7 @@ class PRMessageBuilder:
         """
         opened_date = datetime_parser.parse(time_created).replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
-        time_cutoff = datetime_now - timedelta(days=30 * 6)
+        time_cutoff = datetime_now - timedelta(days=90)
         return opened_date < time_cutoff
 
     def check_pr(self, info: PrData) -> PrData:
