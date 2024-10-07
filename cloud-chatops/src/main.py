@@ -58,10 +58,10 @@ async def schedule_jobs() -> None:
         PostPRsToSlack().run(channel=channel)
 
     schedule.every().monday.at("09:00").do(
-        run_pr, mention=True, channel="C03RT2F6WHZ"  # "pull-requests" channel
+        run_pr, channel="C03RT2F6WHZ"  # "pull-requests" channel
     )
     schedule.every().wednesday.at("09:00").do(
-        run_pr, mention=False, channel="pull-requests"
+        run_pr, channel="pull-requests"
     )
 
     while True:
