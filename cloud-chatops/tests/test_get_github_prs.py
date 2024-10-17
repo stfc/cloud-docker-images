@@ -11,9 +11,7 @@ from pr_dataclass import PrData
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
-    mock_repos = {
-        "owner1": ["repo1"]
-    }
+    mock_repos = {"owner1": ["repo1"]}
     return GetGitHubPRs(mock_repos)
 
 
@@ -43,8 +41,7 @@ def test_request_all_repos_http(mock_make_request, instance):
             f"https://api.github.com/repos/{mock_owner}/{repo}/pulls"
         )
     assert res == [
-        f"https://api.github.com/repos/{mock_owner}/{repo}/pulls"
-        for repo in mock_repos
+        f"https://api.github.com/repos/{mock_owner}/{repo}/pulls" for repo in mock_repos
     ]
 
 
