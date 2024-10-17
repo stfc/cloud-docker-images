@@ -56,7 +56,9 @@ def validate_required_files() -> None:
         if not value:
             raise UserMapNotGiven(f"User {item} does not have a Slack ID assigned.")
         if not item:
-            raise UserMapNotGiven(f"Slack member {value} does not have a GitHub username assigned.")
+            raise UserMapNotGiven(
+                f"Slack member {value} does not have a GitHub username assigned."
+            )
 
 
 def get_token(secret: str) -> str:

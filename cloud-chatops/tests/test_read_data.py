@@ -1,7 +1,7 @@
 """This test file covers all tests for the read_data module."""
+from unittest.mock import patch, mock_open
 import pytest
 import yaml
-from unittest.mock import patch, mock_open
 from errors import RepositoriesNotGiven, TokensNotGiven, UserMapNotGiven
 from read_data import get_token, get_config, validate_required_files
 
@@ -113,7 +113,10 @@ def test_validate_required_files_fail_user_map_github(mock_get_token, mock_get_c
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"": "slack1"}]
     with pytest.raises(UserMapNotGiven) as exc:
         validate_required_files()
-    assert str(exc.value) == "Slack member slack1 does not have a GitHub username assigned."
+    assert (
+        str(exc.value)
+        == "Slack member slack1 does not have a GitHub username assigned."
+    )
 
 
 @patch("read_data.get_config")
