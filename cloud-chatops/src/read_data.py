@@ -1,9 +1,10 @@
 """This module handles reading data from files such as secrets and user maps."""
 
-from typing import List, Dict
+from typing import List, Dict, Union
 import sys
 import os
 import json
+import yaml
 from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
@@ -62,37 +63,16 @@ def get_token(secret: str) -> str:
     return secrets[secret]
 
 
-def get_repos() -> List[str]:
+def get_config(section: str = "all") -> Union[Dict, str]:
     """
-    This function reads the repo csv file and returns a list of repositories
-    :return: List of repositories as strings
+    This function will return the specified section from the config file.
+    :param section: The section of the config to retrieve.
+    :return: The data retrieved from the config file.
     """
-    with open(PATH + "repos.csv", "r", encoding="utf-8") as file:
-        data = file.read()
-        repos = data.split(",")
-        if not repos[-1]:
-            repos = repos[:-1]
-    return repos
-
-
-def get_user_map() -> Dict:
-    """
-    This function gets the GitHub to Slack username mapping from the map file.
-    :return: Dictionary of username mapping
-    """
-    with open(PATH + "user_map.json", "r", encoding="utf-8") as file:
-        data = file.read()
-        user_map = json.loads(data)
-    return user_map
-
-
-def get_maintainer() -> str:
-    """
-    This function will get the maintainer user's Slack ID from the text file.
-    :return: Slack Member ID
-    """
-    with open(PATH + "maintainer.txt", "r", encoding="utf-8") as file:
-        data = file.read()
-        if not data:
-            return "U05RBU0RF4J"  # Default Maintainer: Kalibh Halford
-        return data
+    with open(PATH + "config.yml", "r", encoding="utf-8") as config:
+        config_data = yaml.safe_load(config)
+    match section:
+        case "all":
+            return config_data
+        case _:
+            return config_data.get(section)
