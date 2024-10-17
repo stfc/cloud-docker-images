@@ -1,5 +1,6 @@
 """This test file covers all tests for the read_data module."""
 
+import yaml
 from unittest.mock import patch, mock_open
 from read_data import get_token, get_config
 
@@ -54,3 +55,10 @@ def test_get_maintainer():
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
         res = get_config("maintainer")
         assert res == "mock_maintainer"
+
+
+def test_get_config():
+    """Test that the entire config is returned when no section is specified."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config()
+        assert res == yaml.safe_load(MOCK_CONFIG)
