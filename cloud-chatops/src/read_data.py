@@ -1,6 +1,6 @@
 """This module handles reading data from files such as secrets and user maps."""
 
-from typing import List, Dict, Union
+from typing import Dict, Union
 import sys
 import os
 import json
@@ -32,9 +32,9 @@ def validate_required_files() -> None:
     """
     This function checks that all required files have data in them before the application runs.
     """
-    repos = get_repos()
+    repos = get_config("repos")
     if not repos:
-        raise RepositoriesNotGiven("repos.csv does not contain any repositories.")
+        raise RepositoriesNotGiven("config.yml does not contain any repositories.")
 
     tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]
     for token in tokens:
@@ -43,9 +43,9 @@ def validate_required_files() -> None:
             raise TokensNotGiven(
                 f"Token {token} does not have a value in secrets.json."
             )
-    user_map = get_user_map()
+    user_map = get_config("user-map")
     if not user_map:
-        raise UserMapNotGiven("user_map.json is empty.")
+        raise UserMapNotGiven("config.yml does not contain a user map is empty.")
     for item, value in user_map.items():
         if not value:
             raise UserMapNotGiven(f"User {item} does not have a Slack ID assigned.")
