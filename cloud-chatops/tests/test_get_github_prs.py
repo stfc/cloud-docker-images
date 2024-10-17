@@ -11,9 +11,10 @@ from pr_dataclass import PrData
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
-    mock_repos = ["repo1", "repo2"]
-    mock_owner = "mock_user"
-    return GetGitHubPRs(mock_repos, mock_owner)
+    mock_repos = {
+        "owner1": ["repo1"]
+    }
+    return GetGitHubPRs(mock_repos)
 
 
 @patch("get_github_prs.GetGitHubPRs._request_all_repos_http")
@@ -21,35 +22,36 @@ def instance_fixture():
 def test_run(mock_parse_pr_to_dataclass, mock_request_all_repos_http, instance):
     """Tests the run method returns the correct object"""
     res = instance.run()
-    mock_request_all_repos_http.assert_called_once_with()
-    mock_parse_pr_to_dataclass.assert_called_once_with(
-        mock_request_all_repos_http.return_value
-    )
+    for owner in instance.repos:
+        mock_request_all_repos_http.assert_any_call(owner, instance.repos.get(owner))
+    mock_parse_pr_to_dataclass.assert_called_once()
     assert res == mock_parse_pr_to_dataclass.return_value
 
 
 @patch("get_github_prs.HTTPHandler.make_request")
 def test_request_all_repos_http(mock_make_request, instance):
     """Test a request is made for each repo in the list"""
+    mock_owner = "owner1"
+    mock_repos = instance.repos.get(mock_owner)
     mock_make_request.side_effect = [
-        [f"https://api.github.com/repos/{instance.owner}/{repo}/pulls"]
-        for repo in instance.repos
+        [f"https://api.github.com/repos/{mock_owner}/{repo}/pulls"]
+        for repo in mock_repos
     ]
-    res = instance._request_all_repos_http()
-    for repo in instance.repos:
+    res = instance._request_all_repos_http(mock_owner, mock_repos)
+    for repo in mock_repos:
         mock_make_request.assert_any_call(
-            f"https://api.github.com/repos/{instance.owner}/{repo}/pulls"
+            f"https://api.github.com/repos/{mock_owner}/{repo}/pulls"
         )
     assert res == [
-        f"https://api.github.com/repos/{instance.owner}/{repo}/pulls"
-        for repo in instance.repos
+        f"https://api.github.com/repos/{mock_owner}/{repo}/pulls"
+        for repo in mock_repos
     ]
 
 
 def test_request_all_repos_http_none(instance):
     """Test that nothing is returned when no repos are given"""
-    instance.repos = []
-    res = instance._request_all_repos_http()
+    instance.repos = {}
+    res = instance._request_all_repos_http("", [])
     assert res == []
 
 
