@@ -10,7 +10,7 @@ from dataclasses import replace
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from dateutil import parser as datetime_parser
-from read_data import get_token, get_repos, get_user_map
+from read_data import get_token, get_config
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
 from errors import FailedToPostMessage, UserNotFound
@@ -33,8 +33,8 @@ class BaseFeature(ABC):
     def __init__(self):
         self.channel = DEFAULT_CHANNEL
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-        self.prs = GetGitHubPRs(get_repos(), DEFAULT_REPO_OWNER).run()
-        self.slack_ids = get_user_map()
+        self.prs = GetGitHubPRs(get_config("repos")).run()
+        self.slack_ids = get_config("user-map")
 
     def _post_reminder_message(self) -> str:
         """
@@ -175,7 +175,7 @@ class PRMessageBuilder:
         :param info: The information to validate.
         :return: The validated information.
         """
-        slack_ids = get_user_map()
+        slack_ids = get_config("user-map")
         new_info = replace(
             info,
             user=slack_ids.get(info.user, info.user),
