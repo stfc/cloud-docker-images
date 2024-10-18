@@ -1,0 +1,26 @@
+---
+maintainer: AB12CD34  # Slack Member ID of the application maintainer
+
+user-map:  # Dictionary of GitHub username to Slack Member ID
+  my_github_username: AB12CD34
+  other_github_username: EF56GH78
+
+repos:  # Dictionary of owners and repositories
+  organisation1:
+    - repo1  # E.g. github.com/organisation1/repo1
+    - repo2
+    - repo3
+  organisation2:
+    - repo1  # E.g. github.com/organisation2/repo1
+    - repo2
+    - repo3
+
+defaults:  # Default values for application variables
+  # Default author will be assigned to pull requests where the PR author is not in the above user map.
+  # Usually team lead or senior staff member.
+  author: WX67YZ89  # Slack member ID
+
+  # Default channel is where the pull requests will be posted.
+  # It's recommended to set this as a "maintenance" / "dev" channel in case the application goes awry.
+  # The actual channel messages are sent to can be specified in the code.
+  channel: CH12NN34  # Slack channel ID
