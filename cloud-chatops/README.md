@@ -10,8 +10,9 @@
 
 ### About
 
-Cloud ChatOps is designed to help promote the closing of GitHub pull requests. Either by getting them approved and merged or closed when they go stale.<br>
-The app will notify authors about their pull requests until they are closed / merged. There are multiple methods of sending these reminders.<br>
+Cloud ChatOps is designed to help encourage developers to complete GitHub pull requests. 
+Either by getting them approved and merged or closed when they go stale.<br>
+The app will notify authors about their pull requests, usually by Slack, until they are closed / merged. There are multiple methods of sending these reminders.<br>
 
 ### Usage / Features
 
@@ -34,7 +35,7 @@ Secrets should always be stored in `$HOME/cloud_chatops_secrets` on the host sys
 The application can be run from a Docker image or source code. (Assuming running from project root)<br>
 
 #### Docker image:
-You can build the image locally or pull from [STFC Harbor](https://harbor.stfc.ac.uk).<br>
+You can build the image locally or pull from [STFC Harbor](https://harbor.stfc.ac.uk/harbor/projects/33528/repositories/cloud-chatops).<br>
 Note: If you are pulling the image you will need to specify a version tag. 
 The latest version can be found in [version.txt](version.txt)<br>
 - ```shell
@@ -70,6 +71,11 @@ These should be stored in `$HOME/cloud_chatops_secrets` on the host system.<br>
 #### Config
 The application configuration is stored in [config.yml](template_config.yml).
 This includes information such as username mapping, repositories to check and default values.<br>
+Slack Channel and Member IDs can be found in Slack by:<br>
+- Right-clicking the member / channel
+- View member / channel details
+- Near the bottom of the About tab there will be an ID with copy button
+
 The `config.yml` should look like the below:
 ```yaml
 ---
