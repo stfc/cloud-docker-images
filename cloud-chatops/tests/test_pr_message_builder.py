@@ -13,9 +13,8 @@ from pr_dataclass import PrData
 @patch("features.base_feature.WebClient")
 @patch("features.base_feature.GetGitHubPRs")
 @patch("features.base_feature.get_token")
-@patch("features.base_feature.get_repos")
-@patch("features.base_feature.get_user_map")
-def instance_fixture(_, _2, _3, _4, _5):
+@patch("features.base_feature.get_config")
+def instance_fixture(_, _2, _3, _4):
     """Provides a class instance for the tests"""
     return PRMessageBuilder()
 
@@ -128,8 +127,8 @@ def test_check_pr_age_old(
 
 
 @patch("features.base_feature.PRMessageBuilder._check_pr_age")
-@patch("features.base_feature.get_user_map")
-def test_check_pr_info_found_name(mock_user_map, mock_check_pr_age, instance):
+@patch("features.base_feature.get_config")
+def test_check_pr_info_found_name(mock_get_config, mock_check_pr_age, instance):
     """Test the dataclass is updated and name is found"""
     mock_data = PrData(
         pr_title="mock_title",
@@ -139,16 +138,17 @@ def test_check_pr_info_found_name(mock_user_map, mock_check_pr_age, instance):
         draft=False,
         old=False,
     )
-    mock_user_map.return_value = {"mock_github": "mock_slack"}
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     mock_check_pr_age.return_value = True
     res = instance.check_pr(mock_data)
+    mock_get_config.assert_called_once_with("user-map")
     assert res.user == "mock_slack"
     assert res.old
 
 
 @patch("features.base_feature.PRMessageBuilder._check_pr_age")
-@patch("features.base_feature.get_user_map")
-def test_check_pr_info_unfound_name(mock_user_map, _, instance):
+@patch("features.base_feature.get_config")
+def test_check_pr_info_unfound_name(mock_get_config, _, instance):
     """Test the dataclass is updated and name is not found"""
     mock_data = PrData(
         pr_title="mock_title",
@@ -158,6 +158,7 @@ def test_check_pr_info_unfound_name(mock_user_map, _, instance):
         draft=False,
         old=False,
     )
-    mock_user_map.return_value = {"mock_github": "mock_slack"}
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     res = instance.check_pr(mock_data)
+    mock_get_config.assert_called_once_with("user-map")
     assert res.user == "mock_user"

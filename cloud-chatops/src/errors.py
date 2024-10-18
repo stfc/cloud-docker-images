@@ -10,7 +10,7 @@ class UnknownHTTPError(RuntimeError):
 
 
 class RepositoriesNotGiven(RuntimeError):
-    """Error: repos.csv does not contain any repositories."""
+    """Error: repos supplied is empty does not contain any repositories."""
 
 
 class TokensNotGiven(RuntimeError):

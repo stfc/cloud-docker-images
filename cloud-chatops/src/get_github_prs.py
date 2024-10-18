@@ -21,14 +21,13 @@ class GetGitHubPRs:
     This class handles getting the open PRs from the GitHub Rest API.
     """
 
-    def __init__(self, repos: List[str], owner: str):
+    def __init__(self, repos: Dict[str, List]):
         """
         This method initialises the class with the following attributes.
         :param repos: A list of repositories to get pull requests for.
         :param repos: The owner of the above repositories.
         """
         self.repos = repos
-        self.owner = owner
         self._http_handler = HTTPHandler()
 
     def run(self) -> List[PrData]:
@@ -37,17 +36,21 @@ class GetGitHubPRs:
         It runs the HTTP request methods and returns the responses.
         :return: The responses from the HTTP requests.
         """
-        responses = self._request_all_repos_http()
+        responses = []
+        for owner in self.repos:
+            responses += self._request_all_repos_http(owner, self.repos.get(owner))
         return self._parse_pr_to_dataclass(responses)
 
-    def _request_all_repos_http(self) -> List[Dict]:
+    def _request_all_repos_http(self, owner: str, repos: List[str]) -> List[Dict]:
         """
         This method starts a request for each repository and returns a list of those PRs.
-        :return: A dictionary of repos and their PRs.
+        :param owner: The organisation for repos
+        :param repos: List of repository names
+        :return: A list of PRs stored as dictionaries
         """
         responses = []
-        for repo in self.repos:
-            url = f"https://api.github.com/repos/{self.owner}/{repo}/pulls"
+        for repo in repos:
+            url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
             responses += self._http_handler.make_request(url)
         return responses
 
