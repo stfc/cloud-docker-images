@@ -10,7 +10,7 @@ from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 import schedule
 from features.pr_reminder import PostPRsToSlack
 from features.post_to_dms import PostToDMs
-from read_data import get_token, validate_required_files, get_user_map
+from read_data import get_token, validate_required_files, get_config
 
 
 PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
@@ -60,7 +60,7 @@ async def schedule_jobs() -> None:
 
     def run_personal_reminder() -> None:
         """This is a placeholder function for the schedule to accept."""
-        users = list(get_user_map().values())
+        users = list(get_config("user-map").values())
         PostToDMs().run(users=users, post_all=False)
 
     schedule.every().monday.at("09:00").do(
