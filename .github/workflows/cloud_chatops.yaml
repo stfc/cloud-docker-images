@@ -97,7 +97,7 @@ jobs:
 
       - name: Compare versions
         if: ${{ github.ref != 'refs/heads/master' }}
-        uses: khalford/check-version-action@main
+        uses: stfc/check-version-action@main
         with:
           app_version_path: "cloud-chatops/version.txt"
           docker_compose_path: "cloud-chatops/docker-compose.yaml"
