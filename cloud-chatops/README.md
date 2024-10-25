@@ -59,6 +59,8 @@ You will also need to change any member / channel IDs in the config to those of 
 Integration tests should be developed / run alongside unit tests when working on the code.<br>
 They offer the benefit of end-to-end functional testing inside a development environment / workspace.<br> 
 Integration tests are run from [dev.py](src/dev.py) using flags to specify which tests to run.<br>
+`dev.py` will always run the Slack application after the tests so you can test the slash commands.<br>
+
 E.g.
 ```shell
 # See the help message for information
@@ -70,3 +72,6 @@ python3 src/dev.py --global "some_test_channel"
 # To test multiple events
 python3 src/dev.py --global --personal "some_test_channel"
 ```
+
+Slack slash commands such as `/prs` still need to be called from Slack. 
+Currently, there is no workflow alternative for this.<br>
