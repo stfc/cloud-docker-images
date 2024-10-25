@@ -5,6 +5,7 @@
 ## CI and Automated Builds
 
 [![CI](https://img.shields.io/github/actions/workflow/status/stfc/cloud-docker-images/build_images.yaml?logo=docker)](https://github.com/stfc/cloud-docker-images/actions/workflows/build_images.yaml?query=branch%3Amaster)
+[![codecov](https://codecov.io/gh/stfc/cloud-docker-images/graph/badge.svg?token=BZEBAE0TQD)](https://codecov.io/gh/stfc/cloud-docker-images)
 
 Images are built:
 

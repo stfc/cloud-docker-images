@@ -3,25 +3,21 @@
 from unittest.mock import NonCallableMock, patch, MagicMock
 import pytest
 from features.base_feature import BaseFeature
-from errors import FailedToPostMessage
+from errors import FailedToPostMessage, UserNotFound
 
 
 @pytest.fixture(name="instance", scope="function")
 @patch("features.base_feature.WebClient")
 @patch("features.base_feature.GetGitHubPRs")
 @patch("features.base_feature.get_token")
-@patch("features.base_feature.get_repos")
-@patch("features.base_feature.get_user_map")
+@patch("features.base_feature.get_config")
 def instance_fixture(
-    mock_get_user_map,
-    mock_get_repos,
+    _,
     mock_get_token,
     mock_get_github_prs,
     mock_web_client,
 ):
     """This fixture provides a class instance for the tests"""
-    mock_get_user_map.return_value = {"mock_github": "mock_slack"}
-    mock_get_repos.return_value = ["mock_repo1", "mock_repo2"]
     mock_get_token.return_value = "mock_slack_token"
     mock_get_github_prs.run.return_value = []
     mock_web_client.return_value = NonCallableMock()
@@ -167,3 +163,16 @@ def test_format_prs(mock_pr_message_builder, instance):
     mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr1)
     mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr2)
     assert res == ["format_mock_1", "format_mock_2"]
+
+
+def test_validate_user(instance):
+    """Test the validate user method."""
+    instance.validate_user("mock_user")
+    instance.client.users_profile_get.assert_called_once_with(user="mock_user")
+
+
+def test_validate_user_fails(instance):
+    """Test the validate user method raises an exception."""
+    instance.client.users_profile_get.side_effect = UserNotFound()
+    with pytest.raises(UserNotFound):
+        instance.validate_user("mock_user")

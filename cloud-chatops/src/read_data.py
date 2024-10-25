@@ -1,9 +1,10 @@
 """This module handles reading data from files such as secrets and user maps."""
 
-from typing import List, Dict
+from typing import Dict, Union
 import sys
 import os
 import json
+import yaml
 from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
@@ -13,13 +14,19 @@ from errors import (
 # Production secret path
 PATH = "/usr/src/app/cloud_chatops_secrets/"
 try:
-    if sys.argv[1] == "local":
+    if sys.argv[1] == "dev" or sys.argv[1] == "development":
         # Using dev secrets here for local testing as it runs the application
         # in a separate Slack Workspace than the production application.
         # This means the slash commands won't be picked up by the production application.
         PATH = f"{os.environ['HOME']}/dev_cloud_chatops_secrets/"
+
+    elif sys.argv[1] == "prod" or sys.argv[1] == "production":
+        # Using prod secrets here in case the application is run directly on host without Docker.
+        PATH = f"{os.environ['HOME']}/cloud_chatops_secrets/"
+
 except IndexError:
     pass
+
 except KeyError:
     print(
         "Are you trying to run locally? Couldn't find HOME in your environment variables."
@@ -31,9 +38,9 @@ def validate_required_files() -> None:
     """
     This function checks that all required files have data in them before the application runs.
     """
-    repos = get_repos()
+    repos = get_config("repos")
     if not repos:
-        raise RepositoriesNotGiven("repos.csv does not contain any repositories.")
+        raise RepositoriesNotGiven("config.yml does not contain any repositories.")
 
     tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]
     for token in tokens:
@@ -42,12 +49,16 @@ def validate_required_files() -> None:
             raise TokensNotGiven(
                 f"Token {token} does not have a value in secrets.json."
             )
-    user_map = get_user_map()
+    user_map = get_config("user-map")
     if not user_map:
-        raise UserMapNotGiven("user_map.json is empty.")
+        raise UserMapNotGiven("config.yml does not contain a user map is empty.")
     for item, value in user_map.items():
         if not value:
             raise UserMapNotGiven(f"User {item} does not have a Slack ID assigned.")
+        if not item:
+            raise UserMapNotGiven(
+                f"Slack member {value} does not have a GitHub username assigned."
+            )
 
 
 def get_token(secret: str) -> str:
@@ -62,37 +73,16 @@ def get_token(secret: str) -> str:
     return secrets[secret]
 
 
-def get_repos() -> List[str]:
+def get_config(section: str = "all") -> Union[Dict, str]:
     """
-    This function reads the repo csv file and returns a list of repositories
-    :return: List of repositories as strings
+    This function will return the specified section from the config file.
+    :param section: The section of the config to retrieve.
+    :return: The data retrieved from the config file.
     """
-    with open(PATH + "repos.csv", "r", encoding="utf-8") as file:
-        data = file.read()
-        repos = data.split(",")
-        if not repos[-1]:
-            repos = repos[:-1]
-    return repos
-
-
-def get_user_map() -> Dict:
-    """
-    This function gets the GitHub to Slack username mapping from the map file.
-    :return: Dictionary of username mapping
-    """
-    with open(PATH + "user_map.json", "r", encoding="utf-8") as file:
-        data = file.read()
-        user_map = json.loads(data)
-    return user_map
-
-
-def get_maintainer() -> str:
-    """
-    This function will get the maintainer user's Slack ID from the text file.
-    :return: Slack Member ID
-    """
-    with open(PATH + "maintainer.txt", "r", encoding="utf-8") as file:
-        data = file.read()
-        if not data:
-            return "U05RBU0RF4J"  # Default Maintainer: Kalibh Halford
-        return data
+    with open(PATH + "config.yml", "r", encoding="utf-8") as config:
+        config_data = yaml.safe_load(config)
+    match section:
+        case "all":
+            return config_data
+        case _:
+            return config_data.get(section)

@@ -1,7 +1,28 @@
 """This test file covers all tests for the read_data module."""
-
 from unittest.mock import patch, mock_open
-from read_data import get_token, get_repos, get_user_map, get_maintainer
+import pytest
+import yaml
+from errors import RepositoriesNotGiven, TokensNotGiven, UserMapNotGiven
+from read_data import get_token, get_config, validate_required_files
+
+
+MOCK_CONFIG = """
+---
+maintainer: mock_maintainer
+user-map:
+  mock_user_1: mock_id_1
+  mock_user_2: mock_id_2
+repos:
+  organisation1:
+    - repo1
+    - repo2
+  organisation2:
+    - repo1
+    - repo2
+defaults:
+  author: WX67YZ
+  channel: CH12NN34
+"""
 
 
 def test_get_token():
@@ -15,36 +36,95 @@ def test_get_token():
 
 def test_get_user_map():
     """This test ensures that the JSON file is read and converted to a dictionary correctly."""
-    with patch("builtins.open", mock_open(read_data='{"mock_user_1": "mock_id_1"}')):
-        res = get_user_map()
-        assert res == {"mock_user_1": "mock_id_1"}
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("user-map")
+        assert res == {"mock_user_1": "mock_id_1", "mock_user_2": "mock_id_2"}
 
 
 def test_get_repos():
     """This test checks that a list is returned if a string list of repos is read with no comma at the end."""
-    with patch("builtins.open", mock_open(read_data="repo1,repo2")):
-        res = get_repos()
-        assert res == ["repo1", "repo2"]
-
-
-def test_get_repos_trailing_separator():
-    """
-    This test checks that a list of repos is returned correctly if there is a trailing comma at the end of the list.
-    """
-    with patch("builtins.open", mock_open(read_data="repo1,repo2,")):
-        res = get_repos()
-        assert res == ["repo1", "repo2"]
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("repos")
+        assert res == {
+            "organisation1": ["repo1", "repo2"],
+            "organisation2": ["repo1", "repo2"],
+        }
 
 
 def test_get_maintainer():
     """This test checks that the user's name is returned."""
-    with patch("builtins.open", mock_open(read_data="mock_person")):
-        res = get_maintainer()
-        assert res == "mock_person"
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("maintainer")
+        assert res == "mock_maintainer"
 
 
-def test_get_maintainer_no_value():
-    """This test checks that the defualt user ID is returned if maintainer.txt is empty."""
-    with patch("builtins.open", mock_open(read_data="")):
-        res = get_maintainer()
-        assert res == "U05RBU0RF4J"  # Default Maintainer: Kalibh Halford
+def test_get_config():
+    """Test that the entire config is returned when no section is specified."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config()
+        assert res == yaml.safe_load(MOCK_CONFIG)
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
+    validate_required_files()
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{}, {"github1": "slack1"}]
+    with pytest.raises(RepositoriesNotGiven):
+        validate_required_files()
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_token(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
+    with pytest.raises(TokensNotGiven):
+        validate_required_files()
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_user_map_slack(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": ""}]
+    with pytest.raises(UserMapNotGiven) as exc:
+        validate_required_files()
+    assert str(exc.value) == "User github1 does not have a Slack ID assigned."
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_user_map_github(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"": "slack1"}]
+    with pytest.raises(UserMapNotGiven) as exc:
+        validate_required_files()
+    assert (
+        str(exc.value)
+        == "Slack member slack1 does not have a GitHub username assigned."
+    )
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_user_map(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {}]
+    with pytest.raises(UserMapNotGiven) as exc:
+        validate_required_files()
+    assert str(exc.value) == "config.yml does not contain a user map is empty."

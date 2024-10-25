@@ -10,7 +10,7 @@ class UnknownHTTPError(RuntimeError):
 
 
 class RepositoriesNotGiven(RuntimeError):
-    """Error: repos.csv does not contain any repositories."""
+    """Error: repos supplied is empty does not contain any repositories."""
 
 
 class TokensNotGiven(RuntimeError):
@@ -30,8 +30,12 @@ class ChannelNotFound(LookupError):
 
 
 class UserNotFound(LookupError):
-    """Error: The Slack member was not found in the user map"""
+    """Error: The Slack member was not found."""
 
 
 class FailedToPostMessage(RuntimeError):
     """Error: Failed to post message to Slack."""
+
+
+class NoUsersGiven(RuntimeError):
+    """Error: No users to post to."""

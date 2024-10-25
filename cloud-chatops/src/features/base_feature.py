@@ -10,10 +10,10 @@ from dataclasses import replace
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from dateutil import parser as datetime_parser
-from read_data import get_token, get_repos, get_user_map
+from read_data import get_token, get_config
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
-from errors import FailedToPostMessage
+from errors import FailedToPostMessage, UserNotFound
 
 
 # If the PR author is not in the Slack ID mapping
@@ -33,8 +33,8 @@ class BaseFeature(ABC):
     def __init__(self):
         self.channel = DEFAULT_CHANNEL
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-        self.prs = GetGitHubPRs(get_repos(), DEFAULT_REPO_OWNER).run()
-        self.slack_ids = get_user_map()
+        self.prs = GetGitHubPRs(get_config("repos")).run()
+        self.slack_ids = get_config("user-map")
 
     def _post_reminder_message(self) -> str:
         """
@@ -115,6 +115,15 @@ class BaseFeature(ABC):
             formatted_prs.append(PRMessageBuilder().check_pr(pr))
         return formatted_prs
 
+    def validate_user(self, user: str) -> None:
+        """Validate that the given user is in the workspace."""
+        try:
+            self.client.users_profile_get(user=user)
+        except SlackApiError as exc:
+            raise UserNotFound(
+                f"The user with member ID {user} is not in this workspace."
+            ) from exc
+
 
 class PRMessageBuilder:
     """This class handles constructing the PR messages to be sent."""
@@ -131,7 +140,7 @@ class PRMessageBuilder:
     @staticmethod
     def _construct_string(pr_data: PrData) -> str:
         """
-        This method constructs the PR message depending on if the PR is old and if the message should mention or not.
+        This method constructs the PR message.
         :param pr_data: The data class containing the info about the PR.
         :return: The message as a single string.
         """
@@ -143,7 +152,7 @@ class PRMessageBuilder:
 
         message = []
         if pr_data.old:
-            message.append("*This PR is older than 6 months. Consider closing it:*")
+            message.append("*This PR is older than 90 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
         message.append(f"Author: {name}")
         return "\n".join(message)
@@ -157,7 +166,7 @@ class PRMessageBuilder:
         """
         opened_date = datetime_parser.parse(time_created).replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
-        time_cutoff = datetime_now - timedelta(days=30 * 6)
+        time_cutoff = datetime_now - timedelta(days=90)
         return opened_date < time_cutoff
 
     def check_pr(self, info: PrData) -> PrData:
@@ -166,7 +175,7 @@ class PRMessageBuilder:
         :param info: The information to validate.
         :return: The validated information.
         """
-        slack_ids = get_user_map()
+        slack_ids = get_config("user-map")
         new_info = replace(
             info,
             user=slack_ids.get(info.user, info.user),

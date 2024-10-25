@@ -13,9 +13,8 @@ from pr_dataclass import PrData
 @patch("features.base_feature.WebClient")
 @patch("features.base_feature.GetGitHubPRs")
 @patch("features.base_feature.get_token")
-@patch("features.base_feature.get_repos")
-@patch("features.base_feature.get_user_map")
-def instance_fixture(_, _2, _3, _4, _5):
+@patch("features.base_feature.get_config")
+def instance_fixture(_, _2, _3, _4):
     """Provides a class instance for the tests"""
     return PRMessageBuilder()
 
@@ -63,7 +62,7 @@ def test_construct_string_old(mock_web_client, mock_get_token, instance):
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
     expected = (
-        "*This PR is older than 6 months. Consider closing it:*\n"
+        "*This PR is older than 90 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_real_name"
     )
     assert res == expected
@@ -81,7 +80,7 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     expected = (
-        "*This PR is older than 6 months. Consider closing it:*\n"
+        "*This PR is older than 90 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_user"
     )
     assert res == expected
@@ -96,14 +95,14 @@ def test_check_pr_age_not_old(
 ):
     """Test returns false since PR is not old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
-    mock_datetime.now.return_value.replace.return_value = 200
-    mock_timedelta.return_value = 30 * 6
+    mock_datetime.now.return_value.replace.return_value = 190
+    mock_timedelta.return_value = 90
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30 * 6)
+    mock_timedelta.assert_called_once_with(days=90)
     assert not res
 
 
@@ -117,19 +116,19 @@ def test_check_pr_age_old(
     """Test returns false since PR is  old"""
     mock_datetime_parser.parse.return_value.replace.return_value = 100
     mock_datetime.now.return_value.replace.return_value = 300
-    mock_timedelta.return_value = 30 * 6
+    mock_timedelta.return_value = 90
     res = instance._check_pr_age(100)
     mock_datetime_parser.parse.assert_called_once_with(100)
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=30 * 6)
+    mock_timedelta.assert_called_once_with(days=90)
     assert res
 
 
 @patch("features.base_feature.PRMessageBuilder._check_pr_age")
-@patch("features.base_feature.get_user_map")
-def test_check_pr_info_found_name(mock_user_map, mock_check_pr_age, instance):
+@patch("features.base_feature.get_config")
+def test_check_pr_info_found_name(mock_get_config, mock_check_pr_age, instance):
     """Test the dataclass is updated and name is found"""
     mock_data = PrData(
         pr_title="mock_title",
@@ -139,16 +138,17 @@ def test_check_pr_info_found_name(mock_user_map, mock_check_pr_age, instance):
         draft=False,
         old=False,
     )
-    mock_user_map.return_value = {"mock_github": "mock_slack"}
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     mock_check_pr_age.return_value = True
     res = instance.check_pr(mock_data)
+    mock_get_config.assert_called_once_with("user-map")
     assert res.user == "mock_slack"
     assert res.old
 
 
 @patch("features.base_feature.PRMessageBuilder._check_pr_age")
-@patch("features.base_feature.get_user_map")
-def test_check_pr_info_unfound_name(mock_user_map, _, instance):
+@patch("features.base_feature.get_config")
+def test_check_pr_info_unfound_name(mock_get_config, _, instance):
     """Test the dataclass is updated and name is not found"""
     mock_data = PrData(
         pr_title="mock_title",
@@ -158,6 +158,7 @@ def test_check_pr_info_unfound_name(mock_user_map, _, instance):
         draft=False,
         old=False,
     )
-    mock_user_map.return_value = {"mock_github": "mock_slack"}
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     res = instance.check_pr(mock_data)
+    mock_get_config.assert_called_once_with("user-map")
     assert res.user == "mock_user"
