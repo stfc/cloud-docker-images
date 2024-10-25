@@ -47,7 +47,7 @@ The latest version can be found in [version.txt](version.txt)<br>
   # Pull from harbor and run
   docker run -v $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version> -d
   ```
-
+  
 #### Running from source:
 You can run the code from [main.py](src/main.py).<br>
 It's always recommended to create a [virtual environment](https://docs.python.org/3/library/venv.html) 
@@ -57,11 +57,6 @@ for the application to run before installing dependencies.
   pip3 install -r requirements.txt
   python3 cloud-chatops/src/main.py prod
   ```
-
-
-
-
-
 
 ### Requirements:
 
@@ -119,4 +114,44 @@ The `secrets.json` file should look like the below and there is a template [here
   "SLACK_APP_TOKEN": "<your-token>",
   "GITHUB_TOKEN": "<your-token>"
 }
+```
+
+### Testing
+
+#### Unit Tests
+
+Unit tests are stored in the [tests](tests) directory.<br>
+Each Python module should have a test module named after it `test_<python_module>`and test functions are named `test_<function_name>`.<br>
+Unit tests are run in the GitHub workflow but should be run locally before pushing changes. Again, we recommend using Python Venvs<br>
+```shell
+# From the cloud_chatops folder
+python3 -m venv my_venv
+source my_venv/bin/activate
+pip3 install -r requirements.txt
+python3 -m pytest tests
+
+# Or to show coverage in the terminal use:
+python3 -m pytest tests --cov-report xml:coverage.xml --cov
+python3 -m pycobertura show coverage.xml
+```
+
+#### Integration Tests
+
+**Integration tests should be run in a development Slack workspace not the main Cloud workspace.**
+Considering this, you will need to make a development Slack application mirroring the production application.
+You will also need to change any member / channel IDs in the config to those of the development workspace.
+
+Integration tests should be developed / run alongside unit tests when working on the code.<br>
+They offer the benefit of end-to-end functional testing inside a development environment / workspace.<br> 
+Integration tests are run from [dev.py](src/dev.py) using flags to specify which tests to run.<br>
+E.g.
+```shell
+# See the help message for information
+python3 src/dev.py --help
+
+# Test a specific event e.g. global reminders
+python3 src/dev.py --global "some_test_channel"
+
+# To test multiple events
+python3 src/dev.py --global --personal "some_test_channel"
 ```
