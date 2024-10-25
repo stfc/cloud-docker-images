@@ -39,3 +39,7 @@ class FailedToPostMessage(RuntimeError):
 
 class NoUsersGiven(RuntimeError):
     """Error: No users to post to."""
+
+
+class NoTestCase(LookupError):
+    """Error: There is no method to test this event."""
