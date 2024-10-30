@@ -3,6 +3,7 @@
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import patch
+from datetime import datetime
 import pytest
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
@@ -60,7 +61,7 @@ def test_parse_pr_to_dataclass(instance):
             "number": 1,
             "user": {"login": "mock_login1"},
             "html_url": "mock_html_url1",
-            "created_at": "mock_created_at1",
+            "created_at": "2011-01-26T19:01:12Z",
             "draft": False,
         },
         {
@@ -68,7 +69,7 @@ def test_parse_pr_to_dataclass(instance):
             "number": 2,
             "user": {"login": "mock_login2"},
             "html_url": "mock_html_url2",
-            "created_at": "mock_created_at2",
+            "created_at": "2011-01-26T19:01:12Z",
             "draft": False,
         },
     ]
@@ -77,14 +78,14 @@ def test_parse_pr_to_dataclass(instance):
             pr_title=f"{mock_responses[0]['title']} #{mock_responses[0]['number']}",
             user=mock_responses[0]["user"]["login"],
             url=mock_responses[0]["html_url"],
-            created_at=mock_responses[0]["created_at"],
+            created_at=datetime.strptime(mock_responses[0]["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
             draft=mock_responses[0]["draft"],
         ),
         PrData(
             pr_title=f"{mock_responses[1]['title']} #{mock_responses[1]['number']}",
             user=mock_responses[1]["user"]["login"],
             url=mock_responses[1]["html_url"],
-            created_at=mock_responses[1]["created_at"],
+            created_at=datetime.strptime(mock_responses[1]["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
             draft=mock_responses[1]["draft"],
         ),
     ]

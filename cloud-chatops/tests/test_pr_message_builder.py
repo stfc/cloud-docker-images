@@ -3,6 +3,7 @@
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import NonCallableMock, patch
+from datetime import datetime
 import pytest
 from slack_sdk.errors import SlackApiError
 from features.base_feature import PRMessageBuilder
@@ -134,7 +135,7 @@ def test_check_pr_info_found_name(mock_get_config, mock_check_pr_age, instance):
         pr_title="mock_title",
         user="mock_github",
         url="mock_url",
-        created_at="mock_creation_date",
+        created_at=datetime.now(),
         draft=False,
         old=False,
     )

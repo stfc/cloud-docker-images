@@ -158,13 +158,13 @@ class PRMessageBuilder:
         return "\n".join(message)
 
     @staticmethod
-    def _check_pr_age(time_created: str) -> bool:
+    def _check_pr_age(time_created: datetime) -> bool:
         """
         This method checks if the PR is older than 6 months.
         :param time_created: The date the PR was created.
         :return: PR older or not.
         """
-        opened_date = datetime_parser.parse(time_created).replace(tzinfo=None)
+        opened_date = time_created.replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=90)
         return opened_date < time_cutoff
