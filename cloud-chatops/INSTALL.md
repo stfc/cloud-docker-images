@@ -56,9 +56,8 @@ GitHub:<br>
 The application can be run from a Docker image or source code. (Assuming running from project root)<br>
 
 #### Dependencies:
-* Docker 
-* Python 3.10+ (To run the application from source code)
-* Full list of required python packages can be found in [requirements.txt](requirements.txt)<br>
+* If running from a Docker image, ensure Docker is installed (see [installation guide](https://docs.docker.com/engine/install/)) and the user account is in the relevant docker users group 
+* If running the application from source, ensure Python 3.10 or higher is installed. The full list of required python packages can be found in [requirements.txt](requirements.txt)<br>
 
 #### Docker image:
 You can build the image locally or pull from [STFC Harbor](https://harbor.stfc.ac.uk/harbor/projects/33528/repositories/cloud-chatops).<br>
@@ -76,7 +75,7 @@ The latest version can be found in [version.txt](version.txt)<br>
   # Then either:
   
   # Run container directly, specifying a version
-  docker run -v $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version> -d
+  docker run -v $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version>
   #
   # or
   #
