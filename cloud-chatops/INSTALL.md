@@ -1,5 +1,5 @@
-# Deploying a Cloud ChatOps application
-This document details the instructions to install and run ChatOps
+# Deploying Cloud ChatOps
+This document details the instructions to install dependencies and run the ChatOps application
 
 ## Contents:
 [Requirements](#requirements)<br>

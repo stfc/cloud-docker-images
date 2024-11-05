@@ -30,4 +30,4 @@ Events are defined in the `main.py/schedule_jobs` function:<br>
 
 ### Deployment
 
-For instructions on how to install and deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
+For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
