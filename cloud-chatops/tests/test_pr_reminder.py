@@ -21,7 +21,7 @@ def instance_fixture(
 ):
     """This fixture provides a class instance for the tests"""
     mock_get_token.return_value = "mock_slack_token"
-    mock_get_github_prs.run.return_value = []
+    mock_get_github_prs.return_value.run.return_value = []
     mock_web_client.return_value = NonCallableMock()
     return PostPRsToSlack()
 

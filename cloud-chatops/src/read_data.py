@@ -14,6 +14,7 @@ from errors import (
 # Production secret path
 PATH = "/usr/src/app/cloud_chatops_secrets/"
 
+
 if sys.argv[0].endswith("dev.py"):
     # Using dev secrets here for local testing as it runs the application
     # in a separate Slack Workspace than the production application.

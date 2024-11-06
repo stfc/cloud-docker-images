@@ -38,6 +38,7 @@ def test_main(mock_tests, mock_validate):
 @patch("dev.run_global_reminder")
 def test_call_test(mock_global, mock_personal, mock_args):
     """Test the call test function"""
+    call_test("channel")
     call_test("global")
     mock_global.assert_called_once_with(mock_args.channel)
     call_test("personal")
@@ -49,6 +50,7 @@ def test_call_test(mock_global, mock_personal, mock_args):
 
 class MockArgs:
     """Mock class to patch global args with"""
+
     # Don't need public methods here as this is a class for mocking argparse
     # pylint: disable=R0903
     def __init__(self):

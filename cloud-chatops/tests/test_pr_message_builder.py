@@ -62,7 +62,7 @@ def test_construct_string_old(mock_web_client, mock_get_token, instance):
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
     expected = (
-        "*This PR is older than 90 days. Consider closing it:*\n"
+        "*This PR is older than 30 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_real_name"
     )
     assert res == expected
@@ -80,7 +80,7 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     expected = (
-        "*This PR is older than 90 days. Consider closing it:*\n"
+        "*This PR is older than 30 days. Consider closing it:*\n"
         "Pull Request: <mock_url|mock_title>\nAuthor: mock_user"
     )
     assert res == expected
