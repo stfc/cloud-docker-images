@@ -112,7 +112,7 @@ class BaseFeature(ABC):
         """This method runs checks against the prs given and changes values such as old and author."""
         formatted_prs = []
         for pr in prs:
-            formatted_prs.append(PRMessageBuilder().check_pr(pr))
+            formatted_prs.append(PRMessageBuilder().add_user_info_and_age(pr))
         return formatted_prs
 
     def validate_user(self, user: str) -> None:
@@ -134,7 +134,7 @@ class PRMessageBuilder:
         :param pr_data: The PR info
         :return: The message to post
         """
-        checked_info = self.check_pr(pr_data)
+        checked_info = self.add_user_info_and_age(pr_data)
         return self._construct_string(checked_info)
 
     @staticmethod
@@ -160,7 +160,7 @@ class PRMessageBuilder:
     @staticmethod
     def _check_pr_age(time_created: datetime) -> bool:
         """
-        This method checks if the PR is older than 6 months.
+        This method checks if the PR is older than 3 months.
         :param time_created: The date the PR was created.
         :return: PR older or not.
         """
@@ -169,7 +169,7 @@ class PRMessageBuilder:
         time_cutoff = datetime_now - timedelta(days=90)
         return opened_date < time_cutoff
 
-    def check_pr(self, info: PrData) -> PrData:
+    def add_user_info_and_age(self, info: PrData) -> PrData:
         """
         This method validates certain information in the PR data such as who authored the PR and if it's old or not.
         :param info: The information to validate.
