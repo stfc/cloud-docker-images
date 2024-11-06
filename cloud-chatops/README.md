@@ -74,3 +74,48 @@ python3 src/dev.py --global --personal "some_test_channel"
 ```
 
 Slack slash commands such as `/prs` are not currently tested.<br>
+
+### Testing
+
+#### Unit Tests
+
+Unit tests are stored in the [tests](tests) directory.<br>
+Each Python module should have a test module named after it `test_<python_module>`and test functions are named `test_<function_name>`.<br>
+Unit tests are run in the GitHub workflow but should be run locally before pushing changes. Again, we recommend using Python Venvs<br>
+```shell
+# From the cloud_chatops folder
+python3 -m venv my_venv
+source my_venv/bin/activate
+pip3 install -r requirements.txt
+python3 -m pytest tests
+
+# Or to show coverage in the terminal use:
+python3 -m pytest tests --cov-report xml:coverage.xml --cov
+python3 -m pycobertura show coverage.xml
+```
+
+#### Integration Tests
+
+**Integration tests should be run in a development Slack workspace not the main Cloud workspace.**
+Considering this, you will need to make a development Slack application mirroring the production application.
+You will also need to change any member / channel IDs in the config to those of the development workspace.
+
+Integration tests should be developed / run alongside unit tests when working on the code.<br>
+They offer the benefit of end-to-end functional testing inside a development environment / workspace.<br> 
+Integration tests are run from [dev.py](src/dev.py) using flags to specify which tests to run.<br>
+`dev.py` will always run the Slack application after the tests so you can test the slash commands.<br>
+
+E.g.
+```shell
+# See the help message for information
+python3 src/dev.py --help
+
+# Test a specific event e.g. global reminders
+python3 src/dev.py --global "some_test_channel"
+
+# To test multiple events
+python3 src/dev.py --global --personal "some_test_channel"
+```
+
+Slack slash commands such as `/prs` still need to be called from Slack. 
+Currently, there is no workflow alternative for this.<br>
