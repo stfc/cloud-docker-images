@@ -1,16 +1,13 @@
 """This module runs local integration tests of the code."""
 import logging
-import asyncio
 import argparse
 from argparse import Namespace
-from slack_bolt.app.async_app import AsyncApp
-from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from errors import NoTestCase
-from read_data import get_token, validate_required_files
+from read_data import validate_required_files
 from events import run_global_reminder, run_personal_reminder
 
 logging.basicConfig(level=logging.DEBUG)
-app = AsyncApp(token=get_token("SLACK_BOT_TOKEN"))
+args = None
 
 
 def run_tests() -> None:
@@ -39,17 +36,15 @@ def call_test(event: str) -> None:
             raise NoTestCase(f"There is not test case for {event}")
 
 
-async def main() -> None:
+def main() -> None:
     """
     This function checks the config files, runs the tests then starts the application.
+    :param app: Async app to run Slack app
     """
     validate_required_files()
-    handler = AsyncSocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
-    logging.info("Running tests")
+    logging.info("Running tests\n")
     run_tests()
-    logging.info("Completed tests.")
-    logging.info("Starting Slack application.")
-    await handler.start_async()
+    logging.info("Completed tests.\n")
 
 
 def parse_args() -> Namespace:
@@ -63,4 +58,4 @@ def parse_args() -> Namespace:
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(main())
+    main()
