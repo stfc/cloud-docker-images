@@ -152,7 +152,7 @@ class PRMessageBuilder:
 
         message = []
         if pr_data.old:
-            message.append("*This PR is older than 90 days. Consider closing it:*")
+            message.append("*This PR is older than 30 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
         message.append(f"Author: {name}")
         return "\n".join(message)
