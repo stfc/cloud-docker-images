@@ -102,7 +102,7 @@ def test_check_pr_age_not_old(
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=90)
+    mock_timedelta.assert_called_once_with(days=30)
     assert not res
 
 
@@ -122,7 +122,7 @@ def test_check_pr_age_old(
     mock_datetime_parser.parse.return_value.replace.assert_called_once_with(tzinfo=None)
     mock_datetime.now.assert_called_once_with()
     mock_datetime.now.return_value.replace.assert_called_once_with(tzinfo=None)
-    mock_timedelta.assert_called_once_with(days=90)
+    mock_timedelta.assert_called_once_with(days=30)
     assert res
 
 
