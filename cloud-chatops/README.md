@@ -73,5 +73,4 @@ python3 src/dev.py --global "some_test_channel"
 python3 src/dev.py --global --personal "some_test_channel"
 ```
 
-Slack slash commands such as `/prs` still need to be called from Slack. 
-Currently, there is no workflow alternative for this.<br>
+Slack slash commands such as `/prs` are not currently tested.<br>
