@@ -166,7 +166,7 @@ class PRMessageBuilder:
         """
         opened_date = datetime_parser.parse(time_created).replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
-        time_cutoff = datetime_now - timedelta(days=90)
+        time_cutoff = datetime_now - timedelta(days=30)
         return opened_date < time_cutoff
 
     def check_pr(self, info: PrData) -> PrData:
