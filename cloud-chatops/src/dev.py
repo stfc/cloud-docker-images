@@ -8,6 +8,10 @@ from read_data import validate_required_files
 from events import run_global_reminder, run_personal_reminder
 
 logging.basicConfig(level=logging.DEBUG)
+
+# Disable this warning as the variable is not constant.
+# Empty variable here to patch when testing.
+# pylint: disable=C0103
 args = None
 
 
@@ -15,7 +19,9 @@ def run_tests() -> None:
     """
     Test each event given in args.
     """
-    [call_test(arg) for arg, value in vars(args).items() if value]
+    for arg, value in vars(args).items():
+        if value:
+            call_test(arg)
 
 
 def call_test(event: str) -> None:
@@ -25,10 +31,9 @@ def call_test(event: str) -> None:
     """
     match event:
         case "channel":
-            """
-            Catch case for the required parameter "channel".
-            Nothing should run here as channel is an arg of other tests
-            """
+            # Catch case for the required parameter "channel".
+            # Nothing should run here as channel is an arg of other tests
+            pass
         case "global":
             run_global_reminder(args.channel)
         case "personal":
