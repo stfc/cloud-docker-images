@@ -1,9 +1,7 @@
 """Unit tests for dev.py"""
 
-from unittest.mock import patch, NonCallableMock
-
+from unittest.mock import patch
 import pytest
-
 from dev import run_tests, call_test, main, parse_args
 from errors import NoTestCase
 
@@ -51,7 +49,8 @@ def test_call_test(mock_global, mock_personal, mock_args):
 
 class MockArgs:
     """Mock class to patch global args with"""
-
+    # Don't need public methods here as this is a class for mocking argparse
+    # pylint: disable=R0903
     def __init__(self):
         """Mock argparse values"""
         self.global_test = True
