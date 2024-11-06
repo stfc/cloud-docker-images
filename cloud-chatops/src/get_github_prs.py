@@ -4,8 +4,8 @@ It will get all open pull requests in provided repositories.
 """
 
 from typing import List, Dict
-import requests
 from datetime import datetime
+import requests
 from read_data import get_token
 from pr_dataclass import PrData
 from errors import (

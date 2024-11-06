@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from dataclasses import replace
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from dateutil import parser as datetime_parser
 from read_data import get_token, get_config
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
