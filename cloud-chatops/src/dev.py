@@ -1,4 +1,5 @@
 """This module runs local integration tests of the code."""
+
 import logging
 import argparse
 from argparse import Namespace
@@ -51,8 +52,12 @@ def parse_args() -> Namespace:
     """Create and collect arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("channel", help="Channel to send messages to.")
-    parser.add_argument("--global", help="Test the global reminder", action="store_true")
-    parser.add_argument("--personal", help="Test the personal reminder", action="store_true")
+    parser.add_argument(
+        "--global", help="Test the global reminder", action="store_true"
+    )
+    parser.add_argument(
+        "--personal", help="Test the personal reminder", action="store_true"
+    )
     return parser.parse_args()
 
 

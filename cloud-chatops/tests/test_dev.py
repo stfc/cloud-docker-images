@@ -1,4 +1,5 @@
 """Unit tests for dev.py"""
+
 from unittest.mock import patch, NonCallableMock
 
 import pytest
@@ -13,9 +14,15 @@ def test_parse_args(mock_argparse):
     mock_parser = mock_argparse.ArgumentParser.return_value
     res = parse_args()
     mock_argparse.ArgumentParser.assert_called_once()
-    mock_parser.add_argument.assert_any_call("channel", help="Channel to send messages to.")
-    mock_parser.add_argument.assert_any_call("--global", help="Test the global reminder", action="store_true")
-    mock_parser.add_argument.assert_any_call("--personal", help="Test the personal reminder", action="store_true")
+    mock_parser.add_argument.assert_any_call(
+        "channel", help="Channel to send messages to."
+    )
+    mock_parser.add_argument.assert_any_call(
+        "--global", help="Test the global reminder", action="store_true"
+    )
+    mock_parser.add_argument.assert_any_call(
+        "--personal", help="Test the personal reminder", action="store_true"
+    )
     assert res == mock_argparse.ArgumentParser.return_value.parse_args.return_value
 
 
@@ -44,6 +51,7 @@ def test_call_test(mock_global, mock_personal, mock_args):
 
 class MockArgs:
     """Mock class to patch global args with"""
+
     def __init__(self):
         """Mock argparse values"""
         self.global_test = True

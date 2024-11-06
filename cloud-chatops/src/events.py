@@ -1,6 +1,7 @@
 """
 This module contains events to run in main.py.
 """
+
 import asyncio
 import schedule
 from features.pr_reminder import PostPRsToSlack

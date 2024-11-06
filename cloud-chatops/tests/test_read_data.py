@@ -1,4 +1,5 @@
 """This test file covers all tests for the read_data module."""
+
 from unittest.mock import patch, mock_open
 import pytest
 import yaml
