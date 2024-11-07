@@ -151,7 +151,7 @@ class PRMessageBuilder:
 
         message = []
         if pr_data.old:
-            message.append("*This PR is older than 90 days. Consider closing it:*")
+            message.append("*This PR is older than 30 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
         message.append(f"Author: {name}")
         return "\n".join(message)
@@ -159,7 +159,7 @@ class PRMessageBuilder:
     @staticmethod
     def _check_pr_age(time_created: datetime) -> bool:
         """
-        This method checks if the PR is older than 3 months.
+        This method checks if the PR is older than 30 days.
         :param time_created: The date the PR was created.
         :return: PR older or not.
         """
