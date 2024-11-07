@@ -97,3 +97,27 @@ for the application to run before installing dependencies.
   # Run app
   python3 cloud-chatops/src/main.py prod
   ```
+
+### Automatic Container Update
+
+To pull the latest `docker-compose` file automatically, you can copy the `chatopscron` file into any of the `cron.< hourly | daily | weekly | monthly > directories found in `/etc`.
+
+Once created, you will need to change the file permissions accordingly:
+
+```shell
+  # Change into repo directory
+  cd cloud-docker-images/cloud-chatops
+
+  # Change permissions on script
+  chmod +x chatopscron
+
+  # Copy script to etc/cron.<timeframe>
+  sudo cp chatopscron /etc/cron.<timeframe>
+
+  # You can test that the script is running correctly by using this command.
+  run-parts /etc/cron.<timeframe>
+
+  #if you don't recieve any output, the script has not run.
+  ```
+
+*Please note when naming the file within /etc/cron.<timeframe> you cannot use file extenstions. Only valid characters are allowed [a-zA-Z]*
