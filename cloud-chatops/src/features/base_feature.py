@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from dataclasses import replace
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from dateutil import parser as datetime_parser
 from read_data import get_token, get_config
 from get_github_prs import GetGitHubPRs
 from pr_dataclass import PrData
@@ -112,7 +111,7 @@ class BaseFeature(ABC):
         """This method runs checks against the prs given and changes values such as old and author."""
         formatted_prs = []
         for pr in prs:
-            formatted_prs.append(PRMessageBuilder().check_pr(pr))
+            formatted_prs.append(PRMessageBuilder().add_user_info_and_age(pr))
         return formatted_prs
 
     def validate_user(self, user: str) -> None:
@@ -134,7 +133,7 @@ class PRMessageBuilder:
         :param pr_data: The PR info
         :return: The message to post
         """
-        checked_info = self.check_pr(pr_data)
+        checked_info = self.add_user_info_and_age(pr_data)
         return self._construct_string(checked_info)
 
     @staticmethod
@@ -158,18 +157,18 @@ class PRMessageBuilder:
         return "\n".join(message)
 
     @staticmethod
-    def _check_pr_age(time_created: str) -> bool:
+    def _check_pr_age(time_created: datetime) -> bool:
         """
-        This method checks if the PR is older than 6 months.
+        This method checks if the PR is older than 30 days.
         :param time_created: The date the PR was created.
         :return: PR older or not.
         """
-        opened_date = datetime_parser.parse(time_created).replace(tzinfo=None)
+        opened_date = time_created.replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=30)
         return opened_date < time_cutoff
 
-    def check_pr(self, info: PrData) -> PrData:
+    def add_user_info_and_age(self, info: PrData) -> PrData:
         """
         This method validates certain information in the PR data such as who authored the PR and if it's old or not.
         :param info: The information to validate.
