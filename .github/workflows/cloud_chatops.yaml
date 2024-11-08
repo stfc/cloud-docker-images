@@ -80,9 +80,39 @@ jobs:
           context: "{{defaultContext}}:cloud-chatops"
           tags: "harbor.stfc.ac.uk/stfc-cloud-staging/cloud-chatops:${{ steps.commit_sha.outputs.sha_short }}"
 
+  check_version_update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: 'master'
+          path: 'main'
+
+      - name: Checkout current working branch
+        uses: actions/checkout@v4
+        with:
+          path: 'branch'
+
+      - name: Compare versions
+        if: ${{ github.ref != 'refs/heads/master' }}
+        uses: stfc/check-version-action@main
+        with:
+          app_version_path: "cloud-chatops/version.txt"
+          docker_compose_path: "cloud-chatops/docker-compose.yaml"
+
+      - name: Log App Success
+        if: ${{ env.app_updated == 'true' }}
+        run: |
+          echo "App version has been updated correctly!"
+      - name: Log Compose Success
+        if: ${{ env.compose_updated == 'true' }}
+        run: |
+          echo "Compose version has been updated correctly!"
+
   push_prod_image_harbor:
     runs-on: ubuntu-latest
-    needs: test_and_lint
+    needs: [test_and_lint, check_version_update]
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
