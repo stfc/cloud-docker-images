@@ -4,6 +4,7 @@ It will get all open pull requests in provided repositories.
 """
 
 from typing import List, Dict
+from datetime import datetime
 import requests
 from read_data import get_token
 from pr_dataclass import PrData
@@ -68,11 +69,12 @@ class GetGitHubPRs:
                     pr_title=f"{pr['title']} #{pr['number']}",
                     user=pr["user"]["login"],
                     url=pr["html_url"],
-                    created_at=pr["created_at"],
+                    created_at=datetime.strptime(pr["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
                     draft=pr["draft"],
                 )
             )
-        return responses_dataclasses
+        sorted_responses = sorted(responses_dataclasses, key=lambda x: x.created_at)
+        return sorted_responses
 
 
 class HTTPHandler:

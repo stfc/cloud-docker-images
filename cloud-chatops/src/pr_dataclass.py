@@ -2,7 +2,7 @@
 This module declares the dataclass used to store PR information.
 This is preferred over dictionaries as dataclasses make code more readable.
 """
-
+from datetime import datetime
 from dataclasses import dataclass
 
 
@@ -13,6 +13,6 @@ class PrData:
     pr_title: str
     user: str
     url: str
-    created_at: str
+    created_at: datetime
     draft: bool
     old: bool = False

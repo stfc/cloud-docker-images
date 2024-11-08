@@ -152,7 +152,7 @@ def test_send_thread_react_with_reactions(instance):
 @patch("features.base_feature.PRMessageBuilder")
 def test_format_prs(mock_pr_message_builder, instance):
     """Test the format PR method calls the check pr method"""
-    mock_pr_message_builder.return_value.check_pr.side_effect = [
+    mock_pr_message_builder.return_value.add_user_info_and_age.side_effect = [
         "format_mock_1",
         "format_mock_2",
     ]
@@ -160,8 +160,8 @@ def test_format_prs(mock_pr_message_builder, instance):
     mock_pr2 = NonCallableMock()
     mock_prs = [mock_pr1, mock_pr2]
     res = instance.format_prs(mock_prs)
-    mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr1)
-    mock_pr_message_builder.return_value.check_pr.assert_any_call(mock_pr2)
+    mock_pr_message_builder.return_value.add_user_info_and_age.assert_any_call(mock_pr1)
+    mock_pr_message_builder.return_value.add_user_info_and_age.assert_any_call(mock_pr2)
     assert res == ["format_mock_1", "format_mock_2"]
 
 
