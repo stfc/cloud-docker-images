@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 import pytest
-from dev import run_tests, call_test, main, parse_args
+from dev import run_methods, call_method, main, parse_args
 from errors import NoTestCase
 
 
@@ -25,12 +25,12 @@ def test_parse_args(mock_argparse):
 
 
 @patch("dev.validate_required_files")
-@patch("dev.run_tests")
-def test_main(mock_tests, mock_validate):
+@patch("dev.run_methods")
+def test_main(mock_methods, mock_validate):
     """Test the main function."""
     main()
     mock_validate.assert_called_once()
-    mock_tests.assert_called_once()
+    mock_methods.assert_called_once()
 
 
 @patch("dev.args")
@@ -38,13 +38,13 @@ def test_main(mock_tests, mock_validate):
 @patch("dev.run_global_reminder")
 def test_call_test(mock_global, mock_personal, mock_args):
     """Test the call test function"""
-    call_test("channel")
-    call_test("global")
+    call_method("channel")
+    call_method("global")
     mock_global.assert_called_once_with(mock_args.channel)
-    call_test("personal")
+    call_method("personal")
     mock_personal.assert_called_once_with()
     with pytest.raises(NoTestCase) as exc:
-        call_test("unexpected")
+        call_method("unexpected")
         assert str(exc.value) == "There is not test case for unexpected"
 
 
@@ -60,9 +60,9 @@ class MockArgs:
 
 
 @patch("dev.args", MockArgs())
-@patch("dev.call_test")
-def test_run_tests(mock_call_test):
+@patch("dev.call_method")
+def test_run_tests(mock_call_method):
     """Test that test calls are made."""
-    run_tests()
-    mock_call_test.assert_any_call("global_test")
-    mock_call_test.assert_any_call("personal_test")
+    run_methods()
+    mock_call_method.assert_any_call("global_test")
+    mock_call_method.assert_any_call("personal_test")

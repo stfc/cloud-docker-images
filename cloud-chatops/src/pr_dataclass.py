@@ -2,6 +2,7 @@
 This module declares the dataclass used to store PR information.
 This is preferred over dictionaries as dataclasses make code more readable.
 """
+
 from datetime import datetime
 from dataclasses import dataclass
 

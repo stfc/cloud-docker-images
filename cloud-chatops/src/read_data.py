@@ -8,7 +8,8 @@ import yaml
 from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
-    TokensNotGiven, SecretsInPathNotFound,
+    TokensNotGiven,
+    SecretsInPathNotFound,
 )
 
 # Production secret path
@@ -25,10 +26,10 @@ if sys.argv[0].endswith("dev.py"):
     except KeyError:
         try:
             PATH = f"{os.environ['HOMEPATH']}\\dev_cloud_chatops_secrets\\"
-        except KeyError:
+        except KeyError as exc:
             raise SecretsInPathNotFound(
                 "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
-            )
+            ) from exc
 
 
 def validate_required_files() -> None:
