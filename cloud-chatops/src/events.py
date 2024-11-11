@@ -25,6 +25,7 @@ def run_personal_reminder() -> None:
 async def schedule_jobs() -> None:
     """
     This function schedules tasks for the async loop to run.
+    These dates and times are hardcoded for production use.
     """
 
     schedule.every().monday.at("09:00").do(

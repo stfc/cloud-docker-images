@@ -24,10 +24,12 @@ These slash commands can be run in any channel the application has access to.<br
 
 #### Scheduled Events:
 Using the [schedule](https://pypi.org/project/schedule/) library functions are triggered on a weekly basis.<br>
-Events are defined in the `main.py/schedule_jobs` function:<br>
+The dates and times when the events are run are hard coded in [events.py/schedule_jobs](src/events.py)<br>
+Events are defined in the [events.py](src/events.py) module:<br>
 - `run_global_reminder()`: Sends a message to the pull request channel with every open pull request across the repositories in a thread.
+    - Runs on: Monday / Wednesday @ 09:00 UTC
 - `run_personal_reminder()`: Sends a message to each user directly with a thread of their open pull requests.
-
+    - Runs on: Monday @ 09:00 UTC
 ### Deployment
 
 For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)

@@ -43,3 +43,7 @@ class NoUsersGiven(RuntimeError):
 
 class NoTestCase(LookupError):
     """Error: There is no method to test this event."""
+
+
+class SecretsInPathNotFound(ValueError):
+    """Error: There is no secrets directory in the home path."""

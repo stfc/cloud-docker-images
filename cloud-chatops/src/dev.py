@@ -15,16 +15,16 @@ logging.basicConfig(level=logging.DEBUG)
 args = None
 
 
-def run_tests() -> None:
+def run_methods() -> None:
     """
     Test each event given in args.
     """
     for arg, value in vars(args).items():
         if value:
-            call_test(arg)
+            call_method(arg)
 
 
-def call_test(event: str) -> None:
+def call_method(event: str) -> None:
     """
     Run the test logic for each event.
     :param event: The event to test
@@ -49,7 +49,7 @@ def main() -> None:
     """
     validate_required_files()
     logging.info("Running tests\n")
-    run_tests()
+    run_methods()
     logging.info("Completed tests.\n")
 
 
