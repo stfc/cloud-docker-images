@@ -112,7 +112,7 @@ def test_check_pr_info_found_name_and_is_old(mock_get_config, instance):
         pr_title="mock_title",
         user="mock_github",
         url="mock_url",
-        created_at=datetime.now() - timedelta(days=30),
+        created_at=datetime.now() - timedelta(days=31),
         draft=False,
         old=False,
     )

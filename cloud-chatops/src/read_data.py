@@ -9,29 +9,27 @@ from errors import (
     RepositoriesNotGiven,
     UserMapNotGiven,
     TokensNotGiven,
+    SecretsInPathNotFound,
 )
 
 # Production secret path
 PATH = "/usr/src/app/cloud_chatops_secrets/"
-try:
-    if sys.argv[1] == "dev" or sys.argv[1] == "development":
-        # Using dev secrets here for local testing as it runs the application
-        # in a separate Slack Workspace than the production application.
-        # This means the slash commands won't be picked up by the production application.
+
+
+if sys.argv[0].endswith("dev.py"):
+    # Using dev secrets here for local testing as it runs the application
+    # in a separate Slack Workspace than the production application.
+    # This means the slash commands won't be picked up by the production application.
+    try:
+        # Try multiple paths for Linux / Windows differences
         PATH = f"{os.environ['HOME']}/dev_cloud_chatops_secrets/"
-
-    elif sys.argv[1] == "prod" or sys.argv[1] == "production":
-        # Using prod secrets here in case the application is run directly on host without Docker.
-        PATH = f"{os.environ['HOME']}/cloud_chatops_secrets/"
-
-except IndexError:
-    pass
-
-except KeyError:
-    print(
-        "Are you trying to run locally? Couldn't find HOME in your environment variables."
-    )
-    sys.exit()
+    except KeyError:
+        try:
+            PATH = f"{os.environ['HOMEPATH']}\\dev_cloud_chatops_secrets\\"
+        except KeyError as exc:
+            raise SecretsInPathNotFound(
+                "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
+            ) from exc
 
 
 def validate_required_files() -> None:

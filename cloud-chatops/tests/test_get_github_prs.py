@@ -78,14 +78,18 @@ def test_parse_pr_to_dataclass(instance):
             pr_title=f"{mock_responses[0]['title']} #{mock_responses[0]['number']}",
             user=mock_responses[0]["user"]["login"],
             url=mock_responses[0]["html_url"],
-            created_at=datetime.strptime(mock_responses[0]["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
+            created_at=datetime.strptime(
+                mock_responses[0]["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+            ),
             draft=mock_responses[0]["draft"],
         ),
         PrData(
             pr_title=f"{mock_responses[1]['title']} #{mock_responses[1]['number']}",
             user=mock_responses[1]["user"]["login"],
             url=mock_responses[1]["html_url"],
-            created_at=datetime.strptime(mock_responses[1]["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
+            created_at=datetime.strptime(
+                mock_responses[1]["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+            ),
             draft=mock_responses[1]["draft"],
         ),
     ]

@@ -69,7 +69,9 @@ class GetGitHubPRs:
                     pr_title=f"{pr['title']} #{pr['number']}",
                     user=pr["user"]["login"],
                     url=pr["html_url"],
-                    created_at=datetime.strptime(pr["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
+                    created_at=datetime.strptime(
+                        pr["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+                    ),
                     draft=pr["draft"],
                 )
             )
