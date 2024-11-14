@@ -2,8 +2,30 @@
 This document details the instructions to install dependencies and run the ChatOps application
 
 ## Contents:
+[Slack Configuration](#slack-configuration)<br>
 [Requirements](#requirements)<br>
 [Deployment](#deployment)<br>
+
+### Slack Configuration:
+
+You will need a Slack Workspace and Slack App.<br>
+
+#### Workspace:
+Creating the workspace is simple and can be done by following this documentation [here](https://slack.com/intl/en-gb/help/articles/206845317-Create-a-Slack-workspace). There is no additional setup needed.<br>
+
+#### App:
+Creating a Slack App can be done [here](https://api.slack.com/quickstart). You will need to setup the following features whilst going through the setup.<br>
+> **_NOTE:_** Socket Mode must be enabled before Events can be Subscribed to. This can be enabled under `Settings / Socket Mode`
+- Scopes:
+  - `channels.history`
+  - `chat:write`
+  - `commands`
+  - `groups:history`
+  - `reactions:write`
+  - `users.profile:read`
+- Events / Bot Events:
+  - `message.channels`
+  - `message.groups`
 
 ### Requirements:
 
