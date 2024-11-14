@@ -1,9 +1,10 @@
 # Deploying Cloud ChatOps
-This document details the instructions to install dependencies and run the ChatOps application
+This document covers the following: creating a Slack Workspace and Application, finding / generating Slack and GitHub tokens and deploying the application onto a host. 
 
 ## Contents:
 [Slack Configuration](#slack-configuration)<br>
-[Requirements](#requirements)<br>
+[Slack Tokens](#slack-tokens)<br>
+[Deployment Configuration](#deployment-configuration)<br>
 [Deployment](#deployment)<br>
 
 ### Slack Configuration:
@@ -14,20 +15,45 @@ You will need a Slack Workspace and Slack App.<br>
 Creating the workspace is simple and can be done by following this documentation [here](https://slack.com/intl/en-gb/help/articles/206845317-Create-a-Slack-workspace). There is no additional setup needed.<br>
 
 #### App:
-Creating a Slack App can be done [here](https://api.slack.com/quickstart). You will need to setup the following features whilst going through the setup.<br>
-> **_NOTE:_** Socket Mode must be enabled before Events can be Subscribed to. This can be enabled under `Settings / Socket Mode`
-- Scopes:
+Creating a Slack App can be done [here](https://api.slack.com/quickstart).<br>
+You can copy the application manifest from [app_manifest.yml](./app_manifest.yml) and paste into `Features / App Manifest`.<br>
+Alternatively, you can manually set up the following config whilst going through the setup.<br>
+
+> **_NOTE:_** Socket Mode must be enabled before Events and slash commands can be set up. This can be enabled under `Settings / Socket Mode`
+- **Features / OAuth & Permissions / Scopes / Bot Token Scopes**:
   - `channels.history`
   - `chat:write`
   - `commands`
   - `groups:history`
   - `reactions:write`
   - `users.profile:read`
-- Events / Bot Events:
+  
+
+- **Features / Event Subscriptions / Events / Subscribe to bot events**:
   - `message.channels`
   - `message.groups`
+  
 
-### Requirements:
+- **Features / Slash Commands**:
+  - `/prs`
+    - description: Get all open PRs
+    - usage_hint: "[all: every pr] [mine: your prs]"
+    - should_escape: false
+
+### Slack Tokens:
+
+You will need the Slack App and Bot User tokens when deploying the application. When configuring your app at https://api.slack.com/apps/ you can find / generate these tokens.<br>
+- App token:
+  - You can generate the App token under `Settings / Basic Information / App-Level Tokens`.
+  - You will need to give it the scope `connections:write`.
+  - The name does not matter, and you **can** retrieve this token at a later date from the same location.
+
+
+- Bot User Token:
+  - You can find the Bot User token under `Settings / Install App / OAuth Tokens`.
+  - No scoping is required, and you **can** retrieve this token at a later date from the same location.
+
+### Deployment Configuration:
 
 Two files required for the deployment of this application: `config.yml` and `secrets.json`.<br>
 These should be stored in `$HOME/cloud_chatops_secrets/` on the host system.<br>
@@ -80,7 +106,7 @@ The `secrets.json` file should look like the below and there is a template [here
 }
 ```
 Slack:<br>
-- TODO: How to create your own Slack application.<br>
+- Slack Token information can be found [here](#slack-tokens).<br>
 
 GitHub:<br>
 -  A GitHub Personal Access Token is needed to bypass rate limiting and allows access to private repositories.<br>
