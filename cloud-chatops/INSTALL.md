@@ -33,29 +33,43 @@ Two files required for the deployment of this application: `config.yml` and `sec
 These should be stored in `$HOME/cloud_chatops_secrets/` on the host system.<br>
 
 #### Config:
-The application configuration is stored in [config.yml](template_config.yml).
+The application configuration is stored in `config.yml`.
 This includes information such as username mapping, repositories to check and default values.<br>
 Slack Channel and Member IDs can be found in Slack by:<br>
 - Right-clicking the member / channel
 - View member / channel details
 - Near the bottom of the About tab there will be an ID with copy button
 
-The `config.yml` should look like the below:
+The `config.yml` should look like the below there is a template without the comments [here](./template_config.yml):
 ```yaml
 ---
-maintainer: <maintainers_member_id>
+maintainer: AB12CD34  # Slack Member ID of the application maintainer
 
-user-map:
-  <user_github_username>: <user_member_id>
+user-map:  # Dictionary of GitHub username to Slack Member ID
+  my_github_username: AB12CD34
+  other_github_username: EF56GH78
 
-repos:
-  <organisation>:
-    - <repo>
+repos:  # Dictionary of owners and repositories
+  organisation1:
+    - repo1  # E.g. github.com/organisation1/repo1
+    - repo2
+    - repo3
+  organisation2:
+    - repo1  # E.g. github.com/organisation2/repo1
+    - repo2
+    - repo3
 
-defaults:
-  author: <author_member_id>
-  channel: <reminder_channel_id>
+defaults:  # Default values for application variables
+  # Default author will be assigned to pull requests where the PR author is not in the above user map.
+  # Usually team lead or senior staff member.
+  author: WX67YZ89  # Slack member ID
+  
+  # Default channel is where the pull requests will be posted.
+  # It's recommended to set this as a "maintenance" / "dev" channel in case the application goes awry.
+  # The actual channel messages are sent to can be specified in the code.
+  channel: CH12NN34  # Slack channel ID
 ```
+
 #### Secrets:
 The `secrets.json` file should look like the below and there is a template [here](template_secrets.json)
 ```json
@@ -72,7 +86,6 @@ GitHub:<br>
 -  A GitHub Personal Access Token is needed to bypass rate limiting and allows access to private repositories.<br>
 - Documentation on how to create a GitHub personal access token can be found 
 [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).<br>
-
 
 ### Deployment:
 The application can be run from a Docker image or source code. (Assuming running from project root)<br>
@@ -122,7 +135,9 @@ for the application to run before installing dependencies.
 
 ### Automatic Container Update
 
-To pull the latest `docker-compose` file automatically, you can copy the `chatopscron` file into any of the `cron.< hourly | daily | weekly | monthly > directories found in `/etc`.
+To pull the latest `docker-compose` file automatically, you can copy the `chatopscron` file into any of the `cron.< hourly | daily | weekly | monthly >` directories found in `/etc`.
+
+> **_NOTE:_** When naming the file within /etc/cron.\<timeframe> you cannot use file extenstions. Only valid characters are allowed [a-zA-Z]*
 
 Once created, you will need to change the file permissions accordingly:
 
@@ -141,5 +156,3 @@ Once created, you will need to change the file permissions accordingly:
 
   #if you don't recieve any output, the script has not run.
   ```
-
-*Please note when naming the file within /etc/cron.<timeframe> you cannot use file extenstions. Only valid characters are allowed [a-zA-Z]*
