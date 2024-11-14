@@ -1,9 +1,4 @@
-
-# Use a GPU-enabled base image based on the recommendation from
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#gpu-accelerated-notebooks
-# As this combines the pytorch-notebook and the cuda-notebook, so we only
-# need to install the additional packages for each course.
-FROM cschranz/gpu-jupyter:v1.7_cuda-12.3_ubuntu-22.04_python-only
+FROM cschranz/gpu-jupyter:v1.7_cuda-12.2_ubuntu-22.04_python-only
 
 USER root
 # The base image only gets updated when a new version of CUDA is released.
@@ -13,14 +8,17 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-USER ${NB_UID}
+USER $NB_UID
+RUN set -ex \
+ && buildDeps=' \
+    transformers \
+    accelerate \
+    bitsandbytes \
+ ' \
+ && pip install --no-cache-dir $buildDeps \
+ && fix-permissions "${CONDA_DIR}" \
+ && fix-permissions "/home/${NB_USER}"
 
-RUN mamba install --yes \
-    'jupyter-server-proxy' && \
-    # SciML requirements
-    mamba install --yes \
-    'pytorch' 'transformers' 'accelerate' 'bitsandbytes' && \
-    mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+#switch back to jovyan to avoid accidental container runs as root
+USER ${NB_UID}
 
