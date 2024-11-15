@@ -100,6 +100,7 @@ jobs:
         with:
           app_version_path: "cloud-chatops/version.txt"
           docker_compose_path: "cloud-chatops/docker-compose.yaml"
+          labels: ${{ toJSON(github.event.pull_request.labels.*.name) }}
 
       - name: Log App Success
         if: ${{ env.app_updated == 'true' }}
