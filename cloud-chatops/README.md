@@ -5,6 +5,7 @@
 ## Contents:
 [About](#about)<br>
 [Usage / Features](#usage--features)<br>
+[Testing](#testing)<br>
 [Deployment](#deployment)<br>
 
 ### About
@@ -30,9 +31,6 @@ Events are defined in the [events.py](src/events.py) module:<br>
     - Runs on: Monday / Wednesday @ 09:00 UTC
 - `run_personal_reminder()`: Sends a message to each user directly with a thread of their open pull requests.
     - Runs on: Monday @ 09:00 UTC
-### Deployment
-
-For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
 
 ### Testing
 #### Unit Tests
@@ -76,3 +74,7 @@ python3 src/dev.py --global --personal "some_test_channel"
 ```
 
 Slack slash commands such as `/prs` are not currently tested.<br>
+
+### Deployment
+
+For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
