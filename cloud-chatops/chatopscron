@@ -7,7 +7,7 @@ set -eux
 
 # If run as root change user to ubuntu to prevent running container with root privileges
 if [ "$(id -u)" -eq 0 ]; then
-    exec su ubuntu
+    exec sudo -H -u ubuntu $0 "$@"
 fi
 
 cd /etc/chatops/cloud-docker-images/cloud-chatops
