@@ -5,8 +5,10 @@
 
 set -eux
 
-# Change user to ubuntu to prevent running container as root
-su ubuntu
+# If run as root change user to ubuntu to prevent running container with root privileges
+if [ "$(id -u)" -eq 0 ]; then
+    exec su ubuntu
+fi
 
 cd /etc/chatops/cloud-docker-images/cloud-chatops
 git fetch && git clean -fxd && git reset --hard origin/master
