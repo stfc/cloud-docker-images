@@ -59,8 +59,12 @@ This uses docker compose and an auto updating script to keep the application on 
    # Copy script to etc/cron.< hourly | daily | monthly >
    sudo cp /etc/chatops/cloud-docker-images/cloud-chatops/chatopscron /etc/cron.daily/
 
-   # Test the script works and launch the container
-   # Using sudo here to mimic cron which runs as root user
+   # Check that crontab can see and run the script
+   # If the chatops cron file is not in the command output then crontab will not run it
+   run-parts --test /etc/cron.daily
+   
+   # Launch the container and verify set up is correct
+   # Using sudo here to mimic crontab which runs as root user
    sudo /etc/cron.daily/chatopscron
    
    # Verify the container is running
