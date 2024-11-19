@@ -118,7 +118,7 @@ def test_send_thread_fails(_, instance):
 def test_send_thread_react_no_reactions(instance):
     """Test no reactions are added"""
     mock_pr_data = NonCallableMock()
-    mock_pr_data.old = False
+    mock_pr_data.stale = False
     mock_pr_data.draft = False
     instance.send_thread_react(mock_pr_data, "mock_channel", "100")
     instance.client.reactions_add.assert_not_called()

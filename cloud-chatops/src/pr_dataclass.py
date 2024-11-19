@@ -11,7 +11,8 @@ from typing import List, Dict
 @dataclass
 class PR:
     """Class holding information about a single pull request."""
-
+    # Disabling as we need more than 8 attributes
+    # pylint: disable = R0902
     pr_title: str
     author: str
     url: str

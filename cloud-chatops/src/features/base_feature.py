@@ -90,7 +90,7 @@ class BaseFeature(ABC):
         This method sends reactions to the PR message if necessary.
         """
         react_with = []
-        if pr.old:
+        if pr.stale:
             react_with.append("alarm_clock")
         if pr.draft:
             react_with.append("building_construction")
@@ -142,12 +142,12 @@ class PRMessageBuilder:
         """
         client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
         try:
-            name = client.users_profile_get(user=pr_data.user)["profile"]["real_name"]
+            name = client.users_profile_get(user=pr_data.author)["profile"]["real_name"]
         except SlackApiError:
-            name = pr_data.user
+            name = pr_data.author
 
         message = []
-        if pr_data.old:
+        if pr_data.stale:
             message.append("*This PR is older than 30 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
         message.append(f"Author: {name}")

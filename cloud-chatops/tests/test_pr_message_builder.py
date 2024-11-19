@@ -1,4 +1,5 @@
 """Tests for features.base_feature.PRMessageBuilder"""
+
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import NonCallableMock, patch
@@ -37,10 +38,10 @@ def test_construct_string_not_old(mock_web_client, mock_get_token, instance):
         "profile": {"real_name": "mock_real_name"}
     }
     mock_data = NonCallableMock()
-    mock_data.old = False
+    mock_data.stale = False
     mock_data.url = "mock_url"
     mock_data.pr_title = "mock_title"
-    mock_data.user = "mock_user"
+    mock_data.author = "mock_user"
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
     expected = "Pull Request: <mock_url|mock_title>\nAuthor: mock_real_name"
@@ -74,10 +75,10 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
     """Test if the name lookup fails the given user is printed."""
     mock_web_client.return_value.users_profile_get.side_effect = SlackApiError("", "")
     mock_data = NonCallableMock()
-    mock_data.old = True
+    mock_data.stale = True
     mock_data.url = "mock_url"
     mock_data.pr_title = "mock_title"
-    mock_data.user = "mock_user"
+    mock_data.author = "mock_user"
     res = instance._construct_string(mock_data)
     expected = (
         "*This PR is older than 30 days. Consider closing it:*\n"
