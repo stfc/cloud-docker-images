@@ -1,11 +1,75 @@
 # Deploying Cloud ChatOps
 This document covers the following: creating a Slack Workspace and Application, finding / generating Slack and GitHub tokens and deploying the application onto a host. 
 
+> **_NOTE:_** The installation has only been tested on Ubuntu (20.04) Linux Distributions and may need to be modified to work on others such as Rocky Linux.
+
 ## Contents:
+[Quick Start](#recommended-installation-quick-start)<br>
 [Slack Configuration](#slack-configuration)<br>
 [Slack Tokens](#slack-tokens)<br>
 [Deployment Configuration](#deployment-configuration)<br>
 [Deployment](#deployment)<br>
+
+### Recommended Installation (Quick Start):
+
+Below are instructions for the recommended installation.
+This uses docker compose and an auto updating script to keep the application on the latest version.<br>
+
+#### Prerequisites:
+
+- Set up Slack Workspace and Application [here](#slack-configuration)
+- Retrieved Slack bot user and app tokens[here](#slack-tokens)
+- Generated a GitHub personal access token
+- Installed Docker and Docker Compose [here](https://docs.docker.com/engine/install/ubuntu/)
+
+#### Installation:
+
+1. Make a directory in `/etc` to store all ChatOps related files. Set group ownership to docker so other users (update script) can access the files.
+    ```shell
+    # Create directories
+    sudo mkdir -p /etc/chatops/secrets
+    
+    # Set permissions
+    sudo chown -R $USER:docker /etc/chatops
+    sudo chmod 774 /etc/chatops
+    sudo chmod 770 /etc/chatops/secrets
+   
+    # Clone repository into directory
+    git clone https://github.com/stfc/cloud-docker-images.git /etc/chatops/cloud-docker-images
+    ```
+2. Edit the `template_config.yml` and `template_secrets.json` to create your respective config and secrets file. See [here](#deployment-configuration) for more detail.
+   ```shell
+   # Copy files into secrets folder
+   cp <path_to_file>./template_config.yml /etc/chatops/secrets/config.yml
+   cp <path_to_file>./template_secrets.json /etc/chatops/secrets/secrets.json
+   
+   # If you edited the template_secrets.json from the cloned repository in /etc/chatops
+   # You should delete / reset the file as the permissions are too open
+   
+   git reset --hard origin/master 
+   # Or
+   rm <path_to_file>/template_secrets.json
+   ```
+3. Need to add the Ubuntu user to the docker group for the cron script:
+   ```shell
+   sudo usermod -aG docker ubuntu
+   ```
+4. Move Cron script and start container:
+   ```shell
+   # Copy script to etc/cron.< hourly | daily | monthly >
+   sudo cp /etc/chatops/cloud-docker-images/cloud-chatops/chatopscron /etc/cron.daily/
+
+   # Check that crontab can see and run the script
+   # If the chatops cron file is not in the command output then crontab will not run it
+   run-parts --test /etc/cron.daily
+   
+   # Launch the container and verify set up is correct
+   # Using sudo here to mimic crontab which runs as root user
+   sudo /etc/cron.daily/chatopscron
+   
+   # Verify the container is running
+   docker ps | grep -i cloud-chatops
+   ```
 
 ### Slack Configuration:
 
@@ -56,7 +120,6 @@ You will need the Slack App and Bot User tokens when deploying the application. 
 ### Deployment Configuration:
 
 Two files required for the deployment of this application: `config.yml` and `secrets.json`.<br>
-These should be stored in `$HOME/cloud_chatops_secrets/` on the host system.<br>
 
 #### Config:
 The application configuration is stored in `config.yml`.
@@ -127,16 +190,11 @@ The latest version can be found in [version.txt](version.txt)<br>
 - ```shell
   # Local build and run
   docker build -t cloud_chatops cloud-chatops
-  docker run -v $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ cloud_chatops
+  docker run -v <path_to>/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ cloud_chatops
   ```
 - ```shell
-  # First log in to harbor
-  docker login -u <username> harbor.stfc.ac.uk
-  
-  # Then either:
-  
   # Run container directly, specifying a version
-  docker run -v $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version>
+  docker run -v <path_to>/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version>
   #
   # or
   #
@@ -157,28 +215,4 @@ for the application to run before installing dependencies.
   pip3 install -r requirements.txt
   # Run app
   python3 cloud-chatops/src/main.py prod
-  ```
-
-### Automatic Container Update
-
-To pull the latest `docker-compose` file automatically, you can copy the `chatopscron` file into any of the `cron.< hourly | daily | weekly | monthly >` directories found in `/etc`.
-
-> **_NOTE:_** When naming the file within /etc/cron.\<timeframe> you cannot use file extenstions. Only valid characters are allowed [a-zA-Z]*
-
-Once created, you will need to change the file permissions accordingly:
-
-```shell
-  # Change into repo directory
-  cd cloud-docker-images/cloud-chatops
-
-  # Change permissions on script
-  chmod +x chatopscron
-
-  # Copy script to etc/cron.<timeframe>
-  sudo cp chatopscron /etc/cron.<timeframe>
-
-  # You can test that the script is running correctly by using this command.
-  run-parts /etc/cron.<timeframe>
-
-  #if you don't recieve any output, the script has not run.
   ```

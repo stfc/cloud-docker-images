@@ -1,5 +1,5 @@
 services:
   cloud_chatops:
-    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:2.2.0
+    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:3.0.0
     volumes:
-      - $HOME/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/
+      - /etc/chatops/secrets/:/usr/src/app/cloud_chatops_secrets/
