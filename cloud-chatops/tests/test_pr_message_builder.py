@@ -1,18 +1,17 @@
 """Tests for features.base_feature.PRMessageBuilder"""
-
 # pylint: disable=W0212
 # Disabling this as we need to access protected methods to test them
 from unittest.mock import NonCallableMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytest
 from slack_sdk.errors import SlackApiError
 from features.base_feature import PRMessageBuilder
-from pr_dataclass import PrData
+from pr_dataclass import PR
 
 
 @pytest.fixture(name="instance", scope="function")
 @patch("features.base_feature.WebClient")
-@patch("features.base_feature.GetGitHubPRs")
+@patch("features.base_feature.FindPRs")
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_config")
 def instance_fixture(_, _2, _3, _4):
@@ -90,51 +89,57 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
 @patch("features.base_feature.get_config")
 def test_check_pr_info_found_name_and_is_new(mock_get_config, instance):
     """Test the dataclass is updated and name is found"""
-    mock_data = PrData(
+    mock_data = PR(
         pr_title="mock_title",
-        user="mock_github",
+        author="mock_github",
         url="mock_url",
-        created_at=datetime.now() - timedelta(days=29),
+        stale=False,
         draft=False,
-        old=False,
+        labels=[],
+        repository="mock_repo",
+        created_at=datetime.now(),
     )
     mock_get_config.return_value = {"mock_github": "mock_slack"}
     res = instance.add_user_info_and_age(mock_data)
     mock_get_config.assert_called_once_with("user-map")
-    assert res.user == "mock_slack"
-    assert not res.old
+    assert res.author == "mock_slack"
+    assert not res.stale
 
 
 @patch("features.base_feature.get_config")
 def test_check_pr_info_found_name_and_is_old(mock_get_config, instance):
     """Test the dataclass is updated and name is found"""
-    mock_data = PrData(
+    mock_data = PR(
         pr_title="mock_title",
-        user="mock_github",
+        author="mock_github",
         url="mock_url",
-        created_at=datetime.now() - timedelta(days=31),
+        stale=True,
         draft=False,
-        old=False,
+        labels=[],
+        repository="mock_repo",
+        created_at=datetime.now(),
     )
     mock_get_config.return_value = {"mock_github": "mock_slack"}
     res = instance.add_user_info_and_age(mock_data)
     mock_get_config.assert_called_once_with("user-map")
-    assert res.user == "mock_slack"
-    assert res.old
+    assert res.author == "mock_slack"
+    assert res.stale
 
 
 @patch("features.base_feature.get_config")
 def test_check_pr_info_not_found_name(mock_get_config, instance):
     """Test the dataclass is updated and name is not found"""
-    mock_data = PrData(
+    mock_data = PR(
         pr_title="mock_title",
-        user="mock_user",
+        author="mock_user",
         url="mock_url",
-        created_at=datetime.now(),
+        stale=False,
         draft=False,
-        old=False,
+        labels=[],
+        repository="mock_repo",
+        created_at=datetime.now(),
     )
     mock_get_config.return_value = {"mock_github": "mock_slack"}
     res = instance.add_user_info_and_age(mock_data)
     mock_get_config.assert_called_once_with("user-map")
-    assert res.user == "mock_user"
+    assert res.author == "mock_user"

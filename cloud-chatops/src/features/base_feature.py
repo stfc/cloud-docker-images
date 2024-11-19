@@ -5,13 +5,12 @@ All features should inherit this class to reduce code duplication.
 
 from abc import ABC
 from typing import List
-from datetime import datetime, timedelta
 from dataclasses import replace
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from read_data import get_token, get_config
-from get_github_prs import GetGitHubPRs
-from pr_dataclass import PrData
+from find_prs import FindPRs
+from pr_dataclass import PR
 from errors import FailedToPostMessage, UserNotFound
 
 
@@ -32,7 +31,7 @@ class BaseFeature(ABC):
     def __init__(self):
         self.channel = DEFAULT_CHANNEL
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-        self.prs = GetGitHubPRs(get_config("repos")).run()
+        self.prs = FindPRs().run(get_config("repos"))
         self.slack_ids = get_config("user-map")
 
     def _post_reminder_message(self) -> str:
@@ -66,9 +65,7 @@ class BaseFeature(ABC):
                 '"ok" must be True otherwise message failed. Same as HTTP 200'
             )
 
-    def _send_thread(
-        self, pr_data: PrData, thread_ts: str
-    ) -> WebClient.chat_postMessage:
+    def _send_thread(self, pr_data: PR, thread_ts: str) -> WebClient.chat_postMessage:
         """
         This method sends the message and returns the response.
         :param pr_data: The PR data as a dataclass
@@ -88,7 +85,7 @@ class BaseFeature(ABC):
             )
         return response
 
-    def _send_thread_react(self, pr: PrData, channel: str, thread_ts: str) -> None:
+    def _send_thread_react(self, pr: PR, channel: str, thread_ts: str) -> None:
         """
         This method sends reactions to the PR message if necessary.
         """
@@ -107,7 +104,7 @@ class BaseFeature(ABC):
                 )
 
     @staticmethod
-    def _format_prs(prs: List[PrData]) -> List[PrData]:
+    def _format_prs(prs: List[PR]) -> List[PR]:
         """This method runs checks against the prs given and changes values such as old and author."""
         formatted_prs = []
         for pr in prs:
@@ -127,7 +124,7 @@ class BaseFeature(ABC):
 class PRMessageBuilder:
     """This class handles constructing the PR messages to be sent."""
 
-    def make_message(self, pr_data: PrData) -> str:
+    def make_message(self, pr_data: PR) -> str:
         """
         This method checks the pr data and makes a string message from it.
         :param pr_data: The PR info
@@ -137,7 +134,7 @@ class PRMessageBuilder:
         return self._construct_string(checked_info)
 
     @staticmethod
-    def _construct_string(pr_data: PrData) -> str:
+    def _construct_string(pr_data: PR) -> str:
         """
         This method constructs the PR message.
         :param pr_data: The data class containing the info about the PR.
@@ -156,28 +153,12 @@ class PRMessageBuilder:
         message.append(f"Author: {name}")
         return "\n".join(message)
 
-    @staticmethod
-    def _check_pr_age(time_created: datetime) -> bool:
-        """
-        This method checks if the PR is older than 30 days.
-        :param time_created: The date the PR was created.
-        :return: PR older or not.
-        """
-        opened_date = time_created.replace(tzinfo=None)
-        datetime_now = datetime.now().replace(tzinfo=None)
-        time_cutoff = datetime_now - timedelta(days=30)
-        return opened_date <= time_cutoff
-
-    def add_user_info_and_age(self, info: PrData) -> PrData:
+    def add_user_info_and_age(self, info: PR) -> PR:
         """
         This method validates certain information in the PR data such as who authored the PR and if it's old or not.
         :param info: The information to validate.
         :return: The validated information.
         """
         slack_ids = get_config("user-map")
-        new_info = replace(
-            info,
-            user=slack_ids.get(info.user, info.user),
-            old=self._check_pr_age(info.created_at),
-        )
+        new_info = replace(info, author=slack_ids.get(info.author, info.author))
         return new_info
