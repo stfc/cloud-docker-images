@@ -4,6 +4,7 @@ from unittest.mock import patch, NonCallableMock
 import pytest
 from requests.exceptions import HTTPError
 from find_prs import FindPRs
+from pr_dataclass import PRProps
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -19,10 +20,12 @@ def test_run_with_sort(
     mock_request_all_repos, mock_get_token, mock_pr_dataclass, instance
 ):
     """Tests the run method returns the correct object"""
-    mock_repo_1 = NonCallableMock(pr=1)
-    mock_repo_2 = NonCallableMock(pr=2)
+    mock_repo_1 = NonCallableMock()
+    mock_repo_2 = NonCallableMock()
+    mock_repo_1.created_at = 1
+    mock_repo_2.created_at = 2
     mock_repos = {"owner1": [mock_repo_2, mock_repo_1]}
-    res = instance.run(mock_repos, True)
+    res = instance.run(mock_repos, (PRProps.CREATED_AT, True))
     assert instance.github_token == mock_get_token.return_value
     mock_get_token.assert_called_once_with("GITHUB_TOKEN")
 

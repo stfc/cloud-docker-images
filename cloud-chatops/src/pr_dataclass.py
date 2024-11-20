@@ -5,15 +5,17 @@ This is preferred over dictionaries as dataclasses make code more readable.
 
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import List, Dict
 
 
 @dataclass
 class PR:
     """Class holding information about a single pull request."""
+
     # Disabling as we need more than 8 attributes
     # pylint: disable = R0902
-    pr_title: str
+    title: str
     author: str
     url: str
     created_at: datetime
@@ -31,7 +33,7 @@ class PR:
         """
         created_at = datetime.strptime(data["created_at"], "%Y-%m-%dT%H:%M:%SZ")
         return cls(
-            pr_title=f"{data['title']} #{data['number']}",
+            title=f"{data['title']} #{data['number']}",
             author=data["user"]["login"],
             url=data["html_url"],
             stale=cls.is_stale(created_at),
@@ -51,3 +53,16 @@ class PR:
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=30)
         return opened_date <= time_cutoff
+
+
+class PRProps(Enum):
+    """This Enum class contains properties of the PR dataclass"""
+
+    TITLE = auto()
+    AUTHOR = auto()
+    URL = auto()
+    CREATED_AT = auto()
+    DRAFT = auto()
+    STALE = auto()
+    REPOSITORY = auto()
+    LABELS = auto()

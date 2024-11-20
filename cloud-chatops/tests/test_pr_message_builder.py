@@ -40,7 +40,7 @@ def test_construct_string_not_old(mock_web_client, mock_get_token, instance):
     mock_data = NonCallableMock()
     mock_data.stale = False
     mock_data.url = "mock_url"
-    mock_data.pr_title = "mock_title"
+    mock_data.title = "mock_title"
     mock_data.author = "mock_user"
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
@@ -58,7 +58,7 @@ def test_construct_string_old(mock_web_client, mock_get_token, instance):
     mock_data = NonCallableMock()
     mock_data.old = True
     mock_data.url = "mock_url"
-    mock_data.pr_title = "mock_title"
+    mock_data.title = "mock_title"
     mock_data.user = "mock_user"
     res = instance._construct_string(mock_data)
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
@@ -77,7 +77,7 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
     mock_data = NonCallableMock()
     mock_data.stale = True
     mock_data.url = "mock_url"
-    mock_data.pr_title = "mock_title"
+    mock_data.title = "mock_title"
     mock_data.author = "mock_user"
     res = instance._construct_string(mock_data)
     expected = (
@@ -91,7 +91,7 @@ def test_construct_string_fails_lookup(mock_web_client, _2, instance):
 def test_check_pr_info_found_name_and_is_new(mock_get_config, instance):
     """Test the dataclass is updated and name is found"""
     mock_data = PR(
-        pr_title="mock_title",
+        title="mock_title",
         author="mock_github",
         url="mock_url",
         stale=False,
@@ -111,7 +111,7 @@ def test_check_pr_info_found_name_and_is_new(mock_get_config, instance):
 def test_check_pr_info_found_name_and_is_old(mock_get_config, instance):
     """Test the dataclass is updated and name is found"""
     mock_data = PR(
-        pr_title="mock_title",
+        title="mock_title",
         author="mock_github",
         url="mock_url",
         stale=True,
@@ -131,7 +131,7 @@ def test_check_pr_info_found_name_and_is_old(mock_get_config, instance):
 def test_check_pr_info_not_found_name(mock_get_config, instance):
     """Test the dataclass is updated and name is not found"""
     mock_data = PR(
-        pr_title="mock_title",
+        title="mock_title",
         author="mock_user",
         url="mock_url",
         stale=False,

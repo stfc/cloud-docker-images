@@ -5,7 +5,7 @@ from pr_dataclass import PR
 
 
 MOCK_DATA = {
-    "title": "mock_pr_title",
+    "title": "mock_title",
     "number": 1,
     "user": {"login": "mock_author"},
     "html_url": "https://api.github.com/repos/mock_owner/mock_repo/pulls",
@@ -15,7 +15,7 @@ MOCK_DATA = {
 }
 
 MOCK_PR = PR(
-    pr_title="mock_pr_title #1",
+    title="mock_title #1",
     author="mock_author",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
     stale=False,

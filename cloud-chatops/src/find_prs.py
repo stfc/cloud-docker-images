@@ -1,9 +1,9 @@
 """This module finds all open pull requests from given repositories."""
 
-from typing import List, Dict
+from typing import List, Dict, Union, Tuple
 import requests
 from read_data import get_token
-from pr_dataclass import PR
+from pr_dataclass import PR, PRProps
 
 
 class FindPRs:
@@ -16,13 +16,17 @@ class FindPRs:
         """
         self.github_token = github_token
 
-    def run(self, repos: Dict[str, List], sort=False) -> List[PR]:
+    def run(
+        self, repos: Dict[str, List], sort: Union[Tuple[PRProps, bool], None] = None
+    ) -> List[PR]:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
         :param repos: Dictionary of repository names and owners.
-        :param sort: Sort the repositories by chronological order.
+        :param sort: Sort the list by property in ascending or descending order.
+        :return: List of PRs
         """
-        self.github_token = get_token("GITHUB_TOKEN")
+        if not self.github_token:
+            self.github_token = get_token("GITHUB_TOKEN")
 
         raw_responses = []
         for organisation in repos:
@@ -33,7 +37,11 @@ class FindPRs:
         dataclass_list = [PR.from_json(response) for response in raw_responses]
 
         if sort:
-            dataclass_list = sorted(dataclass_list, key=lambda pr: pr.created_at)
+            dataclass_list = sorted(
+                dataclass_list,
+                key=lambda pr: getattr(pr, str(sort[0]).split(sep=".")[1].lower()),
+                reverse=sort[1],
+            )
 
         return dataclass_list
 

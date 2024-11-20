@@ -10,7 +10,7 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from read_data import get_token, get_config
 from find_prs import FindPRs
-from pr_dataclass import PR
+from pr_dataclass import PR, PRProps
 from errors import FailedToPostMessage, UserNotFound
 
 
@@ -31,7 +31,7 @@ class BaseFeature(ABC):
     def __init__(self):
         self.channel = DEFAULT_CHANNEL
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-        self.prs = FindPRs().run(get_config("repos"))
+        self.prs = FindPRs().run(get_config("repos"), (PRProps.CREATED_AT, True))
         self.slack_ids = get_config("user-map")
 
     def _post_reminder_message(self) -> str:
@@ -149,7 +149,7 @@ class PRMessageBuilder:
         message = []
         if pr_data.stale:
             message.append("*This PR is older than 30 days. Consider closing it:*")
-        message.append(f"Pull Request: <{pr_data.url}|{pr_data.pr_title}>")
+        message.append(f"Pull Request: <{pr_data.url}|{pr_data.title}>")
         message.append(f"Author: {name}")
         return "\n".join(message)
 
