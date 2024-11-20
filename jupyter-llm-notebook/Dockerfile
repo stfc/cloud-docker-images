@@ -8,17 +8,14 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+COPY install-sciml-deps.sh /home/${NB_USER}
+RUN chown ${NB_UID} /home/${NB_USER}/install-sciml-deps.sh
+RUN chmod +rx /home/${NB_USER}/install-sciml-deps.sh
+
 USER $NB_UID
-RUN set -ex \
- && buildDeps=' \
-    transformers \
-    accelerate \
-    bitsandbytes \
- ' \
- && pip install --no-cache-dir $buildDeps \
+RUN /home/${NB_USER}/install-sciml-deps.sh \
  && fix-permissions "${CONDA_DIR}" \
  && fix-permissions "/home/${NB_USER}"
 
 #switch back to jovyan to avoid accidental container runs as root
 USER ${NB_UID}
-
