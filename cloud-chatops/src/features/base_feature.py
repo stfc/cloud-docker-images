@@ -15,13 +15,6 @@ from pr_dataclass import PrData
 from errors import FailedToPostMessage, UserNotFound
 
 
-# If the PR author is not in the Slack ID mapping
-# then we set the author as a default value.
-DEFAULT_AUTHOR = "U01JG0LKU3W"  # David Fairbrother
-DEFAULT_CHANNEL = "C06U37Y02R4"  # "dev-chatops" channel as default
-DEFAULT_REPO_OWNER = "stfc"  # Our repos are owned by "stfc"
-
-
 class BaseFeature(ABC):
     """This base abstract class provides universal methods for features."""
 
@@ -30,7 +23,7 @@ class BaseFeature(ABC):
     channel: str
 
     def __init__(self):
-        self.channel = DEFAULT_CHANNEL
+        self.channel = ""
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
         self.prs = GetGitHubPRs(get_config("repos")).run()
         self.slack_ids = get_config("user-map")

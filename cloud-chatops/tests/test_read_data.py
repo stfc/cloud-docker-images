@@ -20,9 +20,6 @@ repos:
   organisation2:
     - repo1
     - repo2
-defaults:
-  author: WX67YZ
-  channel: CH12NN34
 """
 
 
@@ -50,13 +47,6 @@ def test_get_repos():
             "organisation1": ["repo1", "repo2"],
             "organisation2": ["repo1", "repo2"],
         }
-
-
-def test_get_maintainer():
-    """This test checks that the user's name is returned."""
-    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
-        res = get_config("maintainer")
-        assert res == "mock_maintainer"
 
 
 def test_get_config():
