@@ -27,5 +27,4 @@ npm install -g localtunnel
 echo -e "\nInstalling Ollama...\n"
 OLLAMA_DIR="/opt/ollama"
 OLLAMA_RELEASE_URL="https://github.com/ollama/ollama/releases/download/v0.4.2/ollama-linux-amd64.tgz"
-mkdir -p "$OLLAMA_DIR"
-wget --quiet --show-progress -O- "$OLLAMA_RELEASE_URL" | tar -xz -C "$OLLAMA_DIR"
+wget --quiet -O- "$OLLAMA_RELEASE_URL" | tar -xz -C "$OLLAMA_DIR"

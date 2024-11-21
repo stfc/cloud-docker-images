@@ -8,6 +8,9 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir /opt/ollama && \
+    chown ${NB_UID} /opt/ollama
+
 COPY install-sciml-deps.sh /home/${NB_USER}
 RUN chown ${NB_UID} /home/${NB_USER}/install-sciml-deps.sh
 RUN chmod +rx /home/${NB_USER}/install-sciml-deps.sh
