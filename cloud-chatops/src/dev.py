@@ -5,7 +5,7 @@ import asyncio
 import argparse
 from argparse import Namespace
 from errors import NoTestCase
-from read_data import validate_required_files
+from read_data import validate_required_files, get_config
 from events import run_global_reminder, run_personal_reminder
 
 logging.basicConfig(level=logging.DEBUG)
@@ -38,7 +38,8 @@ def call_method(event: str, args: Namespace) -> None:
         case "global":
             run_global_reminder(args.channel)
         case "personal":
-            run_personal_reminder()
+            users = list(get_config("user-map").values())
+            run_personal_reminder(users)
         case _:
             raise NoTestCase(f"There is not test case for {event}")
 

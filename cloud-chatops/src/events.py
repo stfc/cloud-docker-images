@@ -1,25 +1,46 @@
 """
 This module contains events to run in main.py.
 """
+from typing import List
 
+from slack_sdk import WebClient
 import asyncio
 import schedule
 from features.pr_reminder import PostPRsToSlack
 from features.post_to_dms import PostToDMs
-from read_data import get_config
+from features.new_pr_reminder import PRReminder
+from find_prs import FindPRs
+from read_data import get_config, get_token
+from pr_dataclass import PRProps
 
 PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
 
 
 def run_global_reminder(channel) -> None:
     """This event sends a message to the specified channel with all open PRs."""
-    PostPRsToSlack().run(channel=channel)
+    prs = FindPRs().run(repos=get_config("repos"), sort=(PRProps.CREATED_AT, False))
+    PRReminder(WebClient(token=get_token("SLACK_BOT_TOKEN"))).run(
+        prs=prs,
+        channel=channel,
+    )
 
 
-def run_personal_reminder() -> None:
-    """This event sends a message to each user in the user map with their open PRs."""
-    users = list(get_config("user-map").values())
-    PostToDMs().run(users=users, post_all=False)
+def run_personal_reminder(users: List[str]) -> None:
+    """
+    This event sends a message to each user in the user map with their open PRs.
+    :param users: Users to send reminders to.
+    """
+    prs = FindPRs().run(repos=get_config("repos"), sort=(PRProps.CREATED_AT, False))
+    client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
+    user_map = get_config("user-map")
+    for user in users:
+        github_user = list(user_map.keys())[list(user_map.values()).index(user)]
+        PRReminder(client).run(
+            prs=prs,
+            channel=user,
+            filter_by=(PRProps.AUTHOR, github_user),
+            message_no_prs=False
+        )
 
 
 async def schedule_jobs() -> None:
@@ -36,7 +57,9 @@ async def schedule_jobs() -> None:
         run_global_reminder, channel=PULL_REQUESTS_CHANNEL
     )
 
-    schedule.every().monday.at("09:00").do(run_personal_reminder)
+    schedule.every().monday.at("09:00").do(
+        run_personal_reminder, users=list(get_config("user-map").values())
+    )
 
     while True:
         schedule.run_pending()
@@ -52,12 +75,17 @@ async def slash_prs(ack, respond, command):
     """
     await ack()
     user_id = command["user_id"]
+
+    if user_id not in get_config("user-map").values():
+        await respond(f"Could not find your Slack ID {user_id} in the user map. Please contact the service maintainer to fix this.")
+        return
+
     if command["text"] == "mine":
         await respond("Gathering the PRs...")
-        PostToDMs().run([user_id], False)
+        run_personal_reminder([user_id])
     elif command["text"] == "all":
         await respond("Gathering the PRs...")
-        PostToDMs().run([user_id], True)
+        run_global_reminder(user_id)
     else:
         await respond("Please provide the correct argument: 'mine' or 'all'.")
         return
