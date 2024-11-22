@@ -1,6 +1,7 @@
 """
 This module contains events to run in main.py.
 """
+
 from typing import List
 from slack_sdk import WebClient
 import asyncio
@@ -36,7 +37,7 @@ def run_personal_reminder(users: List[str]) -> None:
             prs=prs,
             channel=user,
             filter_by=(PRProps.AUTHOR, github_user),
-            message_no_prs=False
+            message_no_prs=False,
         )
 
 
@@ -74,7 +75,9 @@ async def slash_prs(ack, respond, command):
     user_id = command["user_id"]
 
     if user_id not in get_config("user-map").values():
-        await respond(f"Could not find your Slack ID {user_id} in the user map. Please contact the service maintainer to fix this.")
+        await respond(
+            f"Could not find your Slack ID {user_id} in the user map. Please contact the service maintainer to fix this."
+        )
         return
 
     if command["text"] == "mine":

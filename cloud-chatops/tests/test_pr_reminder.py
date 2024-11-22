@@ -1,4 +1,5 @@
 """Tests for pr_reminder.py"""
+
 from dataclasses import replace
 from datetime import datetime
 
@@ -45,7 +46,9 @@ def test_get_reactions_none(instance):
 def test_make_string(mock_get_config, instance):
     """Test the right string is returned."""
     mock_get_config.return_value = {"mock_author": "mock_slack"}
-    instance.client.users_profile_get.return_value = {"profile":{"real_name":"mock_real_name"}}
+    instance.client.users_profile_get.return_value = {
+        "profile": {"real_name": "mock_real_name"}
+    }
     res = instance.make_string(MOCK_PR)
     mock_get_config.assert_called_once_with("user-map")
     instance.client.users_profile_get.assert_called_once_with(user="mock_slack")
@@ -77,7 +80,9 @@ def test_add_reactions(instance):
     """Test reaction add calls are made."""
     instance.client.reactions_add.return_value = {"ok": True}
     instance.add_reactions("mock_timestamp", "mock_channel", ["mock_reaction"])
-    instance.client.reactions_add.assert_called_once_with(channel="mock_channel", name="mock_reaction", timestamp="mock_timestamp")
+    instance.client.reactions_add.assert_called_once_with(
+        channel="mock_channel", name="mock_reaction", timestamp="mock_timestamp"
+    )
 
 
 def test_add_reactions_fails(instance):
@@ -85,7 +90,7 @@ def test_add_reactions_fails(instance):
     instance.client.reactions_add.return_value = {"ok": False, "error": "mock_error"}
     with pytest.raises(RuntimeError) as exc:
         instance.add_reactions("mock_timestamp", "mock_channel", ["mock_reaction"])
-        assert str(exc.value) == 'Reaction failed to add with error: mock_error'
+        assert str(exc.value) == "Reaction failed to add with error: mock_error"
 
 
 @patch("features.pr_reminder.PRReminder.add_reactions")
@@ -96,9 +101,18 @@ def test_send_message(mock_add_reactions, instance):
     mock_response.data = {"ts": "mock_timestamp"}
     instance.client.chat_postMessage.return_value = mock_response
 
-    res = instance.send_message("mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp")
-    instance.client.chat_postMessage.assert_called_once_with(text="mock_text", channel="mock_channel", unfurl_links=False, thread_ts="mock_timestamp")
-    mock_add_reactions.assert_called_once_with("mock_timestamp", "mock_channel", ["mock_reaction"])
+    res = instance.send_message(
+        "mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp"
+    )
+    instance.client.chat_postMessage.assert_called_once_with(
+        text="mock_text",
+        channel="mock_channel",
+        unfurl_links=False,
+        thread_ts="mock_timestamp",
+    )
+    mock_add_reactions.assert_called_once_with(
+        "mock_timestamp", "mock_channel", ["mock_reaction"]
+    )
     assert res == mock_response
 
 
@@ -111,5 +125,7 @@ def test_send_message_fails(_, instance):
     mock_response.data = {"ts": "mock_timestamp"}
     instance.client.chat_postMessage.return_value = mock_response
     with pytest.raises(RuntimeError) as exc:
-        instance.send_message("mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp")
+        instance.send_message(
+            "mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp"
+        )
         # assert str(exc.value) == 'Message failed to send with error: mock_error'
