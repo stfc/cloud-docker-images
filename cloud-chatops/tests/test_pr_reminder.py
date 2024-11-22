@@ -153,3 +153,23 @@ def test_run(mock_send_message, mock_construct_messages, instance):
         reactions=["mock_reaction"],
         timestamp=mock_send_message.call_args_list[1].kwargs['timestamp']
     )
+
+
+@patch("features.pr_reminder.PRReminder.construct_messages")
+@patch("features.pr_reminder.PRReminder.send_message")
+def test_run_none_found(mock_send_message, mock_construct_messages, instance):
+    """Test run calls send message for no messages"""
+    mock_construct_messages.return_value = [Message(text="mock_text", reactions=["mock_reaction"])]
+    mock_prs = []
+    instance.run(mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"))
+    mock_send_message.assert_called_once_with(text="No Pull Requests were found.", channel="mock_channel")
+
+
+@patch("features.pr_reminder.PRReminder.construct_messages")
+@patch("features.pr_reminder.PRReminder.send_message")
+def test_run_none_found_no_message(mock_send_message, mock_construct_messages, instance):
+    """Test run calls no methods."""
+    mock_construct_messages.return_value = [Message(text="mock_text", reactions=["mock_reaction"])]
+    mock_prs = []
+    instance.run(mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"), message_no_prs=False)
+    mock_send_message.assert_not_called()
