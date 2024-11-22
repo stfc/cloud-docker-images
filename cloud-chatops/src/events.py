@@ -3,8 +3,8 @@ This module contains events to run in main.py.
 """
 
 from typing import List
-from slack_sdk import WebClient
 import asyncio
+from slack_sdk import WebClient
 import schedule
 from features.pr_reminder import PRReminder
 from find_prs import FindPRs
@@ -76,7 +76,8 @@ async def slash_prs(ack, respond, command):
 
     if user_id not in get_config("user-map").values():
         await respond(
-            f"Could not find your Slack ID {user_id} in the user map. Please contact the service maintainer to fix this."
+            f"Could not find your Slack ID {user_id} in the user map. "
+            f"Please contact the service maintainer to fix this."
         )
         return
 
