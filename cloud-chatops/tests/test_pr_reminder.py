@@ -2,24 +2,33 @@
 
 from dataclasses import replace
 from datetime import datetime
-
-import pytest
 from unittest.mock import patch, NonCallableMock, MagicMock
-
+import pytest
 from slack_sdk.errors import SlackApiError
-
 from features.pr_reminder import PRReminder
-from pr_dataclass import PR, Message
+from pr_dataclass import PR, Message, PRProps
 
 
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
+    """Fixture for class instance."""
     return PRReminder(NonCallableMock())
 
 
 MOCK_PR = PR(
     title="mock_title #1",
     author="mock_author",
+    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    stale=True,
+    draft=True,
+    labels=["mock_label"],
+    repository="mock_repo",
+    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+)
+
+MOCK_PR_2 = PR(
+    title="mock_title #1",
+    author="mock_author_2",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
     stale=True,
     draft=True,
@@ -52,7 +61,8 @@ def test_make_string(mock_get_config, instance):
     res = instance.make_string(MOCK_PR)
     mock_get_config.assert_called_once_with("user-map")
     instance.client.users_profile_get.assert_called_once_with(user="mock_slack")
-    expected = f"*This PR is older than 30 days. Consider closing it:*\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_real_name"
+    expected = (f"*This PR is older than 30 days. Consider closing it:*"
+                f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_real_name")
     assert res == expected
 
 
@@ -62,7 +72,8 @@ def test_make_string_fails(mock_get_config, instance):
     instance.client.users_profile_get.side_effect = SlackApiError("mock", "mock")
     mock_get_config.return_value.get.return_value = "mock_author"
     res = instance.make_string(MOCK_PR)
-    expected = f"*This PR is older than 30 days. Consider closing it:*\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_author"
+    expected = (f"*This PR is older than 30 days. Consider closing it:*"
+                f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_author")
     assert res == expected
 
 
@@ -97,7 +108,6 @@ def test_add_reactions_fails(instance):
 def test_send_message(mock_add_reactions, instance):
     """Test the chat post message is called with the correct parameters"""
     mock_response = MagicMock()
-    mock_response["ok"] = True
     mock_response.data = {"ts": "mock_timestamp"}
     instance.client.chat_postMessage.return_value = mock_response
 
@@ -119,13 +129,27 @@ def test_send_message(mock_add_reactions, instance):
 @patch("features.pr_reminder.PRReminder.add_reactions")
 def test_send_message_fails(_, instance):
     """Test an exception is raised if the message fails to send."""
-    mock_response = MagicMock()
-    mock_response["ok"] = False
-    mock_response["error"] = "mock_error"
-    mock_response.data = {"ts": "mock_timestamp"}
+    mock_response = {"ok": False, "error": "mock_error"}
     instance.client.chat_postMessage.return_value = mock_response
     with pytest.raises(RuntimeError) as exc:
         instance.send_message(
             "mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp"
         )
-        # assert str(exc.value) == 'Message failed to send with error: mock_error'
+        assert str(exc.value) == 'Message failed to send with error: mock_error'
+
+
+@patch("features.pr_reminder.PRReminder.construct_messages")
+@patch("features.pr_reminder.PRReminder.send_message")
+def test_run(mock_send_message, mock_construct_messages, instance):
+    """Test run calls all methods."""
+    mock_construct_messages.return_value = [Message(text="mock_text", reactions=["mock_reaction"])]
+    mock_prs = [MOCK_PR, MOCK_PR_2]
+    instance.run(mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"))
+    mock_construct_messages.assert_called_once_with([MOCK_PR])
+    mock_send_message.assert_any_call(text="Here are the outstanding PRs as of today:", channel="mock_channel")
+    mock_send_message.assert_any_call(
+        text="mock_text",
+        channel="mock_channel",
+        reactions=["mock_reaction"],
+        timestamp=mock_send_message.call_args_list[1].kwargs['timestamp']
+    )
