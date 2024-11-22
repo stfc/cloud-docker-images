@@ -66,3 +66,11 @@ class PRProps(Enum):
     STALE = auto()
     REPOSITORY = auto()
     LABELS = auto()
+
+
+@dataclass
+class Message:
+    """Ready to send message data"""
+    text: str
+    reactions: List[str]
+
