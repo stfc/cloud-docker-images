@@ -6,9 +6,7 @@ from typing import List
 from slack_sdk import WebClient
 import asyncio
 import schedule
-from features.pr_reminder import PostPRsToSlack
-from features.post_to_dms import PostToDMs
-from features.new_pr_reminder import PRReminder
+from features.pr_reminder import PRReminder
 from find_prs import FindPRs
 from read_data import get_config, get_token
 from pr_dataclass import PRProps
