@@ -34,15 +34,17 @@ def test_main(mock_methods, mock_validate):
 
 
 @patch("dev.args")
+@patch("dev.get_config")
 @patch("dev.run_personal_reminder")
 @patch("dev.run_global_reminder")
-def test_call_test(mock_global, mock_personal, mock_args):
+def test_call_test(mock_global, mock_personal, mock_get_config, mock_args):
     """Test the call test function"""
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     call_method("channel")
     call_method("global")
     mock_global.assert_called_once_with(mock_args.channel)
     call_method("personal")
-    mock_personal.assert_called_once_with()
+    mock_personal.assert_called_once_with(["mock_slack"])
     with pytest.raises(NoTestCase) as exc:
         call_method("unexpected")
         assert str(exc.value) == "There is not test case for unexpected"

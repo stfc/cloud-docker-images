@@ -2,7 +2,6 @@
 This module contains events to run in main.py.
 """
 from typing import List
-
 from slack_sdk import WebClient
 import asyncio
 import schedule
