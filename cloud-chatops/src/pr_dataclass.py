@@ -53,16 +53,3 @@ class PR:
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=30)
         return opened_date <= time_cutoff
-
-
-class PRProps(Enum):
-    """This Enum class contains properties of the PR dataclass"""
-
-    TITLE = auto()
-    AUTHOR = auto()
-    URL = auto()
-    CREATED_AT = auto()
-    DRAFT = auto()
-    STALE = auto()
-    REPOSITORY = auto()
-    LABELS = auto()

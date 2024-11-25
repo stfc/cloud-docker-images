@@ -1,10 +1,11 @@
 """Tests for find_prs.py"""
 
 from unittest.mock import patch, NonCallableMock
+from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from find_prs import FindPRs
-from pr_dataclass import PRProps
+from pr_dataclass import PR
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -25,7 +26,7 @@ def test_run_with_sort(
     mock_repo_1.created_at = 1
     mock_repo_2.created_at = 2
     mock_repos = {"owner1": [mock_repo_2, mock_repo_1]}
-    res = instance.run(mock_repos, (PRProps.CREATED_AT, True))
+    res = instance.run(mock_repos, ("created_at", True))
     assert instance.github_token == mock_get_token.return_value
     mock_get_token.assert_called_once_with("GITHUB_TOKEN")
 
@@ -67,3 +68,43 @@ def test_make_request(mock_requests, instance):
         instance.make_request(
             "https://api.github_wrong.com/repos/mock_owner/mock_repo/pulls"
         )
+
+
+MOCK_PR_1 = PR(
+    title="mock_title #1",
+    author="mock_author",
+    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    stale=False,
+    draft=False,
+    labels=["mock_label"],
+    repository="mock_repo",
+    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+)
+MOCK_PR_2 = PR(
+    title="mock_title #2",
+    author="mock_author_2",
+    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    stale=True,
+    draft=True,
+    labels=["mock_label"],
+    repository="mock_repo_2",
+    created_at=datetime.strptime("2024-10-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+)
+
+
+def test_sort_by(instance):
+    """Test the list is sorted correctly."""
+    mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
+    res = instance.sort_by(mock_pr_list, "created_at")
+    assert res == list(reversed(mock_pr_list))
+
+    res_reversed = instance.sort_by(mock_pr_list, "created_at", True)
+    assert res_reversed == mock_pr_list
+
+
+def test_sort_by_fails(instance):
+    """Test sort raises an error when sorting by unknown attribute"""
+    mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
+    with pytest.raises(ValueError) as exc:
+        instance.sort_by(mock_pr_list, "unknown")
+        assert str(exc.value) == "Unable to sort list by unknown"

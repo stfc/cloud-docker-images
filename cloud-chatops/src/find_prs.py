@@ -3,7 +3,7 @@
 from typing import List, Dict, Union, Tuple
 import requests
 from read_data import get_token
-from pr_dataclass import PR, PRProps
+from pr_dataclass import PR
 
 
 class FindPRs:
@@ -17,7 +17,7 @@ class FindPRs:
         self.github_token = github_token
 
     def run(
-        self, repos: Dict[str, List], sort: Union[Tuple[PRProps, bool], None] = None
+        self, repos: Dict[str, List], sort: Union[Tuple[str, bool], None] = None
     ) -> List[PR]:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
@@ -37,11 +37,7 @@ class FindPRs:
         dataclass_list = [PR.from_json(response) for response in raw_responses]
 
         if sort:
-            dataclass_list = sorted(
-                dataclass_list,
-                key=lambda pr: getattr(pr, str(sort[0]).split(sep=".")[1].lower()),
-                reverse=sort[1],
-            )
+            dataclass_list = self.sort_by(dataclass_list, sort[0], sort[1])
 
         return dataclass_list
 
@@ -72,3 +68,17 @@ class FindPRs:
         return (
             [response.json()] if isinstance(response.json(), dict) else response.json()
         )
+
+    @staticmethod
+    def sort_by(obj_list: List[PR], prop: str, reverse: bool = False) -> List[PR]:
+        """
+        Sort the list of PR objects by property.
+        :param obj_list: List of PRs
+        :param prop: Property to sort by
+        :param reverse: To sort in reverse
+        :return: List of PRs
+        """
+        try:
+            return sorted(obj_list, key=lambda pr: getattr(pr, prop), reverse=reverse)
+        except AttributeError as exc:
+            raise ValueError(f"Unable to sort list by {prop}") from exc
