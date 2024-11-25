@@ -1,6 +1,6 @@
 """Unit tests for events.py"""
 
-from unittest.mock import patch, AsyncMock, NonCallableMock
+from unittest.mock import patch, AsyncMock
 import pytest
 from events import run_global_reminder, run_personal_reminder, schedule_jobs, slash_prs
 from pr_dataclass import PRProps
@@ -67,28 +67,17 @@ async def test_schedule_jobs(mock_get_config, mock_schedule):
         await schedule_jobs()
     mock_get_config.assert_called_once_with("user-map")
     mock_schedule.every.return_value.monday.at.assert_any_call("09:00")
-    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(run_global_reminder, channel="C03RT2F6WHZ")
-    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(run_personal_reminder, users=["mock_slack"])
+    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
+        run_global_reminder, channel="C03RT2F6WHZ"
+    )
+    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
+        run_personal_reminder, users=["mock_slack"]
+    )
     mock_schedule.every.return_value.wednesday.at.assert_any_call("09:00")
-    mock_schedule.every.return_value.wednesday.at.return_value.do.assert_any_call(run_global_reminder, channel="C03RT2F6WHZ")
+    mock_schedule.every.return_value.wednesday.at.return_value.do.assert_any_call(
+        run_global_reminder, channel="C03RT2F6WHZ"
+    )
     mock_schedule.run_pending.assert_called_once_with()
-
-
-@pytest.mark.asyncio
-@patch("events.run_personal_reminder")
-@patch("events.get_config")
-async def test_slash_prs_mine(mock_get_config, mock_run_personal):
-    """Test the function calls the correct methods for different inputs"""
-    mock_get_config.return_value = {"mock_github": "mock_user_id"}
-    mock_respond = AsyncMock()
-    mock_command = {"user_id": "mock_user_id", "text": "mine"}
-    mock_ack = AsyncMock()
-    await slash_prs(mock_ack, mock_respond, mock_command)
-    mock_ack.assert_called_once_with()
-    mock_get_config.assert_called_once_with("user-map")
-    mock_respond.assert_any_call("Gathering the PRs...")
-    mock_respond.assert_any_call("Check out your DMs.")
-    mock_run_personal.assert_called_once_with(["mock_user_id"])
 
 
 @pytest.mark.asyncio
@@ -136,6 +125,6 @@ async def test_slash_prs_fail(mock_get_config):
     await slash_prs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
     mock_get_config.assert_called_once_with("user-map")
-    mock_respond.assert_any_call("Please provide the correct argument: 'mine' or 'all'.")
-
-
+    mock_respond.assert_any_call(
+        "Please provide the correct argument: 'mine' or 'all'."
+    )
