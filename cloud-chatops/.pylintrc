@@ -4,9 +4,8 @@
 max-line-length=120
 
 # Disable various warnings:
-# R0801 - Duplicate Code - Ignored to be fixed in future PRs
 
-disable=R0801
+disable=
 
 [MASTER]
 init-hook='import sys; sys.path.append("src")'
