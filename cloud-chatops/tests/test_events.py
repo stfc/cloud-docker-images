@@ -128,3 +128,20 @@ async def test_slash_prs_fail(mock_get_config):
     mock_respond.assert_any_call(
         "Please provide the correct argument: 'mine' or 'all'."
     )
+
+
+@pytest.mark.asyncio
+@patch("events.get_config")
+async def test_slash_prs_no_user(mock_get_config):
+    """Test the function calls the correct methods for different inputs"""
+    mock_get_config.return_value = {"mock_github": "mock_user_id"}
+    mock_respond = AsyncMock()
+    mock_command = {"user_id": "non_existent_user", "text": ""}
+    mock_ack = AsyncMock()
+    await slash_prs(mock_ack, mock_respond, mock_command)
+    mock_ack.assert_called_once_with()
+    mock_get_config.assert_called_once_with("user-map")
+    mock_respond.assert_any_call(
+        "Could not find your Slack ID non_existent_user in the user map. "
+        "Please contact the service maintainer to fix this."
+    )
