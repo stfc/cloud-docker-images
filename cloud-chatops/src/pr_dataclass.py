@@ -5,7 +5,6 @@ This is preferred over dictionaries as dataclasses make code more readable.
 
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from enum import Enum, auto
 from typing import List, Dict
 
 
