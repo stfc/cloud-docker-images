@@ -20,7 +20,6 @@ class FindPRs:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
         :param repos: Dictionary of repository names and owners.
-        :param sort: Sort the list by property in ascending or descending order.
         :return: List of PRs
         """
         if not self.github_token:
