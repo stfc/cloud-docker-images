@@ -31,7 +31,8 @@ class BaseFeature(ABC):
     def __init__(self):
         self.channel = DEFAULT_CHANNEL
         self.client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-        self.prs = FindPRs().run(get_config("repos"), ("created_at", True))
+        prs = FindPRs().run(get_config("repos"))
+        self.prs = FindPRs().sort_by(prs, "created_at", True)
         self.slack_ids = get_config("user-map")
 
     def _post_reminder_message(self) -> str:

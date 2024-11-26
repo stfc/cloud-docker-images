@@ -7,7 +7,7 @@ from pr_dataclass import PR
 
 
 class FindPRs:
-    """This class finds all open pull requests in the given repositories. It can also sort them chronologically."""
+    """This class finds all open pull requests in the given repositories. It can also sort them by property."""
 
     def __init__(self, github_token=""):
         """
@@ -16,9 +16,7 @@ class FindPRs:
         """
         self.github_token = github_token
 
-    def run(
-        self, repos: Dict[str, List], sort: Union[Tuple[str, bool], None] = None
-    ) -> List[PR]:
+    def run(self, repos: Dict[str, List]) -> List[PR]:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
         :param repos: Dictionary of repository names and owners.
@@ -34,12 +32,7 @@ class FindPRs:
                 organisation, repos.get(organisation)
             )
 
-        dataclass_list = [PR.from_json(response) for response in raw_responses]
-
-        if sort:
-            dataclass_list = self.sort_by(dataclass_list, sort[0], sort[1])
-
-        return dataclass_list
+        return [PR.from_json(response) for response in raw_responses]
 
     def request_all_repos(
         self, organisation: str, repositories: List[str]

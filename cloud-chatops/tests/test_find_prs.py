@@ -26,7 +26,8 @@ def test_run_with_sort(
     mock_repo_1.created_at = 1
     mock_repo_2.created_at = 2
     mock_repos = {"owner1": [mock_repo_2, mock_repo_1]}
-    res = instance.run(mock_repos, ("created_at", True))
+    res = instance.run(mock_repos)
+    res = instance.sort_by(res, "created_at", True)
     assert instance.github_token == mock_get_token.return_value
     mock_get_token.assert_called_once_with("GITHUB_TOKEN")
 
