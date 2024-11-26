@@ -1,0 +1,4 @@
+- Update submodule
+- cd into dir
+- `./generate-Dockerfile.sh --python-only`
+- cd .build && docker build .

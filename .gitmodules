@@ -1,0 +1,4 @@
+[submodule "jupyter-llm-notebook/gpu-jupyter-base"]
+	path = jupyter-llm-notebook/gpu-jupyter-base
+	url = https://github.com/iot-salzburg/gpu-jupyter.git
+	branch = v1.8_cuda-12.5_ubuntu-22.04
