@@ -1,11 +1,9 @@
-FROM cschranz/gpu-jupyter:v1.7_cuda-12.2_ubuntu-22.04_python-only
+FROM quay.io/jupyter/pytorch-notebook:cuda12-python-3.11
 
 USER root
-# The base image only gets updated when a new version of CUDA is released.
-# We need to update the base image to get the latest security updates.
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get autoremove -y && \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install npm -y && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /opt/ollama /opt/models && \
@@ -23,11 +21,15 @@ RUN /usr/local/bin/install-sciml-deps.sh \
  && fix-permissions "${CONDA_DIR}" \
  && fix-permissions "/home/${NB_USER}"
 
-# https://huggingface.co/docs/datasets/en/cache
-ENV HF_HOME=/opt/models
-RUN /usr/local/bin/download-models.py \
- && fix-permissions "${CONDA_DIR}" \
- && fix-permissions "/home/${NB_USER}"
+RUN echo -e "\nInstalling Ollama...\n" && \
+    OLLAMA_DIR="/opt/ollama" \
+    OLLAMA_RELEASE_URL="https://github.com/ollama/ollama/releases/download/v0.4.2/ollama-linux-amd64.tgz" \
+    wget --quiet -O- "$OLLAMA_RELEASE_URL" | tar -xz -C "$OLLAMA_DIR"
 
-#switch back to jovyan to avoid accidental container runs as root
+ENV HF_HOME=/opt/models
+# https://huggingface.co/docs/datasets/en/cache
+RUN /usr/local/bin/download-models.py \
+&& fix-permissions "${CONDA_DIR}" \
+&& fix-permissions "/home/${NB_USER}"
+
 USER ${NB_UID}
