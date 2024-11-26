@@ -8,15 +8,24 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /opt/ollama && \
-    chown ${NB_UID} /opt/ollama
+RUN mkdir /opt/ollama /opt/models && \
+    chown -R ${NB_UID} /opt/ollama /opt/models && \
+    chmod -R +rwX /opt/ollama /opt/models
 
-COPY install-sciml-deps.sh /home/${NB_USER}
-RUN chown ${NB_UID} /home/${NB_USER}/install-sciml-deps.sh
-RUN chmod +rx /home/${NB_USER}/install-sciml-deps.sh
+COPY install-sciml-deps.sh /usr/local/bin/
+COPY download-models.py /usr/local/bin/
+
+RUN chown ${NB_UID} /usr/local/bin/install-sciml-deps.sh /usr/local/bin/download-models.py
+RUN chmod +rx /usr/local/bin/install-sciml-deps.sh /usr/local/bin/download-models.py
 
 USER $NB_UID
-RUN /home/${NB_USER}/install-sciml-deps.sh \
+RUN /usr/local/bin/install-sciml-deps.sh \
+ && fix-permissions "${CONDA_DIR}" \
+ && fix-permissions "/home/${NB_USER}"
+
+# https://huggingface.co/docs/datasets/en/cache
+ENV HF_HOME=/opt/models
+RUN /usr/local/bin/download-models.py \
  && fix-permissions "${CONDA_DIR}" \
  && fix-permissions "/home/${NB_USER}"
 
