@@ -10,7 +10,7 @@ echo -e "\nInstalling PyTorch...\n"
 pip install --no-cache-dir --upgrade torch torchvision torchaudio
 
 echo -e "\nInstalling HuggingFace libraries...\n"
-pip install --no-cache-dir --upgrade huggingface_hub transformers accelerate
+pip install --no-cache-dir --upgrade huggingface_hub transformers accelerate datasets
 
 echo -e "\nInstalling bitsandbytes...\n"
 pip install --no-cache-dir bitsandbytes -U
