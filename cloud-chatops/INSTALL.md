@@ -123,7 +123,7 @@ Two files required for the deployment of this application: `config.yml` and `sec
 
 #### Config:
 The application configuration is stored in `config.yml`.
-This includes information such as username mapping, repositories to check and default values.<br>
+This includes information such as username mapping and repositories to check.<br>
 Slack Channel and Member IDs can be found in Slack by:<br>
 - Right-clicking the member / channel
 - View member / channel details
@@ -147,16 +147,6 @@ repos:  # Dictionary of owners and repositories
     - repo1  # E.g. github.com/organisation2/repo1
     - repo2
     - repo3
-
-defaults:  # Default values for application variables
-  # Default author will be assigned to pull requests where the PR author is not in the above user map.
-  # Usually team lead or senior staff member.
-  author: WX67YZ89  # Slack member ID
-  
-  # Default channel is where the pull requests will be posted.
-  # It's recommended to set this as a "maintenance" / "dev" channel in case the application goes awry.
-  # The actual channel messages are sent to can be specified in the code.
-  channel: CH12NN34  # Slack channel ID
 ```
 
 #### Secrets:

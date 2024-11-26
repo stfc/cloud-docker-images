@@ -1,13 +1,7 @@
 ---
-maintainer: <maintainers_member_id>
-
 user-map:
   <user_github_username>: <user_member_id>
 
 repos:
   <organisation>:
     - <repo>
-
-defaults:
-  author: <author_member_id>
-  channel: <reminder_channel_id>
