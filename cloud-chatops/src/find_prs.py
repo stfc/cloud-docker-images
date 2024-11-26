@@ -1,6 +1,6 @@
 """This module finds all open pull requests from given repositories."""
 
-from typing import List, Dict, Union, Tuple
+from typing import List, Dict
 import requests
 from read_data import get_token
 from pr_dataclass import PR
