@@ -5,7 +5,6 @@
 from unittest.mock import NonCallableMock, patch
 import pytest
 from features.pr_reminder import PostPRsToSlack
-from features.base_feature import DEFAULT_CHANNEL
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -33,7 +32,7 @@ def test_run_no_channel(mock_thread, mock_reminder, instance):
     instance.run()
     mock_reminder.assert_called_once()
     mock_thread.assert_called_once_with(instance.prs, mock_reminder.return_value)
-    assert instance.channel == DEFAULT_CHANNEL
+    assert instance.channel == ""
 
 
 @patch("features.pr_reminder.PostPRsToSlack._post_reminder_message")
