@@ -4,9 +4,8 @@ from dataclasses import replace
 from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from pr_dataclass import PR
+from pr_dataclass import PR, Message
 from read_data import get_config
-from pr_dataclass import Message
 
 
 class PRReminder:
