@@ -9,14 +9,14 @@ import schedule
 from features.pr_reminder import PRReminder
 from find_prs import FindPRs
 from read_data import get_config, get_token
-from pr_dataclass import PRProps
 
 PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
 
 
 def run_global_reminder(channel) -> None:
     """This event sends a message to the specified channel with all open PRs."""
-    prs = FindPRs().run(repos=get_config("repos"), sort=(PRProps.CREATED_AT, False))
+    unsorted_prs = FindPRs().run(repos=get_config("repos"))
+    prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
     PRReminder(WebClient(token=get_token("SLACK_BOT_TOKEN"))).run(
         prs=prs,
         channel=channel,
@@ -28,7 +28,8 @@ def run_personal_reminder(users: List[str]) -> None:
     This event sends a message to each user in the user map with their open PRs.
     :param users: Users to send reminders to.
     """
-    prs = FindPRs().run(repos=get_config("repos"), sort=(PRProps.CREATED_AT, False))
+    unsorted_prs = FindPRs().run(repos=get_config("repos"))
+    prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
     client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
     user_map = get_config("user-map")
     for user in users:

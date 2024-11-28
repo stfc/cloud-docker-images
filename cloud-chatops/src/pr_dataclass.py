@@ -52,3 +52,11 @@ class PR:
         datetime_now = datetime.now().replace(tzinfo=None)
         time_cutoff = datetime_now - timedelta(days=30)
         return opened_date <= time_cutoff
+
+
+@dataclass
+class Message:
+    """Ready to send message data"""
+
+    text: str
+    reactions: List[str]

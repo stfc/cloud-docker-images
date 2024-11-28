@@ -5,8 +5,9 @@ from typing import List, Tuple, Union
 from datetime import datetime
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-from pr_dataclass import PR, PRProps, Message
+from pr_dataclass import PR
 from read_data import get_config
+from pr_dataclass import Message
 
 
 class PRReminder:
