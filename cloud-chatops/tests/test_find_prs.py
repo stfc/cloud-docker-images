@@ -20,7 +20,7 @@ def instance_fixture():
 @patch("find_prs.PR")
 @patch("find_prs.get_token")
 @patch("find_prs.FindPRs.request_all_repos")
-def test_run_with_sort(
+def test_run(
     mock_request_all_repos, mock_get_token, mock_pr_dataclass, instance
 ):
     """Tests the run method returns the correct object"""
@@ -36,10 +36,8 @@ def test_run_with_sort(
 
     for owner in mock_repos:
         mock_request_all_repos.assert_any_call(owner, mock_repos.get(owner))
-    for call in mock_request_all_repos.calls():
-        mock_pr_dataclass.assert_any_call(call.return_value)
 
-    mock_res = list(reversed([call.return_value for call in mock_pr_dataclass.calls()]))
+    mock_res = list(reversed([call.return_value for call in mock_pr_dataclass.call_arg_list]))
     assert res == mock_res
 
 
@@ -112,3 +110,18 @@ def test_sort_by_fails(instance):
     with pytest.raises(ValueError) as exc:
         instance.sort_by(mock_pr_list, "unknown")
         assert str(exc.value) == "Unable to sort list by unknown"
+
+
+def test_filter_by(instance):
+    """Test the list is filtered correctly."""
+    mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
+    res = instance.filter_by(mock_pr_list, "repository", "mock_repo")
+    assert res == [MOCK_PR_1]
+
+
+def test_filter_by_fails(instance):
+    """Test filter raises an error when filtering by unknown attribute"""
+    mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
+    with pytest.raises(ValueError) as exc:
+        instance.filter_by(mock_pr_list, "unknown", "some_value")
+        assert str(exc.value) == "Unable to filter list by unknown"
