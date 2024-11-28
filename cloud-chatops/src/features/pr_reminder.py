@@ -1,8 +1,7 @@
 """This module sends reminders to direct messages and channels with open pull requests."""
 
 from dataclasses import replace
-from typing import List, Tuple, Union
-from datetime import datetime
+from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from pr_dataclass import PR
@@ -20,25 +19,14 @@ class PRReminder:
         self,
         prs: List[PR],
         channel: str,
-        filter_by: Tuple[PRProps, Union[str, datetime, bool]] = None,
         message_no_prs: bool = True,
     ) -> None:
         """
         Send pull request reminders to a channel.
         :param prs: List of pull requests.
         :param channel: The channel to send reminders to. This can be a public channel or a user ID.
-        :param filter_by: Property to filter pull requests by.
         :param message_no_prs: Send a message that there are no PRs.
         """
-        if filter_by:
-            prs = list(
-                filter(
-                    lambda pr: getattr(pr, str(filter_by[0]).split(sep=".")[1].lower())
-                    == filter_by[1],
-                    prs,
-                )
-            )
-
         if not prs and message_no_prs:
             self.send_message(text="No Pull Requests were found.", channel=channel)
             return

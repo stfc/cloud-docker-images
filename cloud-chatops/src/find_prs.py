@@ -74,3 +74,17 @@ class FindPRs:
             return sorted(obj_list, key=lambda pr: getattr(pr, prop), reverse=reverse)
         except AttributeError as exc:
             raise ValueError(f"Unable to sort list by {prop}") from exc
+
+    @staticmethod
+    def filter_by(obj_list: List[PR], prop: str, value: str) -> List[PR]:
+        """
+        Filter the list of PR object by property.
+        :param obj_list: List of PR objects
+        :param prop: Property to filter by
+        :param value: Value to evaluate filter.
+        :return: Filtered list of PRs.
+        """
+        try:
+            return list(filter(lambda pr: getattr(pr, prop) == value, obj_list))
+        except AttributeError as exc:
+            raise ValueError(f"Unable to filter list by {prop}") from exc

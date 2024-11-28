@@ -34,10 +34,10 @@ def run_personal_reminder(users: List[str]) -> None:
     user_map = get_config("user-map")
     for user in users:
         github_user = list(user_map.keys())[list(user_map.values()).index(user)]
+        filtered_prs = FindPRs().filter_by(prs, "author", github_user)
         PRReminder(client).run(
-            prs=prs,
+            prs=filtered_prs,
             channel=user,
-            filter_by=(PRProps.AUTHOR, github_user),
             message_no_prs=False,
         )
 
