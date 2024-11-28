@@ -74,7 +74,7 @@ class PRReminder:
             )
 
         if reactions:
-            self.add_reactions(response.data["ts"], channel, reactions)
+            self.add_reactions(response.data["ts"], response.data["channel"], reactions)
 
         return response
 
