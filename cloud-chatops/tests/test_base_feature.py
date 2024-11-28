@@ -8,18 +8,18 @@ from errors import FailedToPostMessage, UserNotFound
 
 @pytest.fixture(name="instance", scope="function")
 @patch("features.base_feature.WebClient")
-@patch("features.base_feature.GetGitHubPRs")
+@patch("features.base_feature.FindPRs")
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_config")
 def instance_fixture(
     _,
     mock_get_token,
-    mock_get_github_prs,
+    mock_find_prs,
     mock_web_client,
 ):
     """This fixture provides a class instance for the tests"""
     mock_get_token.return_value = "mock_slack_token"
-    mock_get_github_prs.run.return_value = []
+    mock_find_prs.run.return_value = []
     mock_web_client.return_value = NonCallableMock()
 
     class BaseFeatureWrapper(BaseFeature):
@@ -118,7 +118,7 @@ def test_send_thread_fails(_, instance):
 def test_send_thread_react_no_reactions(instance):
     """Test no reactions are added"""
     mock_pr_data = NonCallableMock()
-    mock_pr_data.old = False
+    mock_pr_data.stale = False
     mock_pr_data.draft = False
     instance.send_thread_react(mock_pr_data, "mock_channel", "100")
     instance.client.reactions_add.assert_not_called()

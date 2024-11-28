@@ -13,19 +13,19 @@ from features.post_to_dms import PostToDMs
 @pytest.fixture(name="instance", scope="function")
 @patch("features.post_to_dms.PRMessageBuilder")
 @patch("features.base_feature.WebClient")
-@patch("features.base_feature.GetGitHubPRs")
+@patch("features.base_feature.FindPRs")
 @patch("features.base_feature.get_token")
 @patch("features.base_feature.get_config")
 def instance_fixture(
     _,
     mock_get_token,
-    mock_get_github_prs,
+    mock_find_prs,
     mock_web_client,
     mock_pr_message_builder,
 ):
     """This fixture provides a class instance for the tests"""
     mock_get_token.return_value = "mock_slack_token"
-    mock_get_github_prs.return_value.run.return_value = ["mock_pr"]
+    mock_find_prs.return_value.sort_by.return_value = ["mock_pr"]
     mock_web_client.return_value = NonCallableMock()
     mock_pr_message_builder.return_value = NonCallableMock()
     return PostToDMs()

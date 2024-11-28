@@ -3,7 +3,7 @@
 from typing import List, Union
 from enum_states import PRsFoundState
 from features.base_feature import BaseFeature, PRMessageBuilder
-from pr_dataclass import PrData
+from pr_dataclass import PR
 from errors import NoUsersGiven
 
 
@@ -40,7 +40,7 @@ class PostToDMs(BaseFeature):
             self._post_thread_messages(self.prs, reminder_thread_ts, post_all)
 
     def _post_thread_messages(
-        self, prs: List[PrData], thread_ts: str, post_all: bool
+        self, prs: List[PR], thread_ts: str, post_all: bool
     ) -> None:
         """
         This method iterates through each PR and calls the post method for them.
@@ -62,7 +62,7 @@ class PostToDMs(BaseFeature):
             self._send_no_prs_found(thread_ts)
 
     def _filter_thread_message(
-        self, pr: PrData, thread_ts: str, post_all: bool
+        self, pr: PR, thread_ts: str, post_all: bool
     ) -> Union[PRsFoundState, bool]:
         """
         This method filters which pull requests to send to the thread dependent on the value of personal_thread.
@@ -73,7 +73,7 @@ class PostToDMs(BaseFeature):
         :param thread_ts: Timestamp of reminder message
         :return: Returns an Enum state.
         """
-        if post_all or pr.user == self.user:
+        if post_all or pr.author == self.user:
             response = self._send_thread(pr, thread_ts)
             self._send_thread_react(pr, response.data["channel"], response.data["ts"])
             return PRsFoundState.PRS_FOUND

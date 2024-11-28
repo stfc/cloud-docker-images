@@ -2,7 +2,7 @@
 
 from typing import List
 from features.base_feature import BaseFeature
-from pr_dataclass import PrData
+from pr_dataclass import PR
 
 
 class PostPRsToSlack(BaseFeature):
@@ -23,7 +23,7 @@ class PostPRsToSlack(BaseFeature):
         reminder_thread_ts = self._post_reminder_message()
         self._post_thread_messages(self.prs, reminder_thread_ts)
 
-    def _post_thread_messages(self, prs: List[PrData], thread_ts: str) -> None:
+    def _post_thread_messages(self, prs: List[PR], thread_ts: str) -> None:
         """
         This method iterates through each PR and calls the post method for them.
         :param prs: A list of PRs from GitHub
