@@ -6,7 +6,7 @@ from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
 from slack_sdk.errors import SlackApiError
 from features.pr_reminder import PRReminder
-from pr_dataclass import PR, Message, PRProps
+from pr_dataclass import PR, Message
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -112,7 +112,7 @@ def test_add_reactions_fails(instance):
 def test_send_message(mock_add_reactions, instance):
     """Test the chat post message is called with the correct parameters"""
     mock_response = MagicMock()
-    mock_response.data = {"ts": "mock_timestamp"}
+    mock_response.data = {"ts": "mock_timestamp", "channel": "mock_channel"}
     instance.client.chat_postMessage.return_value = mock_response
 
     res = instance.send_message(
@@ -150,8 +150,8 @@ def test_run(mock_send_message, mock_construct_messages, instance):
         Message(text="mock_text", reactions=["mock_reaction"])
     ]
     mock_prs = [MOCK_PR, MOCK_PR_2]
-    instance.run(mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"))
-    mock_construct_messages.assert_called_once_with([MOCK_PR])
+    instance.run(mock_prs, "mock_channel")
+    mock_construct_messages.assert_called_once_with([MOCK_PR, MOCK_PR_2])
     mock_send_message.assert_any_call(
         text="Here are the outstanding PRs as of today:", channel="mock_channel"
     )
@@ -171,7 +171,7 @@ def test_run_none_found(mock_send_message, mock_construct_messages, instance):
         Message(text="mock_text", reactions=["mock_reaction"])
     ]
     mock_prs = []
-    instance.run(mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"))
+    instance.run(mock_prs, "mock_channel")
     mock_send_message.assert_called_once_with(
         text="No Pull Requests were found.", channel="mock_channel"
     )
@@ -187,7 +187,5 @@ def test_run_none_found_no_message(
         Message(text="mock_text", reactions=["mock_reaction"])
     ]
     mock_prs = []
-    instance.run(
-        mock_prs, "mock_channel", (PRProps.AUTHOR, "mock_author"), message_no_prs=False
-    )
+    instance.run(mock_prs, "mock_channel", message_no_prs=False)
     mock_send_message.assert_not_called()
