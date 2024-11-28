@@ -8,6 +8,9 @@ from find_prs import FindPRs
 from pr_dataclass import PR
 
 
+# pylint: disable=R0801
+
+
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
