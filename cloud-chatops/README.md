@@ -4,15 +4,19 @@
 
 ## Contents:
 [About](#about)<br>
+[Deployment](#deployment)<br>
 [Usage / Features](#usage--features)<br>
 [Testing](#testing)<br>
-[Deployment](#deployment)<br>
 
 ### About
 
 Cloud ChatOps is designed to help encourage developers to complete GitHub pull requests. 
 Either by getting them approved and merged or closed when they go stale.<br>
 The app will notify authors about their pull requests, usually by Slack, until they are closed / merged. There are multiple methods of sending these reminders.<br>
+
+### Deployment
+
+For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
 
 ### Usage / Features
 
@@ -29,7 +33,7 @@ The dates and times when the events are run are hard coded in [events.py/schedul
 Events are defined in the [events.py](src/events.py) module:<br>
 - `run_global_reminder()`: Sends a message to the pull request channel with every open pull request across the repositories in a thread.
     - Runs on: Monday / Wednesday @ 09:00 UTC
-- `run_personal_reminder()`: Sends a message to each user directly with a thread of their open pull requests.
+- `run_personal_reminder()`: Sends a message to each user (in the config map) directly with a thread of their open pull requests.
     - Runs on: Monday @ 09:00 UTC
 
 ### Testing
@@ -67,14 +71,14 @@ E.g.
 python3 src/dev.py --help
 
 # Test a specific event e.g. global reminders
-python3 src/dev.py --global "some_test_channel"
+python3 src/dev.py --global --channel "some_test_channel"
+
+# Test another event e.g. personal reminders
+python3 src/dev.py --personal
 
 # To test multiple events
-python3 src/dev.py --global --personal "some_test_channel"
+python3 src/dev.py --global --personal --channel "some_test_channel"
+
+# To test only slash command
+python3 src/dev.py # Then run slash commands in Slack
 ```
-
-Slack slash commands such as `/prs` are not currently tested.<br>
-
-### Deployment
-
-For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
