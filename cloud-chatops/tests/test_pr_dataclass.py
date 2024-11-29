@@ -15,15 +15,17 @@ MOCK_DATA = {
 }
 
 MOCK_PR = PR(
-    title="mock_title #1",
-    author="mock_author",
-    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    stale=False,
-    draft=False,
-    labels=["mock_label"],
-    repository="mock_repo",
-    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
-)
+        title="mock_title #1",
+        author="mock_author",
+        url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+        stale=False,
+        draft=False,
+        labels=["mock_label"],
+        repository="mock_repo",
+        created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+    )
+
+# pylint: disable=R0801
 
 
 def test_is_stale_false():

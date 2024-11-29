@@ -24,16 +24,18 @@ def test_parse_args(mock_argparse):
     assert res == mock_argparse.ArgumentParser.return_value.parse_args.return_value
 
 
+@patch("dev.get_config")
 @patch("dev.run_personal_reminder")
 @patch("dev.run_global_reminder")
-def test_call_method(mock_global, mock_personal):
+def test_call_test(mock_global, mock_personal, mock_get_config):
     """Test the call test function"""
+    mock_get_config.return_value = {"mock_github": "mock_slack"}
     mock_args = NonCallableMock()
     call_method("channel", mock_args)
     call_method("global", mock_args)
     mock_global.assert_called_once_with(mock_args.channel)
     call_method("personal", mock_args)
-    mock_personal.assert_called_once_with()
+    mock_personal.assert_called_once_with(["mock_slack"])
     with pytest.raises(NoTestCase) as exc:
         call_method("unexpected", mock_args)
         assert str(exc.value) == "There is not test case for unexpected"
