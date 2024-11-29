@@ -169,14 +169,20 @@ GitHub:<br>
 - Documentation on how to create a GitHub personal access token can be found 
 [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).<br>
 
-### Deployment:
-The application can be run from a Docker image or source code. (Assuming running from project root)<br>
+### Deployment Options:
+
+The application can be run from a Docker image, source code or Kubernetes<br>
+
 
 #### Dependencies:
 * If running from a Docker image, ensure Docker is installed (see [installation guide](https://docs.docker.com/engine/install/)) and the user account is in the relevant docker users group 
 * If running the application from source, ensure Python 3.10 or higher is installed. The full list of required python packages can be found in [requirements.txt](requirements.txt)<br>
+* If running on Kubernetes, this documentation only describes how to apply a deployment. You will need a cluster already set up.
+
+> **_NOTE:_** Commands below assume you are in the cloud-chatops folder in the project.
 
 #### Docker image:
+ 
 You can build the image locally or pull from [STFC Harbor](https://harbor.stfc.ac.uk/harbor/projects/33528/repositories/cloud-chatops).<br>
 Note: If you are pulling the image you will need to specify a version tag. 
 The latest version can be found in [version.txt](version.txt)<br>
@@ -229,11 +235,43 @@ for the application to run before installing dependencies.
 # Install Venv module
 python3 -m venv my_venv
 # Activate venv
-  source my_venv/bin/activate
-  # Install requirements
-  pip3 install -r requirements.txt
-  # Run app
+source my_venv/bin/activate
+# Install requirements
+pip3 install -r requirements.txt
+# Run app
 python3 src/dev.py
 ```
 
-  ```
+#### Kubernetes Deployment
+You will need a running cluster. Run the following commands from your management / control host (the host with your kubeconfig).
+
+1. Clone the repository and create your config / secrets files
+   ```shell
+   # Start from the Home directory
+   cd ~
+   git clone https://github.com/stfc/cloud-docker-images.git
+   
+   # Edit and rename the template config and secrets file described in the "deployment configuration" section
+   cd cloud-chatops
+   
+   vim template_config.yml
+   vim template_secrets.json
+   
+   mv template_config.yml config.yml
+   mv template_secrets.json secrets.json
+   ```
+   
+2. Create Kubernetes resources and apply deployment
+   ```shell
+   # Create Kubernetes resources
+   kubectl create namespace cloud-chatops
+   kubectl create configmap cloud-chatops-config --from-file config.yml -n cloud-chatops
+   kubectl create secret generic cloud-chatops-secrets --from-file secrets.json -n cloud-chatops
+   
+   # Apply the deployment
+   kubectl apply -f deployment.yml -n cloud-chatops
+     
+   # Check the status of the pod with
+   kubectl get pods -n cloud-chatops # To get pod name
+   kubectl logs <pod_name> -n cloud-chatops
+   ```
