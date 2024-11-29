@@ -12,8 +12,8 @@ from errors import (
     SecretsInPathNotFound,
 )
 
-# Production secret path
-PATH = "/usr/src/app/cloud_chatops_secrets/"
+# Production file path
+PATH = "/usr/src/app/cloud_chatops/"
 
 
 if sys.argv[0].endswith("dev.py"):
@@ -22,10 +22,10 @@ if sys.argv[0].endswith("dev.py"):
     # This means the slash commands won't be picked up by the production application.
     try:
         # Try multiple paths for Linux / Windows differences
-        PATH = f"{os.environ['HOME']}/dev_cloud_chatops_secrets/"
+        PATH = f"{os.environ['HOME']}/dev_cloud_chatops/"
     except KeyError:
         try:
-            PATH = f"{os.environ['HOMEPATH']}\\dev_cloud_chatops_secrets\\"
+            PATH = f"{os.environ['HOMEPATH']}\\dev_cloud_chatops\\"
         except KeyError as exc:
             raise SecretsInPathNotFound(
                 "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
@@ -65,7 +65,7 @@ def get_token(secret: str) -> str:
     :param secret: The secret to find
     :return: A secret as string
     """
-    with open(PATH + "secrets.json", "r", encoding="utf-8") as file:
+    with open(PATH + "secrets/secrets.json", "r", encoding="utf-8") as file:
         data = file.read()
     secrets = json.loads(data)
     return secrets[secret]
@@ -77,7 +77,7 @@ def get_config(section: str = "all") -> Union[Dict, str]:
     :param section: The section of the config to retrieve.
     :return: The data retrieved from the config file.
     """
-    with open(PATH + "config.yml", "r", encoding="utf-8") as config:
+    with open(PATH + "config/config.yml", "r", encoding="utf-8") as config:
         config_data = yaml.safe_load(config)
     match section:
         case "all":

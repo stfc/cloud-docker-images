@@ -27,11 +27,14 @@ This uses docker compose and an auto updating script to keep the application on 
 1. Make a directory in `/etc` to store all ChatOps related files. Set group ownership to docker so other users (update script) can access the files.
     ```shell
     # Create directories
-    sudo mkdir -p /etc/chatops/secrets
+    sudo mkdir /etc/chatops
+    sudo mkdir /etc/chatops/secrets
+    sudo mkdir /etc/chatops/config
     
     # Set permissions
     sudo chown -R $USER:docker /etc/chatops
     sudo chmod 774 /etc/chatops
+    sudo chmod 774 /etc/chatops/config
     sudo chmod 770 /etc/chatops/secrets
    
     # Clone repository into directory
@@ -40,15 +43,15 @@ This uses docker compose and an auto updating script to keep the application on 
 2. Edit the `template_config.yml` and `template_secrets.json` to create your respective config and secrets file. See [here](#deployment-configuration) for more detail.
    ```shell
    # Copy files into secrets folder
-   cp <path_to_file>./template_config.yml /etc/chatops/secrets/config.yml
-   cp <path_to_file>./template_secrets.json /etc/chatops/secrets/secrets.json
+   cp /etc/chatops/cloud-docker-images/cloud-chatops/template_config.yml /etc/chatops/config/config.yml
+   cp /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.json /etc/chatops/secrets/secrets.json
    
-   # If you edited the template_secrets.json from the cloned repository in /etc/chatops
+   # If you edited the template_secrets.json from the cloned repository in /etc/chatops/cloud-docker-images/cloud-chatops
    # You should delete / reset the file as the permissions are too open
    
    git reset --hard origin/master 
    # Or
-   rm <path_to_file>/template_secrets.json
+   rm /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.json
    ```
 3. Need to add the Ubuntu user to the docker group for the cron script:
    ```shell
@@ -180,29 +183,57 @@ The latest version can be found in [version.txt](version.txt)<br>
 - ```shell
   # Local build and run
   docker build -t cloud_chatops cloud-chatops
-  docker run -v <path_to>/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ cloud_chatops
+  docker run cloud_chatops \
+  -v <path_to>/secrets.json/:/usr/src/app/cloud_chatops/secrets/secrets.json \
+  -v <path_to>/config.yml/:/usr/src/app/cloud_chatops/config/config.yml 
   ```
+  
 - ```shell
-  # Run container directly, specifying a version
-  docker run -v <path_to>/cloud_chatops_secrets/:/usr/src/app/cloud_chatops_secrets/ harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version>
-  #
-  # or
-  #
-  # Use Docker Compose in cloud-chatops folder, which will always contain latest image version
+  # Pull the image and run, specifying a version
+  docker run harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version> \
+  -v <path_to>/secrets.json/:/usr/src/app/cloud_chatops/secrets/secrets.json \
+  -v <path_to>/config.yml/:/usr/src/app/cloud_chatops/config/config.yml
+  ```
+  ```shell
+  # Use docker compose (this file will always contain the latest version):
+  # You will need to set up the directory structure as shown in the Quick Start.
+  # Or edit the docker-compose.yml choosing your own paths
   docker compose up -d
   ```
 
 #### Running from source:
-You can run the code from [main.py](src/main.py).<br>
+You will need to have the following folder structure for the config and secrets to be accessible:
+
+```markdown
+$HOME/dev_cloud_chatops
+├── config
+│   ├── config.yml
+├── secrets
+│   ├── secrets.yml
+
+or 
+
+$HOMEPATH/dev_cloud_chatops
+├── config
+│   ├── config.yml
+├── secrets
+│   ├── secrets.yml
+```
+
+You can run the code from [dev.py](src/dev.py).<br>
 It's always recommended to create a [virtual environment](https://docs.python.org/3/library/venv.html) 
 for the application to run before installing dependencies.
-- ```shell
-  # Install Venv module
-  python3 -m venv my_venv
-  # Activate venv
+
+
+```shell
+# Install Venv module
+python3 -m venv my_venv
+# Activate venv
   source my_venv/bin/activate
   # Install requirements
   pip3 install -r requirements.txt
   # Run app
-  python3 cloud-chatops/src/main.py prod
+python3 src/dev.py
+```
+
   ```
