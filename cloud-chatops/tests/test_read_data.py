@@ -24,18 +24,14 @@ repos:
 
 def test_get_token_fails():
     """Test that an error is raised if trying to access a value that doesn't exist."""
-    with patch(
-        "builtins.open", mock_open(read_data='mock_token_1: mock_value_1')
-    ):
+    with patch("builtins.open", mock_open(read_data="mock_token_1: mock_value_1")):
         with pytest.raises(KeyError):
             get_token("mock_token_2")
 
 
 def test_get_token():
     """This test checks that a value is returned when the function is called with a specific token."""
-    with patch(
-        "builtins.open", mock_open(read_data='mock_token_1: mock_value_1')
-    ):
+    with patch("builtins.open", mock_open(read_data="mock_token_1: mock_value_1")):
         res = get_token("mock_token_1")
         assert res == "mock_value_1"
 
