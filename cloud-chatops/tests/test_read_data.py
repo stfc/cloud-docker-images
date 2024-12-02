@@ -2,7 +2,6 @@
 
 from unittest.mock import patch, mock_open
 import pytest
-import yaml
 from errors import RepositoriesNotGiven, TokensNotGiven, UserMapNotGiven
 from read_data import get_token, get_config, validate_required_files
 
