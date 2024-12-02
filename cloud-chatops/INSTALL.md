@@ -40,18 +40,18 @@ This uses docker compose and an auto updating script to keep the application on 
     # Clone repository into directory
     git clone https://github.com/stfc/cloud-docker-images.git /etc/chatops/cloud-docker-images
     ```
-2. Edit the `template_config.yml` and `template_secrets.json` to create your respective config and secrets file. See [here](#deployment-configuration) for more detail.
+2. Edit the `template_config.yml` and `template_secrets.yml` to create your respective config and secrets file. See [here](#deployment-configuration) for more detail.
    ```shell
    # Copy files into secrets folder
    cp /etc/chatops/cloud-docker-images/cloud-chatops/template_config.yml /etc/chatops/config/config.yml
-   cp /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.json /etc/chatops/secrets/secrets.json
+   cp /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.yml /etc/chatops/secrets/secrets.yml
    
-   # If you edited the template_secrets.json from the cloned repository in /etc/chatops/cloud-docker-images/cloud-chatops
+   # If you edited the template_secrets.yml from the cloned repository in /etc/chatops/cloud-docker-images/cloud-chatops
    # You should delete / reset the file as the permissions are too open
    
    git reset --hard origin/master 
    # Or
-   rm /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.json
+   rm /etc/chatops/cloud-docker-images/cloud-chatops/template_secrets.yml
    ```
 3. Need to add the Ubuntu user to the docker group for the cron script:
    ```shell
@@ -122,7 +122,7 @@ You will need the Slack App and Bot User tokens when deploying the application. 
 
 ### Deployment Configuration:
 
-Two files required for the deployment of this application: `config.yml` and `secrets.json`.<br>
+Two files required for the deployment of this application: `config.yml` and `secrets.yml`.<br>
 
 #### Config:
 The application configuration is stored in `config.yml`.
@@ -153,13 +153,11 @@ repos:  # Dictionary of owners and repositories
 ```
 
 #### Secrets:
-The `secrets.json` file should look like the below and there is a template [here](template_secrets.json)
-```json
-{
-  "SLACK_BOT_TOKEN": "<your-token>",
-  "SLACK_APP_TOKEN": "<your-token>",
-  "GITHUB_TOKEN": "<your-token>"
-}
+The `secrets.yml` file should look like the below and there is a template [here](template_secrets.yml)
+```yaml
+  SLACK_BOT_TOKEN: <your-token>
+  SLACK_APP_TOKEN: <your-token>
+  GITHUB_TOKEN: <your-token>
 ```
 Slack:<br>
 - Slack Token information can be found [here](#slack-tokens).<br>
@@ -190,14 +188,14 @@ The latest version can be found in [version.txt](version.txt)<br>
   # Local build and run
   docker build -t cloud_chatops cloud-chatops
   docker run cloud_chatops \
-  -v <path_to>/secrets.json/:/usr/src/app/cloud_chatops/secrets/secrets.json \
+  -v <path_to>/secrets.yml/:/usr/src/app/cloud_chatops/secrets/secrets.yml \
   -v <path_to>/config.yml/:/usr/src/app/cloud_chatops/config/config.yml 
   ```
   
 - ```shell
   # Pull the image and run, specifying a version
   docker run harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:<version> \
-  -v <path_to>/secrets.json/:/usr/src/app/cloud_chatops/secrets/secrets.json \
+  -v <path_to>/secrets.yml/:/usr/src/app/cloud_chatops/secrets/secrets.yml \
   -v <path_to>/config.yml/:/usr/src/app/cloud_chatops/config/config.yml
   ```
   ```shell
@@ -255,10 +253,10 @@ You will need a running cluster. Run the following commands from your management
    cd cloud-chatops
    
    vim template_config.yml
-   vim template_secrets.json
+   vim template_secrets.yml
    
    mv template_config.yml config.yml
-   mv template_secrets.json secrets.json
+   mv template_secrets.yml secrets.yml
    ```
    
 2. Create Kubernetes resources and apply deployment
@@ -266,7 +264,7 @@ You will need a running cluster. Run the following commands from your management
    # Create Kubernetes resources
    kubectl create namespace cloud-chatops
    kubectl create configmap cloud-chatops-config --from-file config.yml -n cloud-chatops
-   kubectl create secret generic cloud-chatops-secrets --from-file secrets.json -n cloud-chatops
+   kubectl create secret generic cloud-chatops-secrets --from-file secrets.yml -n cloud-chatops
    
    # Apply the deployment
    kubectl apply -f deployment.yml -n cloud-chatops
