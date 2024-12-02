@@ -9,7 +9,6 @@ from read_data import get_token, get_config, validate_required_files
 
 MOCK_CONFIG = """
 ---
-maintainer: mock_maintainer
 user-map:
   mock_user_1: mock_id_1
   mock_user_2: mock_id_2
@@ -23,10 +22,19 @@ repos:
 """
 
 
+def test_get_token_fails():
+    """Test that an error is raised if trying to access a value that doesn't exist."""
+    with patch(
+        "builtins.open", mock_open(read_data='mock_token_1: mock_value_1')
+    ):
+        with pytest.raises(KeyError):
+            get_token("mock_token_2")
+
+
 def test_get_token():
     """This test checks that a value is returned when the function is called with a specific token."""
     with patch(
-        "builtins.open", mock_open(read_data='{"mock_token_1": "mock_value_1"}')
+        "builtins.open", mock_open(read_data='mock_token_1: mock_value_1')
     ):
         res = get_token("mock_token_1")
         assert res == "mock_value_1"
@@ -49,11 +57,11 @@ def test_get_repos():
         }
 
 
-def test_get_config():
-    """Test that the entire config is returned when no section is specified."""
+def test_get_config_fails():
+    """This test checks that an error is raised when accessing a part of the config that doesn't exist."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
-        res = get_config()
-        assert res == yaml.safe_load(MOCK_CONFIG)
+        with pytest.raises(KeyError):
+            get_config("unknown")
 
 
 @patch("read_data.get_config")

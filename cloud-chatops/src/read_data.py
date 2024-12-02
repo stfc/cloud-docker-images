@@ -3,7 +3,6 @@
 from typing import Dict, Union
 import sys
 import os
-import json
 import yaml
 from errors import (
     RepositoriesNotGiven,
@@ -65,13 +64,12 @@ def get_token(secret: str) -> str:
     :param secret: The secret to find
     :return: A secret as string
     """
-    with open(PATH + "secrets/secrets.json", "r", encoding="utf-8") as file:
-        data = file.read()
-    secrets = json.loads(data)
-    return secrets[secret]
+    with open(PATH + "secrets/secrets.yml", "r", encoding="utf-8") as secrets:
+        secrets_data = yaml.safe_load(secrets)
+        return secrets_data[secret]
 
 
-def get_config(section: str = "all") -> Union[Dict, str]:
+def get_config(section: str) -> Union[Dict, str]:
     """
     This function will return the specified section from the config file.
     :param section: The section of the config to retrieve.
@@ -79,8 +77,4 @@ def get_config(section: str = "all") -> Union[Dict, str]:
     """
     with open(PATH + "config/config.yml", "r", encoding="utf-8") as config:
         config_data = yaml.safe_load(config)
-    match section:
-        case "all":
-            return config_data
-        case _:
-            return config_data.get(section)
+        return config_data[section]
