@@ -3,7 +3,7 @@
 from typing import List, Dict
 import requests
 from read_data import get_token
-from pr_dataclass import PR
+from data import PR
 
 
 class FindPRs:

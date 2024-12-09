@@ -6,6 +6,8 @@ from typing import List
 import asyncio
 from slack_sdk import WebClient
 import schedule
+
+from data import User
 from features.pr_reminder import PRReminder
 from find_prs import FindPRs
 from read_data import get_config, get_token
@@ -23,7 +25,7 @@ def run_global_reminder(channel) -> None:
     )
 
 
-def run_personal_reminder(users: List[str]) -> None:
+def run_personal_reminder(users: List[User]) -> None:
     """
     This event sends a message to each user in the user map with their open PRs.
     :param users: Users to send reminders to.
@@ -31,13 +33,11 @@ def run_personal_reminder(users: List[str]) -> None:
     unsorted_prs = FindPRs().run(repos=get_config("repos"))
     prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
     client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
-    user_map = get_config("user-map")
     for user in users:
-        github_user = list(user_map.keys())[list(user_map.values()).index(user)]
-        filtered_prs = FindPRs().filter_by(prs, "author", github_user)
+        filtered_prs = FindPRs().filter_by(prs, "author", user.github_name)
         PRReminder(client).run(
             prs=filtered_prs,
-            channel=user,
+            channel=user.slack_id,
             message_no_prs=False,
         )
 
@@ -57,7 +57,7 @@ async def schedule_jobs() -> None:
     )
 
     schedule.every().monday.at("09:00").do(
-        run_personal_reminder, users=list(get_config("user-map").values())
+        run_personal_reminder, users=get_config("users")
     )
 
     while True:
@@ -75,7 +75,7 @@ async def slash_prs(ack, respond, command):
     await ack()
     user_id = command["user_id"]
 
-    if user_id not in get_config("user-map").values():
+    if user_id not in [user.slack_id for user in get_config("users")]:
         await respond(
             f"Could not find your Slack ID {user_id} in the user map. "
             f"Please contact the service maintainer to fix this."

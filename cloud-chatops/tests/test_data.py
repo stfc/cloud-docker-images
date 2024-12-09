@@ -1,7 +1,9 @@
-"""Tests for pr_dataclass.py"""
+"""Tests for data.py"""
 
 from datetime import datetime, timedelta
-from pr_dataclass import PR
+from data import PR, User
+
+# pylint: disable=R0801
 
 
 MOCK_DATA = {
@@ -15,15 +17,19 @@ MOCK_DATA = {
 }
 
 MOCK_PR = PR(
-        title="mock_title #1",
-        author="mock_author",
-        url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-        stale=False,
-        draft=False,
-        labels=["mock_label"],
-        repository="mock_repo",
-        created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
-    )
+    title="mock_title #1",
+    author="mock_author",
+    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    stale=False,
+    draft=False,
+    labels=["mock_label"],
+    repository="mock_repo",
+    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+)
+
+MOCK_USER = User(
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+)
 
 # pylint: disable=R0801
 
@@ -41,3 +47,9 @@ def test_is_stale_true():
 def test_from_json():
     """Test that the JSON | Dict data is correctly serialised into a dataclass."""
     assert MOCK_PR == PR.from_json(MOCK_DATA)
+
+
+def test_from_config():
+    """Test that the User object is returned when supplied with info from the config."""
+    mock_data = {"real_name": "mock user", "github_name": "mock_github", "slack_id": "mock_slack"}
+    assert MOCK_USER == User.from_config(mock_data)

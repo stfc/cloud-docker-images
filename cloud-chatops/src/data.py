@@ -60,3 +60,21 @@ class Message:
 
     text: str
     reactions: List[str]
+
+
+@dataclass
+class User:
+    """Class to store user information"""
+
+    real_name: str
+    github_name: str
+    slack_id: str
+
+    @classmethod
+    def from_config(cls, info: Dict):
+        """Create a user class from the app config."""
+        return cls(
+            real_name=info["real_name"],
+            github_name=info["github_name"],
+            slack_id=info["slack_id"],
+        )
