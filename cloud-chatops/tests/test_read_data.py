@@ -9,9 +9,9 @@ from read_data import get_token, get_config, validate_required_files
 MOCK_CONFIG = """
 ---
 users:
-  - mock user:
-      github_name: mock_github
-      slack_id: mock_slack
+  - real_name: mock user
+    github_name: mock_github
+    slack_id: mock_slack
 repos:
   organisation1:
     - repo1

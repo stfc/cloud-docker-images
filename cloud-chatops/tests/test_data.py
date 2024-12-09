@@ -51,5 +51,5 @@ def test_from_json():
 
 def test_from_config():
     """Test that the User object is returned when supplied with info from the config."""
-    mock_data = {"mock user": {"github_name": "mock_github", "slack_id": "mock_slack"}}
+    mock_data = {"real_name": "mock user", "github_name": "mock_github", "slack_id": "mock_slack"}
     assert MOCK_USER == User.from_config(mock_data)

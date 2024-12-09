@@ -137,9 +137,9 @@ The `config.yml` should look like the below. There is a template without the com
 ---
 users:
   # Information of users in your team
-  - Real Name:
-      github_name: <name_on_github>
-      slack_id: <slack_member_id>
+  - real_name: Real Name
+    github_name: <name_on_github>
+    slack_id: <slack_member_id>
 
 repos:  # Dictionary of owners and repositories
   organisation1:

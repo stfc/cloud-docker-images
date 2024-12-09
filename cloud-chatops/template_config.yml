@@ -1,8 +1,8 @@
 ---
 users:
-  - Real Name:
-      github_name: github_username
-      slack_id: slack_id
+  - real_name: Real Name
+    github_name: github_username
+    slack_id: slack_id
 
 repos:
   <organisation>:
