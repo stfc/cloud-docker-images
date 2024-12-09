@@ -4,9 +4,8 @@ from dataclasses import replace
 from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
-from slack_sdk.errors import SlackApiError
 from features.pr_reminder import PRReminder
-from pr_dataclass import PR, Message
+from data import PR, Message, User
 
 
 @pytest.fixture(name="instance", scope="function")
@@ -14,10 +13,12 @@ def instance_fixture():
     """Fixture for class instance."""
     return PRReminder(NonCallableMock())
 
+# pylint: disable=R0801
+
 
 MOCK_PR = PR(
     title="mock_title #1",
-    author="mock_author",
+    author="mock_github",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
     stale=True,
     draft=True,
@@ -28,13 +29,17 @@ MOCK_PR = PR(
 
 MOCK_PR_2 = PR(
     title="mock_title #1",
-    author="mock_author_2",
+    author="mock_github_2",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
     stale=True,
     draft=True,
     labels=["mock_label"],
     repository="mock_repo",
     created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+)
+
+MOCK_USER = User(
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
 )
 
 
@@ -54,16 +59,12 @@ def test_get_reactions_none(instance):
 @patch("features.pr_reminder.get_config")
 def test_make_string(mock_get_config, instance):
     """Test the right string is returned."""
-    mock_get_config.return_value = {"mock_author": "mock_slack"}
-    instance.client.users_profile_get.return_value = {
-        "profile": {"real_name": "mock_real_name"}
-    }
+    mock_get_config.return_value = [MOCK_USER]
     res = instance.make_string(MOCK_PR)
-    mock_get_config.assert_called_once_with("user-map")
-    instance.client.users_profile_get.assert_called_once_with(user="mock_slack")
+    mock_get_config.assert_called_once_with("users")
     expected = (
         f"*This PR is older than 30 days. Consider closing it:*"
-        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_real_name"
+        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
     )
     assert res == expected
 
@@ -71,12 +72,11 @@ def test_make_string(mock_get_config, instance):
 @patch("features.pr_reminder.get_config")
 def test_make_string_fails(mock_get_config, instance):
     """Test the github name is used if slack name can't be found."""
-    instance.client.users_profile_get.side_effect = SlackApiError("mock", "mock")
-    mock_get_config.return_value.get.return_value = "mock_author"
+    mock_get_config.return_value = [MOCK_USER]
     res = instance.make_string(MOCK_PR)
     expected = (
         f"*This PR is older than 30 days. Consider closing it:*"
-        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_author"
+        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
     )
     assert res == expected
 

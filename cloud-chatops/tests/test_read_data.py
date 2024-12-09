@@ -2,15 +2,16 @@
 
 from unittest.mock import patch, mock_open
 import pytest
+from data import User
 from errors import RepositoriesNotGiven, TokensNotGiven, UserMapNotGiven
 from read_data import get_token, get_config, validate_required_files
 
-
 MOCK_CONFIG = """
 ---
-user-map:
-  mock_user_1: mock_id_1
-  mock_user_2: mock_id_2
+users:
+  - mock user:
+      github_name: mock_github
+      slack_id: mock_slack
 repos:
   organisation1:
     - repo1
@@ -19,6 +20,10 @@ repos:
     - repo1
     - repo2
 """
+
+MOCK_USER = User(
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+)
 
 
 def test_get_token_fails():
@@ -35,11 +40,11 @@ def test_get_token():
         assert res == "mock_value_1"
 
 
-def test_get_user_map():
-    """This test ensures that the JSON file is read and converted to a dictionary correctly."""
+def test_get_users():
+    """This test ensures that a list of User objects is returned from the config."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
-        res = get_config("user-map")
-        assert res == {"mock_user_1": "mock_id_1", "mock_user_2": "mock_id_2"}
+        res = get_config("users")
+        assert res == [MOCK_USER]
 
 
 def test_get_repos():
@@ -90,35 +95,9 @@ def test_validate_required_files_fail_token(mock_get_token, mock_get_config):
 
 @patch("read_data.get_config")
 @patch("read_data.get_token")
-def test_validate_required_files_fail_user_map_slack(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": ""}]
-    with pytest.raises(UserMapNotGiven) as exc:
-        validate_required_files()
-    assert str(exc.value) == "User github1 does not have a Slack ID assigned."
-
-
-@patch("read_data.get_config")
-@patch("read_data.get_token")
-def test_validate_required_files_fail_user_map_github(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"": "slack1"}]
-    with pytest.raises(UserMapNotGiven) as exc:
-        validate_required_files()
-    assert (
-        str(exc.value)
-        == "Slack member slack1 does not have a GitHub username assigned."
-    )
-
-
-@patch("read_data.get_config")
-@patch("read_data.get_token")
-def test_validate_required_files_fail_user_map(mock_get_token, mock_get_config):
+def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {}]
-    with pytest.raises(UserMapNotGiven) as exc:
+    with pytest.raises(UserMapNotGiven):
         validate_required_files()
-    assert str(exc.value) == "config.yml does not contain a user map is empty."

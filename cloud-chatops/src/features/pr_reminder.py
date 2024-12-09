@@ -1,10 +1,8 @@
 """This module sends reminders to direct messages and channels with open pull requests."""
 
-from dataclasses import replace
 from typing import List
 from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
-from pr_dataclass import PR, Message
+from data import PR, Message
 from read_data import get_config
 
 
@@ -106,23 +104,25 @@ class PRReminder:
             messages.append(Message(text=string, reactions=reactions))
         return messages
 
-    def make_string(self, pr: PR) -> str:
+    @staticmethod
+    def make_string(pr: PR) -> str:
         """
         Creates string from PR data.
         :param pr: PR data
         :return: String message
         """
-        slack_ids = get_config("user-map")
-        pr = replace(pr, author=slack_ids.get(pr.author, pr.author))
-        try:
-            name = self.client.users_profile_get(user=pr.author)["profile"]["real_name"]
-        except SlackApiError:
-            name = pr.author
         message = []
+        real_name = ""
+        for user in get_config("users"):
+            if user.github_name == pr.author:
+                real_name = user.real_name
+        if not real_name:
+            real_name = pr.author
+
         if pr.stale:
             message.append("*This PR is older than 30 days. Consider closing it:*")
         message.append(f"Pull Request: <{pr.url}|{pr.title}>")
-        message.append(f"Author: {name}")
+        message.append(f"Author: {real_name}")
         return "\n".join(message)
 
     @staticmethod

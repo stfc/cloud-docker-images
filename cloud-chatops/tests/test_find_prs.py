@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from find_prs import FindPRs
-from pr_dataclass import PR
+from data import PR
 
 
 # pylint: disable=R0801
@@ -20,7 +20,7 @@ def instance_fixture():
 @patch("find_prs.PR")
 @patch("find_prs.get_token")
 @patch("find_prs.FindPRs.request_all_repos")
-def test_run(mock_request_all_repos, mock_get_token, mock_pr_dataclass, instance):
+def test_run(mock_request_all_repos, mock_get_token, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_repo_1 = NonCallableMock()
     mock_repo_2 = NonCallableMock()
@@ -35,9 +35,7 @@ def test_run(mock_request_all_repos, mock_get_token, mock_pr_dataclass, instance
     for owner in mock_repos:
         mock_request_all_repos.assert_any_call(owner, mock_repos.get(owner))
 
-    mock_res = list(
-        reversed([call.return_value for call in mock_pr_dataclass.call_arg_list])
-    )
+    mock_res = list(reversed([call.return_value for call in mock_data.call_arg_list]))
     assert res == mock_res
 
 
