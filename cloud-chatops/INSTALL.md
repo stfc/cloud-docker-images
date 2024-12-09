@@ -132,14 +132,14 @@ Slack Channel and Member IDs can be found in Slack by:<br>
 - View member / channel details
 - Near the bottom of the About tab there will be an ID with copy button
 
-The `config.yml` should look like the below there is a template without the comments [here](./template_config.yml):
+The `config.yml` should look like the below. There is a template without the comments [here](./template_config.yml):
 ```yaml
 ---
-maintainer: AB12CD34  # Slack Member ID of the application maintainer
-
-user-map:  # Dictionary of GitHub username to Slack Member ID
-  my_github_username: AB12CD34
-  other_github_username: EF56GH78
+users:
+  # Information of users in your team
+  - Real Name:
+      github_name: <name_on_github>
+      slack_id: <slack_member_id>
 
 repos:  # Dictionary of owners and repositories
   organisation1:
