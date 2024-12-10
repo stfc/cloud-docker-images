@@ -1,6 +1,8 @@
 ---
-user-map:
-  <user_github_username>: <user_member_id>
+users:
+  - real_name: Real Name
+    github_name: github_username
+    slack_id: slack_id
 
 repos:
   <organisation>:
