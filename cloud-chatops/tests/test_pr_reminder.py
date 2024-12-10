@@ -13,6 +13,7 @@ def instance_fixture():
     """Fixture for class instance."""
     return PRReminder(NonCallableMock())
 
+
 # pylint: disable=R0801
 
 

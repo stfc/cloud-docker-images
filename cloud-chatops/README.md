@@ -26,6 +26,7 @@ This is facilitated by the below features which can be found in [main.py](src/ma
 #### Slash Commands:
 These slash commands can be run in any channel the application has access to.<br>
  - `/prs <mine | all>`: Sends a private message to the user with a list of open pull requests. Either user authored or by anyone.
+ - `/find-host`: Responds with the IP of the host running the app
 
 #### Scheduled Events:
 Using the [schedule](https://pypi.org/project/schedule/) library functions are triggered on a weekly basis.<br>
