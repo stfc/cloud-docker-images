@@ -4,7 +4,13 @@ from unittest.mock import patch, AsyncMock
 import pytest
 
 from data import User
-from events import run_global_reminder, run_personal_reminder, schedule_jobs, slash_prs, slash_find_host
+from events import (
+    run_global_reminder,
+    run_personal_reminder,
+    schedule_jobs,
+    slash_prs,
+    slash_find_host,
+)
 
 MOCK_USER = User(
     real_name="mock user", github_name="mock_github", slack_id="mock_slack"
@@ -167,4 +173,6 @@ async def test_slash_find_host(mock_os):
     await slash_find_host(mock_ack, mock_respond)
     mock_ack.assert_called_once_with()
     mock_os.environ.get.assert_called_once_with("HOST_IP")
-    mock_respond.assert_called_once_with(f"The host IP of this node is: {mock_os.environ.get.return_value}")
+    mock_respond.assert_called_once_with(
+        f"The host IP of this node is: {mock_os.environ.get.return_value}"
+    )
