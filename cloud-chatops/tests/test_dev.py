@@ -2,8 +2,15 @@
 
 from unittest.mock import patch, NonCallableMock
 import pytest
+
+from data import User
 from dev import run_methods, call_method, parse_args
 from errors import NoTestCase
+
+
+MOCK_USER = User(
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+)
 
 
 @patch("dev.argparse")
@@ -29,16 +36,15 @@ def test_parse_args(mock_argparse):
 @patch("dev.run_global_reminder")
 def test_call_test(mock_global, mock_personal, mock_get_config):
     """Test the call test function"""
-    mock_get_config.return_value = {"mock_github": "mock_slack"}
+    mock_get_config.return_value = [MOCK_USER]
     mock_args = NonCallableMock()
     call_method("channel", mock_args)
     call_method("global", mock_args)
     mock_global.assert_called_once_with(mock_args.channel)
     call_method("personal", mock_args)
     mock_personal.assert_called_once_with(["mock_slack"])
-    with pytest.raises(NoTestCase) as exc:
+    with pytest.raises(NoTestCase):
         call_method("unexpected", mock_args)
-        assert str(exc.value) == "There is not test case for unexpected"
 
 
 @patch("dev.call_method")
