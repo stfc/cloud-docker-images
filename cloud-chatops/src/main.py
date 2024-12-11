@@ -8,7 +8,7 @@ import asyncio
 from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from read_data import get_token, validate_required_files
-from events import slash_prs, schedule_jobs
+from events import slash_prs, schedule_jobs, slash_find_host
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -22,7 +22,7 @@ async def handle_message_events(body, logger):
 
 
 @app.command("/prs")
-async def remind_prs(ack, respond, command):
+async def prs(ack, respond, command):
     """
     This command sends the user a message containing all open pull requests.
     :param command: The return object from Slack API.
@@ -30,6 +30,16 @@ async def remind_prs(ack, respond, command):
     :param respond: Slacks respond command to respond to the command in chat.
     """
     await slash_prs(ack, respond, command)
+
+
+@app.command("/find-host")
+async def find_host(ack, respond):
+    """
+    This command responds to the user with the IP of the host that received the message.
+    :param ack: Slacks acknowledgement command.
+    :param respond: Slacks respond command to respond to the command in chat.
+    """
+    await slash_find_host(ack, respond)
 
 
 async def entrypoint() -> None:
