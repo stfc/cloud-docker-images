@@ -20,6 +20,11 @@ spec:
       containers:
       - name: cloud-chatops
         image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:4.0.0
+        env:
+          - name: HOST_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
         volumeMounts:
         - name: cloud-chatops-config
           mountPath: /usr/src/app/cloud_chatops/config

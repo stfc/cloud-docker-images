@@ -2,6 +2,7 @@
 This module contains events to run in main.py.
 """
 
+import os
 from typing import List
 import asyncio
 from slack_sdk import WebClient
@@ -93,3 +94,14 @@ async def slash_prs(ack, respond, command):
         return
 
     await respond("Check out your DMs.")
+
+
+async def slash_find_host(ack, respond):
+    """
+    Responds to the user with the host IP of the machine that received the command.
+    :param ack: Slacks acknowledgement command.
+    :param respond: Slacks respond command to respond to the command in chat.
+    """
+    await ack()
+    host_ip = os.environ.get("HOST_IP")
+    await respond(f"The host IP of this node is: {host_ip}")
