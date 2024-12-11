@@ -11,6 +11,9 @@ features:
       description: Get all open PRs
       usage_hint: "[all: every pr] [mine: your prs]"
       should_escape: false
+    - command: /find-host
+      description: Returns the IP of the host
+      should_escape: false
 oauth_config:
   scopes:
     bot:
