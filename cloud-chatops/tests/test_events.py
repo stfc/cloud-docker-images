@@ -71,23 +71,24 @@ def test_run_personal_reminder(
 @patch("events.get_config")
 async def test_schedule_jobs(mock_get_config, mock_schedule):
     """Test the correct jobs are scheduled"""
-    mock_get_config.return_value = [MOCK_USER]
+    mock_get_config.side_effect = ["channel", [MOCK_USER]]
     # Force an exception then catch it here.
     # This is to prevent the test entering the infinite while wait loop.
     mock_schedule.run_pending.side_effect = Exception()
     with pytest.raises(Exception):
         await schedule_jobs()
-    mock_get_config.assert_called_once_with("users")
+    mock_get_config.assert_any_call("users")
+    mock_get_config.assert_any_call("channel")
     mock_schedule.every.return_value.monday.at.assert_any_call("09:00")
     mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
-        run_global_reminder, channel="C03RT2F6WHZ"
+        run_global_reminder, channel="channel"
     )
     mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
         run_personal_reminder, users=[MOCK_USER]
     )
     mock_schedule.every.return_value.wednesday.at.assert_any_call("09:00")
     mock_schedule.every.return_value.wednesday.at.return_value.do.assert_any_call(
-        run_global_reminder, channel="C03RT2F6WHZ"
+        run_global_reminder, channel="channel"
     )
     mock_schedule.run_pending.assert_called_once_with()
 

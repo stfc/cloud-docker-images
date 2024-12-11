@@ -43,6 +43,7 @@ def validate_required_files() -> None:
         raise ErrorInConfig("Users parameter in config.yml is not set.")
 
     if not get_config("channel"):
+        raise ErrorInConfig("Channel parameter in config.yml is not set.")
 
 
 def get_token(secret: str) -> str:
@@ -68,6 +69,8 @@ def get_config(section: str) -> Union[List | Dict]:
             case "users":
                 return [User.from_config(user) for user in config_data[section]]
             case "repos":
+                return config_data[section]
+            case "channel":
                 return config_data[section]
             case _:
                 raise KeyError(f"No section in config named {section}.")
