@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: cloud-chatops
-        image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:4.1.0
+        image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:4.2.0
         volumeMounts:
         - name: cloud-chatops-config
           mountPath: /usr/src/app/cloud_chatops/config
