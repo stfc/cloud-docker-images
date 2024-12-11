@@ -77,7 +77,11 @@ def test_get_config_fails():
 def test_validate_required_files(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}, "mock_channel"]
+    mock_get_config.side_effect = [
+        {"owner1": ["repo1"]},
+        {"github1": "slack1"},
+        "mock_channel",
+    ]
     validate_required_files()
 
 

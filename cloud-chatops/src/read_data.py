@@ -32,9 +32,7 @@ def validate_required_files() -> None:
     """
     for token in ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]:
         if not get_token(token):
-            raise ErrorInConfig(
-                f"Token {token} does not have a value in secrets.yml."
-            )
+            raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
 
     if not get_config("repos"):
         raise ErrorInConfig("config.yml does not contain any repositories.")

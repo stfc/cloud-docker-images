@@ -47,13 +47,9 @@ async def schedule_jobs() -> None:
     """
     channel = get_config("channel")
 
-    schedule.every().monday.at("09:00").do(
-        run_global_reminder, channel=channel
-    )
+    schedule.every().monday.at("09:00").do(run_global_reminder, channel=channel)
 
-    schedule.every().wednesday.at("09:00").do(
-        run_global_reminder, channel=channel
-    )
+    schedule.every().wednesday.at("09:00").do(run_global_reminder, channel=channel)
 
     schedule.every().monday.at("09:00").do(
         run_personal_reminder, users=get_config("users")
