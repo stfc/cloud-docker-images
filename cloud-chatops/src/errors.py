@@ -1,4 +1,4 @@
-"""This module contains custom exceptions to handle errors for the Application."""
+"""This module contains custom exceptions to handle errors for the app."""
 
 
 class RepositoriesNotGiven(RuntimeError):

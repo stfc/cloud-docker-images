@@ -1,6 +1,6 @@
 """
-This module starts the Slack Bolt application Asynchronously running the event loop.
-Using Socket mode, the application listens for events from the Slack API client.
+This module starts the Slack Bolt app Asynchronously running the event loop.
+Using Socket mode, the app listens for events from the Slack API client.
 """
 
 import logging
@@ -34,7 +34,7 @@ async def remind_prs(ack, respond, command):
 
 async def entrypoint() -> None:
     """
-    This function is the main entry point for the application. First, it validates the required files.
+    This function is the main entry point for the app. First, it validates the required files.
     Then it starts the async loop and runs the scheduler.
     """
     validate_required_files()

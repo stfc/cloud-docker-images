@@ -17,9 +17,9 @@ PATH = "/usr/src/app/cloud_chatops/"
 
 
 if sys.argv[0].endswith("dev.py"):
-    # Using dev secrets here for local testing as it runs the application
-    # in a separate Slack Workspace than the production application.
-    # This means the slash commands won't be picked up by the production application.
+    # Using dev secrets here for local testing as it runs the app
+    # in a separate Slack Workspace than the production app.
+    # This means the slash commands won't be picked up by the production app.
     try:
         # Try multiple paths for Linux / Windows differences
         PATH = f"{os.environ['HOME']}/dev_cloud_chatops/"
@@ -34,7 +34,7 @@ if sys.argv[0].endswith("dev.py"):
 
 def validate_required_files() -> None:
     """
-    This function checks that all required files have data in them before the application runs.
+    This function checks that all required files have data in them before the app runs.
     """
     repos = get_config("repos")
     if not repos:
