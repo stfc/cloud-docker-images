@@ -120,6 +120,6 @@ def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
 def test_validate_required_files_fail_channel(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {}, ""]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"mock_github": "mock_user"}, ""]
     with pytest.raises(ErrorInConfig):
         validate_required_files()
