@@ -13,8 +13,6 @@ from features.pr_reminder import PRReminder
 from find_prs import FindPRs
 from read_data import get_config, get_token
 
-PULL_REQUESTS_CHANNEL = "C03RT2F6WHZ"
-
 
 def run_global_reminder(channel) -> None:
     """This event sends a message to the specified channel with all open PRs."""
@@ -48,14 +46,11 @@ async def schedule_jobs() -> None:
     This function schedules tasks for the async loop to run.
     These dates and times are hardcoded for production use.
     """
+    channel = get_config("channel")
 
-    schedule.every().monday.at("09:00").do(
-        run_global_reminder, channel=PULL_REQUESTS_CHANNEL
-    )
+    schedule.every().monday.at("09:00").do(run_global_reminder, channel=channel)
 
-    schedule.every().wednesday.at("09:00").do(
-        run_global_reminder, channel=PULL_REQUESTS_CHANNEL
-    )
+    schedule.every().wednesday.at("09:00").do(run_global_reminder, channel=channel)
 
     schedule.every().monday.at("09:00").do(
         run_personal_reminder, users=get_config("users")

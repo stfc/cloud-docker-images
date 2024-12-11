@@ -46,7 +46,7 @@ def call_method(event: str, args: Namespace) -> None:
 
 def main(args: Namespace) -> None:
     """
-    This function checks the config files, runs the tests then starts the application.
+    This function checks the config files, runs the tests then starts the app.
     :param args: CLI Arguments
     """
     # Disabling this as we can't import in the top level as it breaks unit testing
