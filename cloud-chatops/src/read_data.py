@@ -4,22 +4,16 @@ from typing import Dict, Union, List
 import sys
 import os
 import yaml
-from errors import (
-    RepositoriesNotGiven,
-    UserMapNotGiven,
-    TokensNotGiven,
-    SecretsInPathNotFound,
-)
+from errors import ErrorInConfig
 from data import User
 
-# Production file path
+# Production config path
 PATH = "/usr/src/app/cloud_chatops/"
 
-
 if sys.argv[0].endswith("dev.py"):
-    # Using dev secrets here for local testing as it runs the application
-    # in a separate Slack Workspace than the production application.
-    # This means the slash commands won't be picked up by the production application.
+    # Using dev secrets here for local testing as it runs the app
+    # in a separate Slack Workspace than the production app.
+    # This means the slash commands won't be picked up by the production app.
     try:
         # Try multiple paths for Linux / Windows differences
         PATH = f"{os.environ['HOME']}/dev_cloud_chatops/"
@@ -27,29 +21,27 @@ if sys.argv[0].endswith("dev.py"):
         try:
             PATH = f"{os.environ['HOMEPATH']}\\dev_cloud_chatops\\"
         except KeyError as exc:
-            raise SecretsInPathNotFound(
+            raise ErrorInConfig(
                 "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
             ) from exc
 
 
 def validate_required_files() -> None:
     """
-    This function checks that all required files have data in them before the application runs.
+    This function checks that all required files have data in them before the app runs.
     """
-    repos = get_config("repos")
-    if not repos:
-        raise RepositoriesNotGiven("config.yml does not contain any repositories.")
+    for token in ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]:
+        if not get_token(token):
+            raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
 
-    tokens = ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]
-    for token in tokens:
-        temp = get_token(token)
-        if not temp:
-            raise TokensNotGiven(
-                f"Token {token} does not have a value in secrets.json."
-            )
-    user_map = get_config("users")
-    if not user_map:
-        raise UserMapNotGiven("config.yml does not contain a user map is empty.")
+    if not get_config("repos"):
+        raise ErrorInConfig("config.yml does not contain any repositories.")
+
+    if not get_config("users"):
+        raise ErrorInConfig("Users parameter in config.yml is not set.")
+
+    if not get_config("channel"):
+        raise ErrorInConfig("Channel parameter in config.yml is not set.")
 
 
 def get_token(secret: str) -> str:
@@ -75,6 +67,8 @@ def get_config(section: str) -> Union[List | Dict]:
             case "users":
                 return [User.from_config(user) for user in config_data[section]]
             case "repos":
+                return config_data[section]
+            case "channel":
                 return config_data[section]
             case _:
                 raise KeyError(f"No section in config named {section}.")

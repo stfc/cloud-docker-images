@@ -7,3 +7,5 @@ users:
 repos:
   <organisation>:
     - <repo>
+
+channel: <pull-requests-channel>

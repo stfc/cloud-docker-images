@@ -150,6 +150,9 @@ repos:  # Dictionary of owners and repositories
     - repo1  # E.g. github.com/organisation2/repo1
     - repo2
     - repo3
+  
+# Channel to send global reminders to
+channel: <pull-requests-channel-id>
 ```
 
 #### Secrets:

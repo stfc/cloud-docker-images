@@ -3,7 +3,7 @@
 from unittest.mock import patch, mock_open
 import pytest
 from data import User
-from errors import RepositoriesNotGiven, TokensNotGiven, UserMapNotGiven
+from errors import ErrorInConfig
 from read_data import get_token, get_config, validate_required_files
 
 MOCK_CONFIG = """
@@ -19,6 +19,7 @@ repos:
   organisation2:
     - repo1
     - repo2
+channel: mock_channel
 """
 
 MOCK_USER = User(
@@ -57,6 +58,13 @@ def test_get_repos():
         }
 
 
+def test_get_config_channel():
+    """Tests that the channel is returned from the config."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("channel")
+        assert res == "mock_channel"
+
+
 def test_get_config_fails():
     """This test checks that an error is raised when accessing a part of the config that doesn't exist."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
@@ -69,7 +77,11 @@ def test_get_config_fails():
 def test_validate_required_files(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
+    mock_get_config.side_effect = [
+        {"owner1": ["repo1"]},
+        {"github1": "slack1"},
+        "mock_channel",
+    ]
     validate_required_files()
 
 
@@ -79,7 +91,7 @@ def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
     mock_get_config.side_effect = [{}, {"github1": "slack1"}]
-    with pytest.raises(RepositoriesNotGiven):
+    with pytest.raises(ErrorInConfig):
         validate_required_files()
 
 
@@ -89,7 +101,7 @@ def test_validate_required_files_fail_token(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["", "mock_app", "mock_github"]
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
-    with pytest.raises(TokensNotGiven):
+    with pytest.raises(ErrorInConfig):
         validate_required_files()
 
 
@@ -99,5 +111,15 @@ def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {}]
-    with pytest.raises(UserMapNotGiven):
+    with pytest.raises(ErrorInConfig):
+        validate_required_files()
+
+
+@patch("read_data.get_config")
+@patch("read_data.get_token")
+def test_validate_required_files_fail_channel(mock_get_token, mock_get_config):
+    """Test the validate files function"""
+    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"mock_github": "mock_user"}, ""]
+    with pytest.raises(ErrorInConfig):
         validate_required_files()
