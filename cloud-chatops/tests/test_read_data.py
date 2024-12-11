@@ -58,6 +58,13 @@ def test_get_repos():
         }
 
 
+def test_get_config_channel():
+    """Tests that the channel is returned from the config."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("channel")
+        assert res == "mock_channel"
+
+
 def test_get_config_fails():
     """This test checks that an error is raised when accessing a part of the config that doesn't exist."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
