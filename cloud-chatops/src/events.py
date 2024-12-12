@@ -14,7 +14,7 @@ from find_prs import FindPRs
 from read_data import get_config, get_token
 
 
-def run_global_reminder(channel) -> None:
+def run_global_reminder(channel: str) -> None:
     """This event sends a message to the specified channel with all open PRs."""
     unsorted_prs = FindPRs().run(repos=get_config("repos"))
     prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
@@ -24,9 +24,10 @@ def run_global_reminder(channel) -> None:
     )
 
 
-def run_personal_reminder(users: List[User]) -> None:
+def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> None:
     """
     This event sends a message to each user in the user map with their open PRs.
+    :param message_no_prs: Send a message saying there are no PRs open.
     :param users: Users to send reminders to.
     """
     unsorted_prs = FindPRs().run(repos=get_config("repos"))
@@ -37,7 +38,7 @@ def run_personal_reminder(users: List[User]) -> None:
         PRReminder(client).run(
             prs=filtered_prs,
             channel=user.slack_id,
-            message_no_prs=False,
+            message_no_prs=message_no_prs,
         )
 
 
