@@ -71,8 +71,8 @@ async def slash_prs(ack, respond, command):
     """
     await ack()
     user_id = command["user_id"]
-
-    if user_id not in [user.slack_id for user in get_config("users")]:
+    users = get_config("users")
+    if user_id not in [user.slack_id for user in users]:
         await respond(
             f"Could not find your Slack ID {user_id} in the user map. "
             f"Please contact the service maintainer to fix this."
@@ -81,7 +81,7 @@ async def slash_prs(ack, respond, command):
 
     if command["text"] == "mine":
         await respond("Gathering the PRs...")
-        run_personal_reminder([user_id])
+        run_personal_reminder([user for user in users if user.slack_id == user_id], message_no_prs=True)
     elif command["text"] == "all":
         await respond("Gathering the PRs...")
         run_global_reminder(user_id)
