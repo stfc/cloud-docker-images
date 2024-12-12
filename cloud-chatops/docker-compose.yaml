@@ -1,6 +1,6 @@
 services:
   cloud_chatops:
-    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:5.0.0
+    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:5.0.1
     environment:
       HOST_IP: ${HOST_IP:?error}
     volumes:
