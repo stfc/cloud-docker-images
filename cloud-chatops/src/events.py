@@ -14,7 +14,7 @@ from find_prs import FindPRs
 from read_data import get_config, get_token
 
 
-def run_global_reminder(channel) -> None:
+def run_global_reminder(channel: str) -> None:
     """This event sends a message to the specified channel with all open PRs."""
     unsorted_prs = FindPRs().run(repos=get_config("repos"))
     prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
@@ -24,9 +24,10 @@ def run_global_reminder(channel) -> None:
     )
 
 
-def run_personal_reminder(users: List[User]) -> None:
+def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> None:
     """
     This event sends a message to each user in the user map with their open PRs.
+    :param message_no_prs: Send a message saying there are no PRs open.
     :param users: Users to send reminders to.
     """
     unsorted_prs = FindPRs().run(repos=get_config("repos"))
@@ -37,7 +38,7 @@ def run_personal_reminder(users: List[User]) -> None:
         PRReminder(client).run(
             prs=filtered_prs,
             channel=user.slack_id,
-            message_no_prs=False,
+            message_no_prs=message_no_prs,
         )
 
 
@@ -70,8 +71,8 @@ async def slash_prs(ack, respond, command):
     """
     await ack()
     user_id = command["user_id"]
-
-    if user_id not in [user.slack_id for user in get_config("users")]:
+    users = get_config("users")
+    if user_id not in [user.slack_id for user in users]:
         await respond(
             f"Could not find your Slack ID {user_id} in the user map. "
             f"Please contact the service maintainer to fix this."
@@ -80,7 +81,9 @@ async def slash_prs(ack, respond, command):
 
     if command["text"] == "mine":
         await respond("Gathering the PRs...")
-        run_personal_reminder([user_id])
+        run_personal_reminder(
+            [user for user in users if user.slack_id == user_id], message_no_prs=True
+        )
     elif command["text"] == "all":
         await respond("Gathering the PRs...")
         run_global_reminder(user_id)

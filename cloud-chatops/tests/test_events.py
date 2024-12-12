@@ -112,7 +112,7 @@ async def test_slash_prs_mine(mock_get_config, mock_run_personal):
     mock_get_config.assert_called_once_with("users")
     mock_respond.assert_any_call("Gathering the PRs...")
     mock_respond.assert_any_call("Check out your DMs.")
-    mock_run_personal.assert_called_once_with(["mock_slack"])
+    mock_run_personal.assert_called_once_with([MOCK_USER], message_no_prs=True)
 
 
 @pytest.mark.asyncio
