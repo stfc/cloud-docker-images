@@ -81,7 +81,9 @@ async def slash_prs(ack, respond, command):
 
     if command["text"] == "mine":
         await respond("Gathering the PRs...")
-        run_personal_reminder([user for user in users if user.slack_id == user_id], message_no_prs=True)
+        run_personal_reminder(
+            [user for user in users if user.slack_id == user_id], message_no_prs=True
+        )
     elif command["text"] == "all":
         await respond("Gathering the PRs...")
         run_global_reminder(user_id)
