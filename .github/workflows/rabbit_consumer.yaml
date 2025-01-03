@@ -1,0 +1,125 @@
+name: Rabbit Consumer
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/rabbit_consumer.yaml"
+      - "openstack-rabbit-consumer/**"
+
+jobs:
+  test_and_lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Required for requests-kerberos
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install libkrb5-dev
+          pip install -r openstack-rabbit-consumer/requirements.txt
+          pip install -r openstack-rabbit-consumer/requirements-test.txt
+
+      - name: Run tests
+        # Using Python3 to launch the module sets up the Python path for us
+        run: cd openstack-rabbit-consumer && python3 -m coverage run -m pytest .
+
+      - name: Analyse with pylint
+        run: |
+          cd openstack-rabbit-consumer && pylint $(git ls-files '*.py')
+
+      - name: Prepare coverage
+        run: |
+          cd openstack-rabbit-consumer && python -m coverage xml
+
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: openstack-rabbit-consumer/coverage.xml
+          fail_ci_if_error: true
+          flags: rabbit_consumer
+
+  push_dev_image_harbor:
+    runs-on: ubuntu-latest
+    needs: test_and_lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Harbor
+        uses: docker/login-action@v2
+        with:
+          registry: harbor.stfc.ac.uk
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_TOKEN }}
+
+      - name: Set commit SHA for later
+        id: commit_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push to staging project
+        uses: docker/build-push-action@v3
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          context: "{{defaultContext}}:openstack-rabbit-consumer"
+          tags: "harbor.stfc.ac.uk/stfc-cloud-staging/openstack-rabbit-consumer:${{ steps.commit_sha.outputs.sha_short }}"
+
+      - name: Inform of tagged name
+        run: echo "Image published to harbor.stfc.ac.uk/stfc-cloud-staging/openstack-rabbit-consumer:${{ steps.commit_sha.outputs.sha_short }}"
+
+  push_release_image_harbor:
+    runs-on: ubuntu-latest
+    needs: test_and_lint
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Harbor
+        uses: docker/login-action@v2
+        with:
+          registry: harbor.stfc.ac.uk
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_TOKEN }}
+
+      - name: Get release tag for later
+        id: release_tag
+        run: echo "version=$(cat openstack-rabbit-consumer/version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Check if release file has updated
+        uses: dorny/paths-filter@v2
+        id: release_updated
+        with:
+          filters: |
+            version:
+              - 'openstack-rabbit-consumer/version.txt'
+
+      - name: Build and push on version change
+        uses: docker/build-push-action@v3
+        if: steps.release_updated.outputs.version == 'true'
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          context: "{{defaultContext}}:openstack-rabbit-consumer"
+          tags: "harbor.stfc.ac.uk/stfc-cloud/openstack-rabbit-consumer:v${{ steps.release_tag.outputs.version }}"
+
+      - name: Inform of tagged name
+        if: steps.release_updated.outputs.version == 'true'
+        run: echo "Image published to harbor.stfc.ac.uk/stfc-cloud/openstack-rabbit-consumer:v${{ steps.release_tag.outputs.version }}"
