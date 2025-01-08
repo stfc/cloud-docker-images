@@ -4,7 +4,7 @@ from unittest.mock import patch, NonCallableMock
 from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
-from find_prs import FindPRs
+from find_pr_api.github import FindPRs
 from data import PR
 
 
@@ -17,9 +17,9 @@ def instance_fixture():
     return FindPRs()
 
 
-@patch("find_prs.PR")
-@patch("find_prs.get_token")
-@patch("find_prs.FindPRs.request_all_repos")
+@patch("find_pr_api.github.PR")
+@patch("find_pr_api.github.get_token")
+@patch("find_pr_api.github.FindPRs.request_all_repos")
 def test_run(mock_request_all_repos, mock_get_token, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_repo_1 = NonCallableMock()
@@ -39,7 +39,7 @@ def test_run(mock_request_all_repos, mock_get_token, mock_data, instance):
     assert res == mock_res
 
 
-@patch("find_prs.FindPRs.make_request")
+@patch("find_pr_api.github.FindPRs.make_request")
 def test_request_all_repos(mock_make_request, instance):
     """Test a request is made for each repo in the list"""
     mock_make_request.side_effect = [["mock_response_1"], ["mock_response_2"]]
@@ -53,7 +53,7 @@ def test_request_all_repos(mock_make_request, instance):
     assert res == ["mock_response_1", "mock_response_2"]
 
 
-@patch("find_prs.requests")
+@patch("find_pr_api.github.requests")
 def test_make_request(mock_requests, instance):
     """Test that requests are made and errors are raised."""
     mock_ok_request = NonCallableMock()
