@@ -104,9 +104,8 @@ def test_add_reactions(instance):
 def test_add_reactions_fails(instance):
     """Test reaction add calls are made and fail."""
     instance.client.reactions_add.return_value = {"ok": False, "error": "mock_error"}
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(RuntimeError):
         instance.add_reactions("mock_timestamp", "mock_channel", ["mock_reaction"])
-        assert str(exc.value) == "Reaction failed to add with error: mock_error"
 
 
 @patch("features.pr_reminder.PRReminder.add_reactions")
@@ -136,11 +135,10 @@ def test_send_message_fails(_, instance):
     """Test an exception is raised if the message fails to send."""
     mock_response = {"ok": False, "error": "mock_error"}
     instance.client.chat_postMessage.return_value = mock_response
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(RuntimeError):
         instance.send_message(
             "mock_text", "mock_channel", ["mock_reaction"], "mock_timestamp"
         )
-        assert str(exc.value) == "Message failed to send with error: mock_error"
 
 
 @patch("features.pr_reminder.PRReminder.construct_messages")

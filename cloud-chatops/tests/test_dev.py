@@ -65,6 +65,5 @@ def test_run_methods_invalid():
     mock_args = NonCallableMock()
     setattr(mock_args, "global", True)
     mock_args.channel = ""
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError):
         run_methods(mock_args)
-        assert str(exc.value) == "If using --global then --channel is required"
