@@ -5,7 +5,7 @@ from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
 from slack_reminder_api.pr_reminder import PRReminder
-from data import PR, Message, User
+from helper.data import PR, Message, User
 
 
 @pytest.fixture(name="instance", scope="function")

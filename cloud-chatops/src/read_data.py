@@ -5,7 +5,7 @@ import sys
 import os
 import yaml
 from errors import ErrorInConfig
-from data import User
+from helper.data import User
 
 
 def get_path() -> str:

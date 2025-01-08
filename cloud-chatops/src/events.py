@@ -8,7 +8,7 @@ import asyncio
 from slack_sdk import WebClient
 import schedule
 
-from data import User
+from helper.data import User
 from slack_reminder_api.pr_reminder import PRReminder
 from find_pr_api.github import FindPRs
 from read_data import get_config, get_token

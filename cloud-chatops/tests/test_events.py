@@ -3,7 +3,7 @@
 from unittest.mock import patch, AsyncMock
 import pytest
 
-from data import User
+from helper.data import User
 from events import (
     run_global_reminder,
     run_personal_reminder,

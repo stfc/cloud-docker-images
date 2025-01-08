@@ -3,7 +3,7 @@
 from unittest.mock import patch, NonCallableMock
 import pytest
 
-from data import User
+from helper.data import User
 from dev import run_methods, call_method, parse_args
 from errors import NoTestCase
 
