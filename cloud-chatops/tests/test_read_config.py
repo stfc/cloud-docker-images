@@ -1,10 +1,10 @@
-"""This test file covers all tests for the read_data module."""
+"""This test file covers all tests for the read_config module."""
 
 from unittest.mock import patch, mock_open
 import pytest
 from helper.data import User
 from helper.errors import ErrorInConfig
-from read_data import get_token, get_config, validate_required_files, get_path
+from helper.read_config import get_token, get_config, validate_required_files, get_path
 
 MOCK_CONFIG = """
 ---
@@ -32,8 +32,8 @@ def test_get_path_prod():
     assert get_path() == "/usr/src/app/cloud_chatops/"
 
 
-@patch("read_data.os")
-@patch("read_data.sys")
+@patch("helper.read_config.os")
+@patch("helper.read_config.sys")
 def test_get_path_dev_linux(mock_sys, mock_os):
     """Test the development path is returned for a system using the HOME environment variable."""
     mock_sys.argv = ["dev.py"]
@@ -41,8 +41,8 @@ def test_get_path_dev_linux(mock_sys, mock_os):
     assert get_path() == "/home/mock/dev_cloud_chatops/"
 
 
-@patch("read_data.os")
-@patch("read_data.sys")
+@patch("helper.read_config.os")
+@patch("helper.read_config.sys")
 def test_get_path_dev_windows(mock_sys, mock_os):
     """Test the development path is returned for a system using the HOMEPATH environment variable."""
     mock_sys.argv = ["dev.py"]
@@ -50,8 +50,8 @@ def test_get_path_dev_windows(mock_sys, mock_os):
     assert get_path() == "\\home\\mock\\dev_cloud_chatops\\"
 
 
-@patch("read_data.os")
-@patch("read_data.sys")
+@patch("helper.read_config.os")
+@patch("helper.read_config.sys")
 def test_get_path_dev_fails(mock_sys, mock_os):
     """Test an error is raised if HOME or HOMEPATH can't be found in the environment."""
     mock_sys.argv = ["dev.py"]
@@ -106,8 +106,8 @@ def test_get_config_fails():
             get_config("unknown")
 
 
-@patch("read_data.get_config")
-@patch("read_data.get_token")
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
 def test_validate_required_files(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
@@ -119,8 +119,8 @@ def test_validate_required_files(mock_get_token, mock_get_config):
     validate_required_files()
 
 
-@patch("read_data.get_config")
-@patch("read_data.get_token")
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
 def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
@@ -129,8 +129,8 @@ def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
         validate_required_files()
 
 
-@patch("read_data.get_config")
-@patch("read_data.get_token")
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
 def test_validate_required_files_fail_token(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["", "mock_app", "mock_github"]
@@ -139,8 +139,8 @@ def test_validate_required_files_fail_token(mock_get_token, mock_get_config):
         validate_required_files()
 
 
-@patch("read_data.get_config")
-@patch("read_data.get_token")
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
 def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
@@ -149,8 +149,8 @@ def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
         validate_required_files()
 
 
-@patch("read_data.get_config")
-@patch("read_data.get_token")
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
 def test_validate_required_files_fail_channel(mock_get_token, mock_get_config):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]

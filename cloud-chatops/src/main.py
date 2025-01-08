@@ -7,7 +7,7 @@ import logging
 import asyncio
 from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
-from read_data import get_token, validate_required_files
+from helper.read_config import get_token, validate_required_files
 from events import slash_prs, schedule_jobs, slash_find_host
 
 
