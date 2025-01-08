@@ -4,8 +4,12 @@ import logging
 import asyncio
 import argparse
 from argparse import Namespace
+
+from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
+
 from helper.errors import NoTestCase
-from helper.read_config import validate_required_files, get_config
+from helper.read_config import validate_required_files, get_config, get_token
 from events import run_global_reminder, run_personal_reminder
 
 logging.basicConfig(level=logging.DEBUG)
@@ -46,19 +50,17 @@ def call_method(event: str, args: Namespace) -> None:
 
 def main(args: Namespace) -> None:
     """
-    This function checks the config files, runs the tests then starts the app.
-    :param args: CLI Arguments
+    This function checks the config files, runs the tests, then starts the app.
+    :param args: Command line interface arguments
     """
-    # Disabling this as we can't import in the top level as it breaks unit testing
-    # pylint: disable=C0415
-    from main import main as async_main
-
-    validate_required_files()
     logging.info("Running tests")
     run_methods(args)
     logging.info("Completed tests.")
     logging.info("Running Async App")
-    asyncio.run(async_main())
+
+    app = App(token=get_token("SLACK_BOT_TOKEN"))
+    handler = SocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
+    handler.start()
 
 
 def parse_args() -> Namespace:
@@ -75,4 +77,6 @@ def parse_args() -> Namespace:
 
 
 if __name__ == "__main__":
-    main(parse_args())
+    args = parse_args()
+    validate_required_files()
+    main(args)
