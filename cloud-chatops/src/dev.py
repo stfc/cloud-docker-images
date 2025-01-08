@@ -4,7 +4,7 @@ import logging
 import asyncio
 import argparse
 from argparse import Namespace
-from errors import NoTestCase
+from helper.errors import NoTestCase
 from read_data import validate_required_files, get_config
 from events import run_global_reminder, run_personal_reminder
 

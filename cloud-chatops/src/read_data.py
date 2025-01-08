@@ -4,7 +4,7 @@ from typing import Dict, Union, List
 import sys
 import os
 import yaml
-from errors import ErrorInConfig
+from helper.errors import ErrorInConfig
 from helper.data import User
 
 

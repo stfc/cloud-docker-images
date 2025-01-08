@@ -3,7 +3,7 @@
 from unittest.mock import patch, mock_open
 import pytest
 from helper.data import User
-from errors import ErrorInConfig
+from helper.errors import ErrorInConfig
 from read_data import get_token, get_config, validate_required_files, get_path
 
 MOCK_CONFIG = """
