@@ -105,9 +105,8 @@ def test_sort_by(instance):
 def test_sort_by_fails(instance):
     """Test sort raises an error when sorting by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError):
         instance.sort_by(mock_pr_list, "unknown")
-        assert str(exc.value) == "Unable to sort list by unknown"
 
 
 def test_filter_by(instance):
@@ -120,6 +119,5 @@ def test_filter_by(instance):
 def test_filter_by_fails(instance):
     """Test filter raises an error when filtering by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError):
         instance.filter_by(mock_pr_list, "unknown", "some_value")
-        assert str(exc.value) == "Unable to filter list by unknown"
