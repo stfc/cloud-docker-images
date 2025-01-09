@@ -43,7 +43,7 @@ def call_method(event: str, args: Namespace) -> None:
         case "global":
             run_global_reminder(args.channel)
         case "personal":
-            users = [user.slack_id for user in get_config("users")]
+            users = get_config("users")
             run_personal_reminder(users)
         case _:
             raise NoTestCase(f"There is not test case for {event}")

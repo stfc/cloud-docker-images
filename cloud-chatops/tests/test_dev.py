@@ -42,7 +42,7 @@ def test_call_test(mock_global, mock_personal, mock_get_config):
     call_method("global", mock_args)
     mock_global.assert_called_once_with(mock_args.channel)
     call_method("personal", mock_args)
-    mock_personal.assert_called_once_with(["mock_slack"])
+    mock_personal.assert_called_once_with([MOCK_USER])
     with pytest.raises(NoTestCase):
         call_method("unexpected", mock_args)
 
