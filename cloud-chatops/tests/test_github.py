@@ -18,39 +18,22 @@ def instance_fixture():
 
 
 @patch("find_pr_api.github.PR")
-@patch("find_pr_api.github.get_token")
-@patch("find_pr_api.github.FindPRs.request_all_repos")
-def test_run(mock_request_all_repos, mock_get_token, mock_data, instance):
+@patch("find_pr_api.github.FindPRs.make_request")
+def test_run(mock_make_request, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_repo_1 = NonCallableMock()
     mock_repo_2 = NonCallableMock()
     mock_repo_1.created_at = 1
     mock_repo_2.created_at = 2
-    mock_repos = {"owner1": [mock_repo_2, mock_repo_1]}
-    res = instance.run(mock_repos)
+    mock_repos = [mock_repo_2, mock_repo_1]
+    res = instance.run(mock_repos, "mock_token")
     res = instance.sort_by(res, "created_at", True)
-    assert instance.github_token == mock_get_token.return_value
-    mock_get_token.assert_called_once_with("GITHUB_TOKEN")
 
-    for owner in mock_repos:
-        mock_request_all_repos.assert_any_call(owner, mock_repos.get(owner))
+    for repo in mock_repos:
+        mock_make_request.assert_any_call(repo, "mock_token")
 
     mock_res = list(reversed([call.return_value for call in mock_data.call_arg_list]))
     assert res == mock_res
-
-
-@patch("find_pr_api.github.FindPRs.make_request")
-def test_request_all_repos(mock_make_request, instance):
-    """Test a request is made for each repo in the list"""
-    mock_make_request.side_effect = [["mock_response_1"], ["mock_response_2"]]
-    res = instance.request_all_repos("mock_owner", ["mock_repo_1", "mock_repo_2"])
-    mock_make_request.assert_any_call(
-        "https://api.github.com/repos/mock_owner/mock_repo_1/pulls"
-    )
-    mock_make_request.assert_any_call(
-        "https://api.github.com/repos/mock_owner/mock_repo_2/pulls"
-    )
-    assert res == ["mock_response_1", "mock_response_2"]
 
 
 @patch("find_pr_api.github.requests")
@@ -61,12 +44,14 @@ def test_make_request(mock_requests, instance):
     mock_error_request.raise_for_status.side_effect = HTTPError
     mock_requests.get.side_effect = [mock_ok_request, mock_error_request]
     res = instance.make_request(
-        "https://api.github.com/repos/mock_owner/mock_repo/pulls"
+        "https://api.github.com/repos/mock_owner/mock_repo/pulls",
+        "mock_token"
     )
     assert res == mock_ok_request.json.return_value
     with pytest.raises(HTTPError):
         instance.make_request(
-            "https://api.github_wrong.com/repos/mock_owner/mock_repo/pulls"
+            "https://api.github_wrong.com/repos/mock_owner/mock_repo/pulls",
+            "mock_token"
         )
 
 

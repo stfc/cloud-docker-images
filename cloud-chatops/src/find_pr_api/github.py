@@ -1,60 +1,35 @@
-"""This module finds all open pull requests from given repositories."""
+"""This module finds all open pull requests from given repositories in GitHub."""
 
 from typing import List, Dict
 import requests
-from helper.read_config import get_token
 from helper.data import PR
 
 
 class FindPRs:
     """This class finds all open pull requests in the given repositories. It can also sort them by property."""
-
-    def __init__(self, github_token=""):
-        """
-        Initialise the class with a GitHub token if not using run as entry point.
-        :param github_token: GitHub REST API token.
-        """
-        self.github_token = github_token
-
-    def run(self, repos: Dict[str, List]) -> List[PR]:
+    def run(self, repos: List, token: str) -> List[PR]:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
+        :param token: GitHub Personal Access Token
         :param repos: Dictionary of repository names and owners.
         :return: List of PRs
         """
-        if not self.github_token:
-            self.github_token = get_token("GITHUB_TOKEN")
-
-        raw_responses = []
-        for organisation in repos:
-            raw_responses += self.request_all_repos(
-                organisation, repos.get(organisation)
-            )
-
-        return [PR.from_json(response) for response in raw_responses]
-
-    def request_all_repos(
-        self, organisation: str, repositories: List[str]
-    ) -> List[Dict]:
-        """
-        Makes a request for each repository and returns a list of those PRs.
-        :param organisation: The repository owner
-        :param repositories: List of repository names
-        :return: A list of PRs stored as dictionaries
-        """
         responses = []
-        for repo in repositories:
-            url = f"https://api.github.com/repos/{organisation}/{repo}/pulls"
-            responses += self.make_request(url)
-        return responses
+        for repo in repos:
+            responses += self.make_request(repo, token)
 
-    def make_request(self, url: str) -> List[Dict]:
+        return [PR.from_json(response) for response in responses]
+
+    @staticmethod
+    def make_request(repo: str, token: str) -> List[Dict]:
         """
         Send an HTTP request to the GitHub Rest API endpoint and return all open PRs.
-        :param url: The URL to make the request to
+        :param token: GitHub Personal Access Token
+        :param repo: The repo to request. For example, stfc/cloud-docker-images
         :return: List of PRs in dict / json
         """
-        headers = {"Authorization": "token " + self.github_token}
+        headers = {"Authorization": "token " + token}
+        url = f"https://api.github.com/repos/{repo}/pulls"
         response = requests.get(url, headers=headers, timeout=60)
         response.raise_for_status()
         return (

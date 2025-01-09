@@ -86,10 +86,7 @@ def test_get_config_repos():
     """This test checks that a list is returned if a string list of repos is read with no comma at the end."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
         res = get_config("repos")
-        assert res == {
-            "organisation1": ["repo1", "repo2"],
-            "organisation2": ["repo1", "repo2"],
-        }
+        assert res == ["organisation1/repo1", "organisation1/repo2", "organisation2/repo1", "organisation2/repo2"]
 
 
 def test_get_config_channel():

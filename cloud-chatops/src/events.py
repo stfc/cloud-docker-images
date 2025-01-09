@@ -16,7 +16,7 @@ from helper.read_config import get_config, get_token
 
 def run_global_reminder(channel: str) -> None:
     """This event sends a message to the specified channel with all open PRs."""
-    unsorted_prs = FindPRs().run(repos=get_config("repos"))
+    unsorted_prs = FindPRs().run(repos=get_config("repos"), token=get_token("GITHUB_TOKEN"))
     prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
     PRReminder(WebClient(token=get_token("SLACK_BOT_TOKEN"))).run(
         prs=prs,
@@ -30,7 +30,7 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
     :param message_no_prs: Send a message saying there are no PRs open.
     :param users: Users to send reminders to.
     """
-    unsorted_prs = FindPRs().run(repos=get_config("repos"))
+    unsorted_prs = FindPRs().run(repos=get_config("repos"), token=get_token("GITHUB_TOKEN"))
     prs = FindPRs().sort_by(unsorted_prs, "created_at", False)
     client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
     for user in users:
