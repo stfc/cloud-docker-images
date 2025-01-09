@@ -1,4 +1,6 @@
-"""This module runs local integration tests of the code."""
+"""
+This module uses Socket Mode to enable the code to run locally and not need to be open to the internet.
+"""
 
 import logging
 import asyncio

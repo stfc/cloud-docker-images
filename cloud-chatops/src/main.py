@@ -1,6 +1,6 @@
 """
-This module starts the Slack Bolt app Asynchronously running the event loop.
-Using Socket mode, the app listens for events from the Slack API client.
+This module uses endpoints to run the Slack app.
+It listens for requests from Slack and executes different functions.
 """
 
 import logging
