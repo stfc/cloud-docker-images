@@ -3,7 +3,6 @@ This module uses Socket Mode to enable the code to run locally and not need to b
 """
 
 import logging
-import asyncio
 import argparse
 from argparse import Namespace
 

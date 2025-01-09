@@ -4,7 +4,7 @@ This module contains events to run in main.py.
 
 import os
 from typing import List
-import asyncio
+import time
 from slack_sdk import WebClient
 import schedule
 
@@ -42,9 +42,9 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
         )
 
 
-async def schedule_jobs() -> None:
+def schedule_jobs() -> None:
     """
-    This function schedules tasks for the async loop to run.
+    This function schedules tasks for the loop to run.
     These dates and times are hardcoded for production use.
     """
     channel = get_config("channel")
@@ -59,47 +59,47 @@ async def schedule_jobs() -> None:
 
     while True:
         schedule.run_pending()
-        await asyncio.sleep(10)
+        time.sleep(10)
 
 
-async def slash_prs(ack, respond, command):
+def slash_prs(ack, respond, command):
     """
     This event sends a message to the user containing open PRs.
     :param command: The return object from Slack API.
     :param ack: Slacks acknowledgement command.
     :param respond: Slacks respond command to respond to the command in chat.
     """
-    await ack()
+    ack()
     user_id = command["user_id"]
     users = get_config("users")
     if user_id not in [user.slack_id for user in users]:
-        await respond(
+        respond(
             f"Could not find your Slack ID {user_id} in the user map. "
             f"Please contact the service maintainer to fix this."
         )
         return
 
     if command["text"] == "mine":
-        await respond("Gathering the PRs...")
+        respond("Gathering the PRs...")
         run_personal_reminder(
             [user for user in users if user.slack_id == user_id], message_no_prs=True
         )
     elif command["text"] == "all":
-        await respond("Gathering the PRs...")
+        respond("Gathering the PRs...")
         run_global_reminder(user_id)
     else:
-        await respond("Please provide the correct argument: 'mine' or 'all'.")
+        respond("Please provide the correct argument: 'mine' or 'all'.")
         return
 
-    await respond("Check out your DMs.")
+    respond("Check out your DMs.")
 
 
-async def slash_find_host(ack, respond):
+def slash_find_host(ack, respond):
     """
     Responds to the user with the host IP of the machine that received the command.
     :param ack: Slacks acknowledgement command.
     :param respond: Slacks respond command to respond to the command in chat.
     """
-    await ack()
+    ack()
     host_ip = os.environ.get("HOST_IP")
-    await respond(f"The host IP of this node is: {host_ip}")
+    respond(f"The host IP of this node is: {host_ip}")

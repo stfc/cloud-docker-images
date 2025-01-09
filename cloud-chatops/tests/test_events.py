@@ -1,6 +1,6 @@
 """Unit tests for events.py"""
 
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, MagicMock
 import pytest
 
 from helper.data import User
@@ -71,17 +71,16 @@ def test_run_personal_reminder(
     )
 
 
-@pytest.mark.asyncio
 @patch("events.schedule")
 @patch("events.get_config")
-async def test_schedule_jobs(mock_get_config, mock_schedule):
+def test_schedule_jobs(mock_get_config, mock_schedule):
     """Test the correct jobs are scheduled"""
     mock_get_config.side_effect = ["channel", [MOCK_USER]]
     # Force an exception then catch it here.
     # This is to prevent the test entering the infinite while wait loop.
     mock_schedule.run_pending.side_effect = Exception()
     with pytest.raises(Exception):
-        await schedule_jobs()
+        schedule_jobs()
     mock_get_config.assert_any_call("users")
     mock_get_config.assert_any_call("channel")
     mock_schedule.every.return_value.monday.at.assert_any_call("09:00")
@@ -98,16 +97,15 @@ async def test_schedule_jobs(mock_get_config, mock_schedule):
     mock_schedule.run_pending.assert_called_once_with()
 
 
-@pytest.mark.asyncio
 @patch("events.run_personal_reminder")
 @patch("events.get_config")
-async def test_slash_prs_mine(mock_get_config, mock_run_personal):
-    """Test the function works when users choose mine"""
+def test_slash_prs_mine(mock_get_config, mock_run_personal):
+    """Test the function works when users choose "mine" """
     mock_get_config.return_value = [MOCK_USER]
-    mock_respond = AsyncMock()
+    mock_respond = MagicMock()
     mock_command = {"user_id": "mock_slack", "text": "mine"}
-    mock_ack = AsyncMock()
-    await slash_prs(mock_ack, mock_respond, mock_command)
+    mock_ack = MagicMock()
+    slash_prs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
     mock_get_config.assert_called_once_with("users")
     mock_respond.assert_any_call("Gathering the PRs...")
@@ -115,16 +113,15 @@ async def test_slash_prs_mine(mock_get_config, mock_run_personal):
     mock_run_personal.assert_called_once_with([MOCK_USER], message_no_prs=True)
 
 
-@pytest.mark.asyncio
 @patch("events.run_global_reminder")
 @patch("events.get_config")
-async def test_slash_prs_all(mock_get_config, mock_run_global):
+def test_slash_prs_all(mock_get_config, mock_run_global):
     """Test the function works when users choose all"""
     mock_get_config.return_value = [MOCK_USER]
-    mock_respond = AsyncMock()
+    mock_respond = MagicMock()
     mock_command = {"user_id": "mock_slack", "text": "all"}
-    mock_ack = AsyncMock()
-    await slash_prs(mock_ack, mock_respond, mock_command)
+    mock_ack = MagicMock()
+    slash_prs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
     mock_get_config.assert_called_once_with("users")
     mock_respond.assert_any_call("Gathering the PRs...")
@@ -134,13 +131,13 @@ async def test_slash_prs_all(mock_get_config, mock_run_global):
 
 @pytest.mark.asyncio
 @patch("events.get_config")
-async def test_slash_prs_fail(mock_get_config):
+def test_slash_prs_fail(mock_get_config):
     """Test the function fails if no option is given"""
     mock_get_config.return_value = [MOCK_USER]
-    mock_respond = AsyncMock()
+    mock_respond = MagicMock()
     mock_command = {"user_id": "mock_slack", "text": ""}
-    mock_ack = AsyncMock()
-    await slash_prs(mock_ack, mock_respond, mock_command)
+    mock_ack = MagicMock()
+    slash_prs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
     mock_get_config.assert_called_once_with("users")
     mock_respond.assert_any_call(
@@ -150,13 +147,13 @@ async def test_slash_prs_fail(mock_get_config):
 
 @pytest.mark.asyncio
 @patch("events.get_config")
-async def test_slash_prs_no_user(mock_get_config):
+def test_slash_prs_no_user(mock_get_config):
     """Test the function fails if the user is not found in the config file"""
     mock_get_config.return_value = [MOCK_USER]
-    mock_respond = AsyncMock()
+    mock_respond = MagicMock()
     mock_command = {"user_id": "non_existent_user", "text": ""}
-    mock_ack = AsyncMock()
-    await slash_prs(mock_ack, mock_respond, mock_command)
+    mock_ack = MagicMock()
+    slash_prs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
     mock_get_config.assert_called_once_with("users")
     mock_respond.assert_any_call(
@@ -167,11 +164,11 @@ async def test_slash_prs_no_user(mock_get_config):
 
 @pytest.mark.asyncio
 @patch("events.os")
-async def test_slash_find_host(mock_os):
+def test_slash_find_host(mock_os):
     """Test that the environment variable is retrieved and responded."""
-    mock_ack = AsyncMock()
-    mock_respond = AsyncMock()
-    await slash_find_host(mock_ack, mock_respond)
+    mock_ack = MagicMock()
+    mock_respond = MagicMock()
+    slash_find_host(mock_ack, mock_respond)
     mock_ack.assert_called_once_with()
     mock_os.environ.get.assert_called_once_with("HOST_IP")
     mock_respond.assert_called_once_with(
