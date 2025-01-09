@@ -10,3 +10,4 @@ pytest-asyncio
 pylint
 black
 pyyaml
+flask

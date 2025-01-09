@@ -7,22 +7,28 @@ import logging
 import os
 
 from slack_bolt import App
+from slack_bolt.adapter.flask import SlackRequestHandler
+from flask import Flask, request
+
 
 from helper.read_config import get_token, validate_required_files
 from events import slash_prs, slash_find_host
 
 
 logging.basicConfig(level=logging.DEBUG)
-app = App(token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET"))
+
+validate_required_files()
+
+slack_app = App(token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET"))
 
 
-@app.event("message")
+@slack_app.event("message")
 def handle_message_events(body, logger):
     """This method handles message events and logs them."""
     logger.info(body)
 
 
-@app.command("/prs")
+@slack_app.command("/prs")
 def prs(ack, respond, command):
     """
     This command sends the user a message containing all open pull requests.
@@ -33,7 +39,7 @@ def prs(ack, respond, command):
     slash_prs(ack, respond, command)
 
 
-@app.command("/find-host")
+@slack_app.command("/find-host")
 def find_host(ack, respond):
     """
     This command responds to the user with the IP of the host that received the message.
@@ -43,6 +49,11 @@ def find_host(ack, respond):
     slash_find_host(ack, respond)
 
 
-if __name__ == "__main__":
-    validate_required_files()
-    app.start(port=int(os.environ.get("PORT", 3000)))
+flask_app = Flask(__name__)
+slack_handler = SlackRequestHandler(slack_app)
+
+
+@flask_app.route("/slack/events", methods=["POST"])
+def slack_events() -> slack_handler.handle:
+    """This function makes requests to the Slack App from the Flask request."""
+    return slack_handler.handle(request)
