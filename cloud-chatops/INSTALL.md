@@ -119,6 +119,9 @@ You will need the Slack App and Bot User tokens when deploying the application. 
 - Bot User Token:
   - You can find the Bot User token under `Settings / Install App / OAuth Tokens`.
   - No scoping is required, and you **can** retrieve this token at a later date from the same location.
+  
+- Singing Secret:
+  - You can find the Singing Secret under `Settings / Basic Information / Client Secret`
 
 ### Deployment Configuration:
 
