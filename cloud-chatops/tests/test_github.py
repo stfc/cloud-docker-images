@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from find_pr_api.github import FindPRs
-from helper.data import PR
+from helper.data import PR, sort_by, filter_by
 
 
 # pylint: disable=R0801
@@ -27,7 +27,7 @@ def test_run(mock_make_request, mock_data, instance):
     mock_repo_2.created_at = 2
     mock_repos = [mock_repo_2, mock_repo_1]
     res = instance.run(mock_repos, "mock_token")
-    res = instance.sort_by(res, "created_at", True)
+    res = sort_by(res, "created_at", True)
 
     for repo in mock_repos:
         mock_make_request.assert_any_call(repo, "mock_token")
@@ -80,10 +80,10 @@ MOCK_PR_2 = PR(
 def test_sort_by(instance):
     """Test the list is sorted correctly."""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
-    res = instance.sort_by(mock_pr_list, "created_at")
+    res = sort_by(mock_pr_list, "created_at")
     assert res == list(reversed(mock_pr_list))
 
-    res_reversed = instance.sort_by(mock_pr_list, "created_at", True)
+    res_reversed = sort_by(mock_pr_list, "created_at", True)
     assert res_reversed == mock_pr_list
 
 
@@ -91,13 +91,13 @@ def test_sort_by_fails(instance):
     """Test sort raises an error when sorting by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     with pytest.raises(ValueError):
-        instance.sort_by(mock_pr_list, "unknown")
+        sort_by(mock_pr_list, "unknown")
 
 
 def test_filter_by(instance):
     """Test the list is filtered correctly."""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
-    res = instance.filter_by(mock_pr_list, "repository", "mock_repo")
+    res = filter_by(mock_pr_list, "repository", "mock_repo")
     assert res == [MOCK_PR_1]
 
 
@@ -105,4 +105,4 @@ def test_filter_by_fails(instance):
     """Test filter raises an error when filtering by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     with pytest.raises(ValueError):
-        instance.filter_by(mock_pr_list, "unknown", "some_value")
+        filter_by(mock_pr_list, "unknown", "some_value")
