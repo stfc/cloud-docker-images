@@ -57,3 +57,9 @@ slack_handler = SlackRequestHandler(slack_app)
 def slack_events() -> slack_handler.handle:
     """This function makes requests to the Slack App from the Flask request."""
     return slack_handler.handle(request)
+
+
+if __name__ == "__main__":
+    from waitress import serve
+    serve(flask_app, host="0.0.0.0", port=3000)
+    
