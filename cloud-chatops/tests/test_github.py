@@ -4,13 +4,11 @@ from unittest.mock import patch, NonCallableMock
 from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
-from find_pr_api.github import FindPRs
 from helper.data import PR, sort_by, filter_by
+from find_pr_api.github import FindPRs
 
 
 # pylint: disable=R0801
-
-
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
@@ -76,7 +74,7 @@ MOCK_PR_2 = PR(
 )
 
 
-def test_sort_by(instance):
+def test_sort_by():
     """Test the list is sorted correctly."""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     res = sort_by(mock_pr_list, "created_at")
@@ -86,21 +84,21 @@ def test_sort_by(instance):
     assert res_reversed == mock_pr_list
 
 
-def test_sort_by_fails(instance):
+def test_sort_by_fails():
     """Test sort raises an error when sorting by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     with pytest.raises(ValueError):
         sort_by(mock_pr_list, "unknown")
 
 
-def test_filter_by(instance):
+def test_filter_by():
     """Test the list is filtered correctly."""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     res = filter_by(mock_pr_list, "repository", "mock_repo")
     assert res == [MOCK_PR_1]
 
 
-def test_filter_by_fails(instance):
+def test_filter_by_fails():
     """Test filter raises an error when filtering by unknown attribute"""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
     with pytest.raises(ValueError):

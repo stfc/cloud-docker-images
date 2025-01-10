@@ -78,6 +78,6 @@ def parse_args() -> Namespace:
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    arguments = parse_args()
     validate_required_files()
-    main(args)
+    main(arguments)

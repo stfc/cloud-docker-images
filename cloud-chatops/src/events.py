@@ -4,14 +4,11 @@ This module contains events to run in main.py.
 
 import os
 from typing import List
-import time
 from slack_sdk import WebClient
-import schedule
-
 from helper.data import User, sort_by, filter_by
+from helper.read_config import get_config, get_token
 from slack_reminder_api.pr_reminder import PRReminder
 from find_pr_api.github import FindPRs
-from helper.read_config import get_config, get_token
 
 
 def run_global_reminder(channel: str) -> None:

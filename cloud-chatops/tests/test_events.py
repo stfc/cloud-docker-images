@@ -16,6 +16,10 @@ MOCK_USER = User(
     real_name="mock user", github_name="mock_github", slack_id="mock_slack"
 )
 
+# Disable for patching
+# pylint: disable=R0917
+# pylint: disable=R0913
+
 
 @patch("events.sort_by")
 @patch("events.WebClient")
@@ -48,6 +52,10 @@ def test_run_global_reminder(
     mock_get_config.assert_called_once_with("repos")
     mock_get_token.assert_any_call("GITHUB_TOKEN")
     mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
+
+# Disable for patching
+# pylint: disable=R0917
+# pylint: disable=R0913
 
 
 @patch("events.sort_by")

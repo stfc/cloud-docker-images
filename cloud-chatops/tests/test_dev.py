@@ -2,10 +2,9 @@
 
 from unittest.mock import patch, NonCallableMock
 import pytest
-
 from helper.data import User
-from dev import run_methods, call_method, parse_args
 from helper.errors import NoTestCase
+from dev import run_methods, call_method, parse_args
 
 
 MOCK_USER = User(
