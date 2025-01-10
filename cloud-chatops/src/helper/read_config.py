@@ -45,7 +45,7 @@ def get_token(secret: str) -> str:
         return secrets_data[secret]
 
 
-def get_config(section: str) -> Union[List | Dict]:
+def get_config(section: str) -> Union[List, Dict, str]:
     """
     This function returns the specified section from the config file.
     :param section: The section of the config to retrieve.

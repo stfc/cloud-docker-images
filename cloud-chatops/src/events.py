@@ -42,24 +42,18 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
         )
 
 
-def schedule_jobs() -> None:
+def weekly_reminder(reminder_type: str) -> None:
     """
-    This function schedules tasks for the loop to run.
-    These dates and times are hardcoded for production use.
+    This function chooses which type of reminder to call based on its arguments.
+    :param reminder_type: Type of reminder to send, global or personal.
     """
-    channel = get_config("channel")
-
-    schedule.every().monday.at("09:00").do(run_global_reminder, channel=channel)
-
-    schedule.every().wednesday.at("09:00").do(run_global_reminder, channel=channel)
-
-    schedule.every().monday.at("09:00").do(
-        run_personal_reminder, users=get_config("users")
-    )
-
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
+    if reminder_type == "global":
+        channel = get_config("channel")
+        run_global_reminder(channel)
+    elif reminder_type == "personal":
+        run_personal_reminder(users=get_config("users"), message_no_prs=False)
+    else:
+        raise ValueError(f'Reminder type {reminder_type} is not supported. Use either "global" or "personal".')
 
 
 def slash_prs(ack, respond, command):

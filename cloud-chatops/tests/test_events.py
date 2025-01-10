@@ -7,7 +7,7 @@ from helper.data import User
 from events import (
     run_global_reminder,
     run_personal_reminder,
-    schedule_jobs,
+    weekly_reminder,
     slash_prs,
     slash_find_host,
 )
@@ -80,30 +80,19 @@ def test_run_personal_reminder(
     )
 
 
-@patch("events.schedule")
+@patch("events.run_global_reminder")
+@patch("events.run_personal_reminder")
 @patch("events.get_config")
-def test_schedule_jobs(mock_get_config, mock_schedule):
-    """Test the correct jobs are scheduled"""
+def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
+    """Test the correct jobs are run"""
     mock_get_config.side_effect = ["channel", [MOCK_USER]]
-    # Force an exception then catch it here.
-    # This is to prevent the test entering the infinite while wait loop.
-    mock_schedule.run_pending.side_effect = Exception()
-    with pytest.raises(Exception):
-        schedule_jobs()
-    mock_get_config.assert_any_call("users")
+    weekly_reminder("global")
     mock_get_config.assert_any_call("channel")
-    mock_schedule.every.return_value.monday.at.assert_any_call("09:00")
-    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
-        run_global_reminder, channel="channel"
-    )
-    mock_schedule.every.return_value.monday.at.return_value.do.assert_any_call(
-        run_personal_reminder, users=[MOCK_USER]
-    )
-    mock_schedule.every.return_value.wednesday.at.assert_any_call("09:00")
-    mock_schedule.every.return_value.wednesday.at.return_value.do.assert_any_call(
-        run_global_reminder, channel="channel"
-    )
-    mock_schedule.run_pending.assert_called_once_with()
+    mock_global.assert_called_once_with("channel")
+
+    weekly_reminder("personal")
+    mock_get_config.assert_any_call("users")
+    mock_personal.assert_called_once_with(users=[MOCK_USER], message_no_prs=False)
 
 
 @patch("events.run_personal_reminder")
