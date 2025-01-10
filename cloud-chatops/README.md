@@ -10,9 +10,9 @@
 
 ### About
 
-Cloud ChatOps is designed to help encourage developers to complete GitHub pull requests. 
-Either by getting them approved and merged or closed when they go stale.<br>
-The app notifies authors about their pull requests, usually by Slack, until they're closed / merged.
+Cloud ChatOps is designed to help encourage developers to complete GitHub pull requests.
+Either by getting them approved and merged or closed when they go stale.
+The app notifies authors about their pull requests in Slack through channels or direct messages.
 There are multiple methods of sending these reminders.<br>
 
 ### Deployment
@@ -27,16 +27,24 @@ This is facilitated by the below features which can be found in [main.py](src/ma
 #### Slash Commands:
 These slash commands can be run in any channel the app has access to.<br>
  - `/prs <mine | all>`: sends a private message to the user with a list of open pull requests. Either user authored or by anyone.
- - `/find-host`: responds with the IP of the host running the app
+ - `/find-host`: responds with the IP of the host running the app, this only works in development instances.
 
 #### Scheduled Events:
-Using the [schedule](https://pypi.org/project/schedule/) library functions are triggered on a weekly basis.<br>
-The dates and times when the events are run are hard coded in [events.py/schedule_jobs](src/events.py)<br>
-Events are defined in the [events.py](src/events.py) module:<br>
+The app has an endpoint at `https://<your-app-domain>/slack/schedule` which listens for requests to trigger reminder messages being sent.<br>
+You must provide the same secret / token that you generated and stored in the [secrets.yml](template_secrets.yml) file where the app is being hosted.<br>
+You must send POST requests like the below:<br>
+```bash
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: token myToken" \
+--data '{"type":"global | personal"}' \
+https://<your-app-domain>/slack/schedule
+```
+This triggers either of the below functions depending on the value of "type".<br>
+Defined in the [events.py](src/events.py) module:<br>
 - `run_global_reminder()`: sends a message to the pull request channel with every open pull request across the repositories in a thread.
-    - Runs on: Monday / Wednesday @ 09:00 UTC
+
 - `run_personal_reminder()`: sends a message to each user, in the config map, directly with a thread of their open pull requests.
-    - Runs on: Monday @ 09:00 UTC
 
 ### Testing
 #### Unit Tests
@@ -81,6 +89,6 @@ python3 src/dev.py --personal
 # To test multiple events
 python3 src/dev.py --global --personal --channel "some_test_channel"
 
-# To test only slash command
+# To test only slash commands
 python3 src/dev.py # Then run slash commands in Slack
 ```
