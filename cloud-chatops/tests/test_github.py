@@ -44,14 +44,13 @@ def test_make_request(mock_requests, instance):
     mock_error_request.raise_for_status.side_effect = HTTPError
     mock_requests.get.side_effect = [mock_ok_request, mock_error_request]
     res = instance.make_request(
-        "https://api.github.com/repos/mock_owner/mock_repo/pulls",
-        "mock_token"
+        "https://api.github.com/repos/mock_owner/mock_repo/pulls", "mock_token"
     )
     assert res == mock_ok_request.json.return_value
     with pytest.raises(HTTPError):
         instance.make_request(
             "https://api.github_wrong.com/repos/mock_owner/mock_repo/pulls",
-            "mock_token"
+            "mock_token",
         )
 
 

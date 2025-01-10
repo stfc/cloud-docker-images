@@ -18,7 +18,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 validate_required_files()
 
-slack_app = App(token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET"))
+slack_app = App(
+    token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET")
+)
 
 
 @slack_app.event("message")
@@ -71,4 +73,5 @@ def slack_schedule() -> str:
 
 if __name__ == "__main__":
     from waitress import serve
+
     serve(flask_app, host="0.0.0.0", port=3000)

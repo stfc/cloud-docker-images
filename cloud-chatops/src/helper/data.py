@@ -80,7 +80,9 @@ class User:
         )
 
 
-def sort_by(obj_list: List[PR | User], prop: str, reverse: bool = False) -> List[PR | User]:
+def sort_by(
+    obj_list: List[PR | User], prop: str, reverse: bool = False
+) -> List[PR | User]:
     """
     Sort the list of Dataclasses by property.
     :param obj_list: List of Dataclasses

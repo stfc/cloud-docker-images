@@ -24,14 +24,18 @@ MOCK_USER = User(
 @patch("events.FindPRs")
 @patch("events.PRReminder")
 def test_run_global_reminder(
-    mock_pr_reminder, mock_find_prs, mock_get_config, mock_get_token, mock_web_client, mock_sort_by
+    mock_pr_reminder,
+    mock_find_prs,
+    mock_get_config,
+    mock_get_token,
+    mock_web_client,
+    mock_sort_by,
 ):
     """Test global reminder event"""
     mock_get_token.side_effect = ["mock_github", "mock_slack"]
     run_global_reminder("mock_channel")
     mock_find_prs.return_value.run.assert_called_once_with(
-        repos=mock_get_config.return_value,
-        token="mock_github"
+        repos=mock_get_config.return_value, token="mock_github"
     )
     mock_sort_by.assert_called_once_with(
         mock_find_prs.return_value.run.return_value, "created_at", False
@@ -54,14 +58,22 @@ def test_run_global_reminder(
 @patch("events.FindPRs")
 @patch("events.PRReminder")
 def test_run_personal_reminder(
-    mock_pr_reminder, mock_find_prs, mock_get_config, mock_get_token, mock_web_client, mock_filter_by, mock_sort_by
+    mock_pr_reminder,
+    mock_find_prs,
+    mock_get_config,
+    mock_get_token,
+    mock_web_client,
+    mock_filter_by,
+    mock_sort_by,
 ):
     """Test personal reminder event"""
     mock_get_token.side_effect = ["mock_github", "mock_slack"]
     mock_repos = {"mock_owner": ["mock_repo"]}
     mock_get_config.side_effect = [mock_repos]
     run_personal_reminder([MOCK_USER])
-    mock_find_prs.return_value.run.assert_called_once_with(repos=mock_repos, token="mock_github")
+    mock_find_prs.return_value.run.assert_called_once_with(
+        repos=mock_repos, token="mock_github"
+    )
     mock_sort_by.assert_called_once_with(
         mock_find_prs.return_value.run.return_value, "created_at", False
     )

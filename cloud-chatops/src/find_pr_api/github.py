@@ -7,6 +7,7 @@ from helper.data import PR
 
 class FindPRs:
     """This class finds all open pull requests in the given repositories. It can also sort them by property."""
+
     def run(self, repos: List, token: str) -> List[PR]:
         """
         Finds all open pull requests and returns them as a list of dataclasses.
