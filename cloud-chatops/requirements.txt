@@ -1,12 +1,9 @@
 slack-sdk
-schedule
 slack-bolt
-aiohttp
 requests
 python-dateutil
 pytest
 pytest-cov
-pytest-asyncio
 pylint
 black
 pyyaml

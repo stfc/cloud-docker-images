@@ -153,7 +153,6 @@ def test_slash_prs_all(mock_get_config, mock_run_global):
     mock_run_global.assert_called_once_with("mock_slack")
 
 
-@pytest.mark.asyncio
 @patch("events.get_config")
 def test_slash_prs_fail(mock_get_config):
     """Test the function fails if no option is given"""
@@ -169,7 +168,6 @@ def test_slash_prs_fail(mock_get_config):
     )
 
 
-@pytest.mark.asyncio
 @patch("events.get_config")
 def test_slash_prs_no_user(mock_get_config):
     """Test the function fails if the user is not found in the config file"""
@@ -186,7 +184,6 @@ def test_slash_prs_no_user(mock_get_config):
     )
 
 
-@pytest.mark.asyncio
 @patch("events.os")
 def test_slash_find_host(mock_os):
     """Test that the environment variable is retrieved and responded."""

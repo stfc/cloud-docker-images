@@ -57,7 +57,7 @@ def main(args: Namespace) -> None:
     logging.info("Running tests")
     run_methods(args)
     logging.info("Completed tests.")
-    logging.info("Running Async App")
+    logging.info("Running Slack App")
 
     app = App(token=get_token("SLACK_BOT_TOKEN"))
     handler = SocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
