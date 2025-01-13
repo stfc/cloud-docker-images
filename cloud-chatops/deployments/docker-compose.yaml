@@ -4,3 +4,18 @@ services:
     volumes:
       - /etc/chatops/secrets/:/usr/src/app/cloud_chatops/secrets/
       - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
+    networks:
+      - backend
+
+  haproxy:
+    image: haproxytech/haproxy-alpine:2.4
+    networks:
+      - backend
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
+
+networks:
+  backend:
