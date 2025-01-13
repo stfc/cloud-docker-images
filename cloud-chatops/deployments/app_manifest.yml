@@ -8,7 +8,7 @@ features:
     always_online: true
   slash_commands:
     - command: /prs
-      url: https://dev-cloud-chatops.nubes.rl.ac.uk/slack/events
+      url: https://<your-domain-here>/slack/events
       description: Get all open PRs
       usage_hint: "[all: every pr] [mine: your prs]"
       should_escape: false
