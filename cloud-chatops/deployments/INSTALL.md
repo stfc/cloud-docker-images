@@ -179,7 +179,7 @@ This uses docker compose to deploy the ChatOps container and a HAProxy container
 5. Move Cron script and start container:
    ```shell
    # Copy script to etc/cron.< hourly | daily | monthly >
-   sudo cp /etc/chatops/cloud-docker-images/cloud-chatops/chatopscron /etc/cron.daily/
+   sudo cp /etc/chatops/cloud-docker-images/cloud-chatops/deployments/chatopscron /etc/cron.daily/
 
    # Check that crontab can see and run the script
    # If the chatops cron file is not in the command output then crontab will not run it
