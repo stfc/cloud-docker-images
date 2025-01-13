@@ -17,7 +17,7 @@ There are multiple methods of sending these reminders.<br>
 
 ### Deployment
 
-For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](./INSTALL.md)
+For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](deployments/INSTALL.md)
 
 ### Usage / Features
 
@@ -31,7 +31,7 @@ These slash commands can be run in any channel the app has access to.<br>
 
 #### Scheduled Events:
 The app has an endpoint at `https://<your-app-domain>/slack/schedule` which listens for requests to trigger reminder messages being sent.<br>
-You must provide the same secret / token that you generated and stored in the [secrets.yml](template_secrets.yml) file where the app is being hosted.<br>
+You must provide the same secret / token that you generated and stored in the [secrets.yml](deployments/template_secrets.yml) file where the app is being hosted.<br>
 You must send POST requests like the below:<br>
 ```bash
 curl -X POST \
