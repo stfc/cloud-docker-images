@@ -115,6 +115,12 @@ def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
     mock_personal.assert_called_once_with(users=[MOCK_USER], message_no_prs=False)
 
 
+def test_weekly_reminder_fails():
+    """Test the functions raises an error for an incorrect job."""
+    with pytest.raises(ValueError):
+        weekly_reminder("some_incorrect_value")
+
+
 @patch("events.run_personal_reminder")
 @patch("events.get_config")
 def test_slash_prs_mine(mock_get_config, mock_run_personal):
