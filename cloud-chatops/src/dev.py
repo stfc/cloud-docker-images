@@ -77,7 +77,7 @@ def parse_args() -> Namespace:
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     arguments = parse_args()
     validate_required_files()
     main(arguments)
