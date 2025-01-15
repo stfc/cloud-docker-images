@@ -85,3 +85,9 @@ jobs:
           default_author: github_actions
           committer_name: GitHub Actions
           committer_email: actions@github.com
+          new_branch: rabbitConsumerDependUpdate
+
+      - name: create pull request
+        run: gh pr create -B master -H rabbitConsumerDependUpdate --title 'Merge rabbitConsumerDependUpdate into master' --body 'Updating the dependencies for Rabbit Consumer Image. Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
