@@ -16,6 +16,3 @@ services:
       - 443:443
     volumes:
       - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
-
-networks:
-  backend:
