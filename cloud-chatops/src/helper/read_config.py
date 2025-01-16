@@ -73,9 +73,12 @@ def validate_required_files() -> None:
     """
     This function checks that all required files have data in them before the app runs.
     """
-    for token in ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]:
+    for token in ["SLACK_BOT_TOKEN", "GITHUB_TOKEN"]:
         if not get_token(token):
             raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
+
+    if not get_token("SLACK_APP_TOKEN") and not get_token("SLACK_SIGNING_SECRET"):
+        raise ErrorInConfig(f"App requires either SLACK_APP_TOKEN or SLACK_SIGNING_SECRET in secrets.yml. Found neither")
 
     if not get_config("repos"):
         raise ErrorInConfig("config.yml does not contain any repositories.")
