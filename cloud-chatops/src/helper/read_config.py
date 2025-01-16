@@ -42,7 +42,7 @@ def get_token(secret: str) -> str:
     path = get_path()
     with open(path + "secrets/secrets.yml", "r", encoding="utf-8") as secrets:
         secrets_data = yaml.safe_load(secrets)
-        return secrets_data[secret]
+        return secrets_data.get(secret, "")
 
 
 def get_config(section: str) -> Union[List, Dict, str]:

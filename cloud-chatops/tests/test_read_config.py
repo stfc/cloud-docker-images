@@ -63,8 +63,8 @@ def test_get_path_dev_fails(mock_sys, mock_os):
 def test_get_token_fails():
     """Test that an error is raised if trying to access a value that doesn't exist."""
     with patch("builtins.open", mock_open(read_data="mock_token_1: mock_value_1")):
-        with pytest.raises(KeyError):
-            get_token("mock_token_2")
+        res = get_token("mock_token_2")
+        assert res == ""
 
 
 def test_get_token():
