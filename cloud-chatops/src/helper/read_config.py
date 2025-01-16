@@ -78,7 +78,9 @@ def validate_required_files() -> None:
             raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
 
     if not get_token("SLACK_APP_TOKEN") and not get_token("SLACK_SIGNING_SECRET"):
-        raise ErrorInConfig(f"App requires either SLACK_APP_TOKEN or SLACK_SIGNING_SECRET in secrets.yml. Found neither")
+        raise ErrorInConfig(
+            "App requires either SLACK_APP_TOKEN or SLACK_SIGNING_SECRET in secrets.yml. Found neither"
+        )
 
     if not get_config("repos"):
         raise ErrorInConfig("config.yml does not contain any repositories.")

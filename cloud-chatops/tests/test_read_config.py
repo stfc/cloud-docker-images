@@ -133,7 +133,9 @@ def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_fail_token_first_check(mock_get_token, mock_get_config):
+def test_validate_required_files_fail_token_first_check(
+    mock_get_token, mock_get_config
+):
     """Test the validate files function"""
     mock_get_token.side_effect = ["", "mock_github"]
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
@@ -143,7 +145,9 @@ def test_validate_required_files_fail_token_first_check(mock_get_token, mock_get
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_fail_token_second_check(mock_get_token, mock_get_config):
+def test_validate_required_files_fail_token_second_check(
+    mock_get_token, mock_get_config
+):
     """Test the validate files function"""
     mock_get_token.side_effect = ["mock_bot", "mock_github", "", ""]
     mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]

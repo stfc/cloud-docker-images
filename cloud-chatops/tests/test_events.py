@@ -53,6 +53,7 @@ def test_run_global_reminder(
     mock_get_token.assert_any_call("GITHUB_TOKEN")
     mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
 
+
 # Disable for patching
 # pylint: disable=R0917
 # pylint: disable=R0913
