@@ -4,8 +4,8 @@ from typing import Dict, Union, List
 import sys
 import os
 import yaml
-from errors import ErrorInConfig
-from data import User
+from helper.errors import ErrorInConfig
+from helper.data import User
 
 
 def get_path() -> str:
@@ -42,10 +42,10 @@ def get_token(secret: str) -> str:
     path = get_path()
     with open(path + "secrets/secrets.yml", "r", encoding="utf-8") as secrets:
         secrets_data = yaml.safe_load(secrets)
-        return secrets_data[secret]
+        return secrets_data.get(secret, "")
 
 
-def get_config(section: str) -> Union[List | Dict]:
+def get_config(section: str) -> Union[List, Dict, str]:
     """
     This function returns the specified section from the config file.
     :param section: The section of the config to retrieve.
@@ -58,7 +58,11 @@ def get_config(section: str) -> Union[List | Dict]:
             case "users":
                 return [User.from_config(user) for user in config_data[section]]
             case "repos":
-                return config_data[section]
+                data = config_data[section]
+                repos = []
+                for owner in data:
+                    repos += [f"{owner}/{repo}" for repo in data[owner]]
+                return repos
             case "channel":
                 return config_data[section]
             case _:
@@ -69,9 +73,14 @@ def validate_required_files() -> None:
     """
     This function checks that all required files have data in them before the app runs.
     """
-    for token in ["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "GITHUB_TOKEN"]:
+    for token in ["SLACK_BOT_TOKEN", "GITHUB_TOKEN"]:
         if not get_token(token):
             raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
+
+    if not get_token("SLACK_APP_TOKEN") and not get_token("SLACK_SIGNING_SECRET"):
+        raise ErrorInConfig(
+            "App requires either SLACK_APP_TOKEN or SLACK_SIGNING_SECRET in secrets.yml. Found neither"
+        )
 
     if not get_config("repos"):
         raise ErrorInConfig("config.yml does not contain any repositories.")
