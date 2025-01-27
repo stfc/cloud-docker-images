@@ -3,6 +3,7 @@ users:
   - real_name: Real Name
     github_name: github_username
     slack_id: slack_id
+    gitlab_name: gitlab_username
 
 repos:
   <organisation>:

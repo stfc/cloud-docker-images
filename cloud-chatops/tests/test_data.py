@@ -81,5 +81,6 @@ def test_from_config():
         "real_name": "mock user",
         "github_name": "mock_github",
         "slack_id": "mock_slack",
+        "gitlab_name": "mock_gitlab",
     }
     assert MOCK_USER == User.from_config(mock_data)

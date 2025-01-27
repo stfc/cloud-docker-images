@@ -61,6 +61,7 @@ users:
   - real_name: Real Name
     github_name: <name_on_github>
     slack_id: <slack_member_id>
+    gitlab_name: <name_on_gitlab>
 
 repos:  # Dictionary of owners and repositories
   organisation1:

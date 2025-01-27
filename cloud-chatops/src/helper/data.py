@@ -88,6 +88,7 @@ class User:
     real_name: str
     github_name: str
     slack_id: str
+    gitlab_name: str
 
     @classmethod
     def from_config(cls, info: Dict):
@@ -96,6 +97,7 @@ class User:
             real_name=info["real_name"],
             github_name=info["github_name"],
             slack_id=info["slack_id"],
+            gitlab_name=info["gitlab_name"],
         )
 
 
