@@ -27,6 +27,27 @@ MOCK_PR = PR(
     created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
 )
 
+MOCK_GITLAB_DATA = {
+    "title": "mock_title",
+    "iid": 1,
+    "author": {"username": "mock-user"},
+    "web_url": "https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/205",
+    "created_at": "2024-12-15T07:33:56.000+00:00",
+    "draft": False,
+    "labels": ["mock_label"],
+}
+
+MOCK_MR = PR(
+    title="mock_title #1",
+    author="mock-user",
+    url="https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/205",
+    stale=True,
+    draft=False,
+    labels=["mock_label"],
+    repository="mock-project",
+    created_at=datetime.fromisoformat("2024-12-15T07:33:56.000+00:00"),
+    )
+
 MOCK_USER = User(
     real_name="mock user", github_name="mock_github", slack_id="mock_slack"
 )
@@ -47,6 +68,11 @@ def test_is_stale_true():
 def test_from_github():
     """Test that the JSON | Dict data is correctly serialised into a dataclass."""
     assert MOCK_PR == PR.from_github(MOCK_GITHUB_DATA)
+
+
+def test_from_gitlab():
+    """Test that the JSON | Dict data is correctly serialised into a dataclass."""
+    assert MOCK_MR == PR.from_gitlab(MOCK_GITLAB_DATA)
 
 
 def test_from_config():

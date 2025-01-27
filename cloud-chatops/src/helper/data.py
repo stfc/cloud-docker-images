@@ -42,6 +42,25 @@ class PR:
             repository=data["html_url"].split(sep="/")[5],
         )
 
+    @classmethod
+    def from_gitlab(cls, data: Dict):
+        """
+        Serialise the JSON data into this dataclass structure.
+        :param data: JSON | Dict HTTP response data
+        :return:
+        """
+        created_at = datetime.fromisoformat(data["created_at"])
+        return cls(
+            title=f"{data['title']} #{data['iid']}",
+            author=data["author"]["username"],
+            url=data["web_url"],
+            stale=cls.is_stale(created_at),
+            created_at=created_at,
+            draft=data["draft"],
+            labels=data["labels"],
+            repository=data["web_url"].split(sep="/")[4],
+        )
+
     @staticmethod
     def is_stale(created_at: datetime) -> bool:
         """
