@@ -19,7 +19,7 @@ class FindPRs:
         for repo in repos:
             responses += self.make_request(repo, token)
 
-        return [PR.from_json(response) for response in responses]
+        return [PR.from_github(response) for response in responses]
 
     @staticmethod
     def make_request(repo: str, token: str) -> List[Dict]:

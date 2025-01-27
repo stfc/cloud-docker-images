@@ -6,7 +6,7 @@ from helper.data import PR, User
 # pylint: disable=R0801
 
 
-MOCK_DATA = {
+MOCK_GITHUB_DATA = {
     "title": "mock_title",
     "number": 1,
     "user": {"login": "mock_author"},
@@ -44,9 +44,9 @@ def test_is_stale_true():
     assert PR.is_stale(datetime.now() - timedelta(days=30))
 
 
-def test_from_json():
+def test_from_github():
     """Test that the JSON | Dict data is correctly serialised into a dataclass."""
-    assert MOCK_PR == PR.from_json(MOCK_DATA)
+    assert MOCK_PR == PR.from_github(MOCK_GITHUB_DATA)
 
 
 def test_from_config():

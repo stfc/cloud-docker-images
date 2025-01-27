@@ -24,9 +24,9 @@ class PR:
     labels: List[str]
 
     @classmethod
-    def from_json(cls, data: Dict):
+    def from_github(cls, data: Dict):
         """
-        Serialise the JSON data into this dataclass structure.
+        Serialise the JSON data from GitHub REST API into this dataclass structure.
         :param data: JSON | Dict HTTP response data
         :return:
         """
