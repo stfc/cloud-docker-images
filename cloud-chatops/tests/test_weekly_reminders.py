@@ -11,7 +11,7 @@ from events.weekly_reminders import (
 )
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
 )
 
 # Disable for patching

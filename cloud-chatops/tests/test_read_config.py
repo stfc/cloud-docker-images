@@ -23,10 +23,11 @@ projects:
   group1:
     - project1
 channel: mock_channel
+gitlab_domain: gitlab_domain
 """
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
 )
 
 
@@ -109,6 +110,13 @@ def test_get_config_channel():
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
         res = get_config("channel")
         assert res == "mock_channel"
+
+
+def test_get_config_gitlab_domain():
+    """Tests that the GitLab domain is returned from the config."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("gitlab_domain")
+        assert res == "gitlab_domain"
 
 
 def test_get_config_fails():

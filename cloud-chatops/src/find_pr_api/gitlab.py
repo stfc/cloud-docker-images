@@ -4,6 +4,7 @@
 from typing import List, Dict
 import requests
 from helper.data import PR
+from helper.read_config import get_config
 
 
 class FindPRs:
@@ -31,7 +32,8 @@ class FindPRs:
         :return: List of PRs in dict / json
         """
         headers = {"Authorization": "Bearer " + token}
-        url = f"https://gitlab.stfc.ac.uk/api/v4/projects/{project}/merge_requests?state=opened&scope=all"
+        domain = get_config("gitlab_domain")
+        url = f"https://{domain}/api/v4/projects/{project}/merge_requests?state=opened&scope=all"
         response = requests.get(url, headers=headers, timeout=60)
         response.raise_for_status()
         return (

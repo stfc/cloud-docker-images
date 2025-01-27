@@ -5,12 +5,12 @@ from unittest.mock import patch, MagicMock
 from helper.data import User
 from events.slash_commands import (
     slash_prs,
-    slack_mrs,
+    slash_mrs,
     slash_find_host,
 )
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
 )
 
 

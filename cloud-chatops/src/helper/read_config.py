@@ -65,6 +65,8 @@ def get_config(section: str) -> Union[List, Dict, str]:
                 return repos
             case "channel":
                 return config_data[section]
+            case "gitlab_domain":
+                return config_data[section]
             case "projects":
                 data = config_data[section]
                 projects = []

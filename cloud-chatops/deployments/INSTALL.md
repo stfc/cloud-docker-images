@@ -85,6 +85,8 @@ projects:  # Dictionary of groups and projects
   
 # Channel to send global reminders to
 channel: <pull-requests-channel-id>
+# URL of your GitLab instance
+gitlab_domain: <gitlab-instance-domain>
 ```
 
 The file `haproxy.cfg` can be copied into the correct directory without any changes.<br>
