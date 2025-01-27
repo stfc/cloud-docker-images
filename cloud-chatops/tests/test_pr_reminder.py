@@ -4,7 +4,7 @@ from dataclasses import replace
 from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
-from slack_reminder_api.pr_reminder import PRReminder
+from slack_reminder_api.pr_reminder import PRReminder, send_reminders
 from helper.data import PR, Message, User
 
 
@@ -188,3 +188,14 @@ def test_run_none_found_no_message(
     mock_prs = []
     instance.run(mock_prs, "mock_channel", message_no_prs=False)
     mock_send_message.assert_not_called()
+
+
+@patch("slack_reminder_api.pr_reminder.get_token")
+@patch("slack_reminder_api.pr_reminder.PRReminder")
+@patch("slack_reminder_api.pr_reminder.WebClient")
+def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_token):
+    send_reminders("mock_channel", ["mock_pr"], True)
+    mock_get_token.assert_called_once_with("SLACK_BOT_TOKEN")
+    mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
+    mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
+    mock_pr_reminder.return_value.run.assert_called_once_with(prs=["mock_pr"], channel="mock_channel", message_no_prs=True)
