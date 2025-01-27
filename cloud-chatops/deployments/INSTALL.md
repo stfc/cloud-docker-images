@@ -71,6 +71,16 @@ repos:  # Dictionary of owners and repositories
     - repo1  # E.g. github.com/organisation2/repo1
     - repo2
     - repo3
+      
+projects:  # Dictionary of groups and projects
+  group1:
+    - project1
+    - project2
+    - project3
+  group2:
+    - project1
+    - project2
+    - project3
   
 # Channel to send global reminders to
 channel: <pull-requests-channel-id>
@@ -97,10 +107,12 @@ In the `slash commands` section the URL needs to be changed to your publicly acc
 #### Secrets:
 The `secrets.yml` file should look like the below and there's a template [here](template_secrets.yml)
 ```yaml
-  SLACK_BOT_TOKEN: <your-token>
-  SLACK_APP_TOKEN: <your-token> # Development use only
-  SLACK_SIGNING_SECRET: <your-token>
-  GITHUB_TOKEN: <your-token>
+  SLACK_BOT_TOKEN: <your-token> # Required
+  SLACK_SIGNING_SECRET: <your-token> # Required for production use
+  SLACK_APP_TOKEN: <your-token> # Optional: development use only
+  SCHEDULED_REMINDER_TOKEN: <your-token> # Optional: to use the endpoint /slack/schedule reminder
+  GITHUB_TOKEN: <your-token> # Optional: to find GitHub pull requests
+  GITLAB_TOKEN: <your-token> # Optional: to find GitLab merge requests
 ```
 Slack:<br>
 - Slack Token information can be found [here](#slack-tokens).<br>

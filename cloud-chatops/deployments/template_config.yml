@@ -8,4 +8,8 @@ repos:
   <organisation>:
     - <repo>
 
+projects:
+  <group>:
+    - <project>
+
 channel: <pull-requests-channel>
