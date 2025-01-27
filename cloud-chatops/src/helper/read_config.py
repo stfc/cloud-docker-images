@@ -65,6 +65,12 @@ def get_config(section: str) -> Union[List, Dict, str]:
                 return repos
             case "channel":
                 return config_data[section]
+            case "projects":
+                data = config_data[section]
+                projects = []
+                for group in data:
+                    projects += [f"{group}%2F{project}" for project in data[group]]
+                return projects
             case _:
                 raise KeyError(f"No section in config named {section}.")
 

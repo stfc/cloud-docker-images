@@ -19,6 +19,9 @@ repos:
   organisation2:
     - repo1
     - repo2
+projects:
+  group1:
+    - project1
 channel: mock_channel
 """
 
@@ -83,7 +86,7 @@ def test_get_config_users():
 
 
 def test_get_config_repos():
-    """This test checks that a list is returned if a string list of repos is read with no comma at the end."""
+    """This test checks that the repos are read and formatted correctly."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
         res = get_config("repos")
         assert res == [
@@ -92,6 +95,13 @@ def test_get_config_repos():
             "organisation2/repo1",
             "organisation2/repo2",
         ]
+
+
+def test_get_config_projects():
+    """This test checks that the projects are read and formatted correctly."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("projects")
+        assert res == ["group1%2Fproject1"]
 
 
 def test_get_config_channel():
