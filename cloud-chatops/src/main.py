@@ -11,7 +11,8 @@ from flask import Flask, request
 
 
 from helper.read_config import get_token, validate_required_files
-from events import slash_prs, slash_find_host, weekly_reminder
+from events.weekly_reminders import weekly_reminder
+from events.slash_commands import slash_prs, slash_mrs
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -31,23 +32,14 @@ def handle_message_events(body, logger):
 
 @slack_app.command("/prs")
 def prs(ack, respond, command):
-    """
-    This command sends the user a message containing all open pull requests.
-    :param command: The return object from Slack API.
-    :param ack: Slacks acknowledgement command.
-    :param respond: Slacks respond command to respond to the command in chat.
-    """
+    """See events/slash_commands.py for documentation."""
     slash_prs(ack, respond, command)
 
 
-@slack_app.command("/find-host")
-def find_host(ack, respond):
-    """
-    This command responds to the user with the IP of the host that received the message.
-    :param ack: Slacks acknowledgement command.
-    :param respond: Slacks respond command to respond to the command in chat.
-    """
-    slash_find_host(ack, respond)
+@slack_app.command("/mrs")
+def prs(ack, respond, command):
+    """See events/slash_commands.py for documentation."""
+    slash_mrs(ack, respond, command)
 
 
 flask_app = Flask(__name__)
