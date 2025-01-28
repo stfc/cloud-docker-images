@@ -1,17 +1,21 @@
 ---
-users:
-  - real_name: Real Name
-    github_name: github_username
-    slack_id: slack_id
-    gitlab_name: gitlab_username
+app:
+  users:
+    - real_name: Real Name
+      slack_id: slack_id
+      github_name: github_username
+      gitlab_name: gitlab_username
 
-repos:
-  <organisation>:
-    - <repo>
 
-projects:
-  <group>:
-    - <project>
+github:
+  enabled: true
+  repositories:
+    <owner>:
+      - <repo>
 
-channel: <pull-requests-channel>
-gitlab_domain: <gitlab-instance-domain>
+gitlab:
+  enabled: true
+  domain: gitlab.example.com
+  projects:
+    <group>:
+      - <project>

@@ -56,37 +56,27 @@ Slack Channel and Member IDs can be found in Slack by:<br>
 The `config.yml` should look like the below. There's a template without the comments [here](template_config.yml):
 ```yaml
 ---
-users:
-  # Information of users in your team
-  - real_name: Real Name
-    github_name: <name_on_github>
-    slack_id: <slack_member_id>
-    gitlab_name: <name_on_gitlab>
+---
+app:  # Configuration for the app
+  users:
+    - real_name: Real Name
+      slack_id: slack_id
+      github_name: github_username
+      gitlab_name: gitlab_username
 
-repos:  # Dictionary of owners and repositories
-  organisation1:
-    - repo1  # E.g. github.com/organisation1/repo1
-    - repo2
-    - repo3
-  organisation2:
-    - repo1  # E.g. github.com/organisation2/repo1
-    - repo2
-    - repo3
-      
-projects:  # Dictionary of groups and projects
-  group1:
-    - project1
-    - project2
-    - project3
-  group2:
-    - project1
-    - project2
-    - project3
-  
-# Channel to send global reminders to
-channel: <pull-requests-channel-id>
-# URL of your GitLab instance
-gitlab_domain: <gitlab-instance-domain>
+
+github:  # Configuration for the GitHub feature
+  enabled: true  # Disable if you do not want GitHub pull request reminders
+  repositories:
+    <owner>:
+      - <repo>
+
+gitlab:
+  enabled: true  # Disable if you do not want GitHub pull request reminders
+  domain: gitlab.example.com
+  projects:
+    <group>:
+      - <project>
 ```
 
 The file `haproxy.cfg` can be copied into the correct directory without any changes.<br>
@@ -111,8 +101,11 @@ In the `slash commands` section the URL needs to be changed to your publicly acc
 The `secrets.yml` file should look like the below and there's a template [here](template_secrets.yml)
 ```yaml
   SLACK_BOT_TOKEN: <your-token> # Required
-  SLACK_SIGNING_SECRET: <your-token> # Required for production use
-  SLACK_APP_TOKEN: <your-token> # Optional: development use only
+  
+  # You must have either of the app token or signing secret.
+  SLACK_APP_TOKEN: <your-token> # Development use only
+  SLACK_SIGNING_SECRET: <your-token> # Production use only
+  
   SCHEDULED_REMINDER_TOKEN: <your-token> # Optional: to use the endpoint /slack/schedule reminder
   GITHUB_TOKEN: <your-token> # Optional: to find GitHub pull requests
   GITLAB_TOKEN: <your-token> # Optional: to find GitLab merge requests
@@ -124,6 +117,11 @@ GitHub:<br>
 -  A GitHub Personal Access Token is needed to bypass rate limiting and allows access to private repositories.<br>
 - Documentation on how to create a GitHub personal access token can be found 
 [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).<br>
+
+GitLab:<br>
+- A GitLab Personal Access Token is needed to authenticate with the GitLab API.
+- Documentation on how to create a GitLab personal access token can be found
+[here](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)<br>
 
 ### Deployment Options:
 

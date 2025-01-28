@@ -4,7 +4,7 @@ from typing import Dict, Union, List
 import sys
 import os
 import yaml
-from helper.errors import ErrorInConfig
+from helper.errors import ErrorInConfig, ErrorInSecrets
 from helper.data import User
 
 
@@ -25,24 +25,24 @@ def get_path() -> str:
             try:
                 return f"{os.environ['HOMEPATH']}\\dev_cloud_chatops\\"
             except KeyError as exc:
-                raise ErrorInConfig(
+                raise RuntimeError(
                     "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
                 ) from exc
 
-    # Production path
+    # Docker image path
     return "/usr/src/app/cloud_chatops/"
 
 
 def get_token(secret: str) -> str:
     """
-    This function reads from the secret's file and returns a specified secret.
+    This function reads from the secrets file and returns a specified secret.
     :param secret: The secret to find
-    :return: A secret as string
+    :return: The secret as string
     """
     path = get_path()
     with open(path + "secrets/secrets.yml", "r", encoding="utf-8") as secrets:
         secrets_data = yaml.safe_load(secrets)
-        return secrets_data.get(secret, "")
+        return secrets_data[secret]
 
 
 def get_config(section: str) -> Union[List, Dict, str]:
@@ -54,47 +54,56 @@ def get_config(section: str) -> Union[List, Dict, str]:
     path = get_path()
     with open(path + "config/config.yml", "r", encoding="utf-8") as config:
         config_data = yaml.safe_load(config)
-        match section:
-            case "users":
-                return [User.from_config(user) for user in config_data[section]]
-            case "repos":
-                data = config_data[section]
-                repos = []
-                for owner in data:
-                    repos += [f"{owner}/{repo}" for repo in data[owner]]
-                return repos
-            case "channel":
-                return config_data[section]
-            case "gitlab_domain":
-                return config_data[section]
-            case "projects":
-                data = config_data[section]
-                projects = []
-                for group in data:
-                    projects += [f"{group}%2F{project}" for project in data[group]]
-                return projects
-            case _:
-                raise KeyError(f"No section in config named {section}.")
+    match section:
+        case "users":
+            return [User.from_config(user) for user in config_data["app"]["users"]]
+        case "repos":
+            data = config_data["github"]["repositories"]
+            repos = []
+            for owner in data:
+                repos += [f"{owner}/{repo}" for repo in data[owner]]
+            return repos
+        case "gitlab_domain":
+            return config_data["gitlab"]["domain"]
+        case "projects":
+            data = config_data["gitlab"]["projects"]
+            projects = []
+            for group in data:
+                projects += [f"{group}%2F{project}" for project in data[group]]
+            return projects
+        case _:
+            raise KeyError(f"No section in config.yml named {section}.")
 
 
 def validate_required_files() -> None:
     """
-    This function checks that all required files have data in them before the app runs.
+    This function checks that the config.yaml and secrets.yaml are valid.
     """
-    for token in ["SLACK_BOT_TOKEN", "GITHUB_TOKEN"]:
-        if not get_token(token):
-            raise ErrorInConfig(f"Token {token} does not have a value in secrets.yml.")
+    if sys.argv[0].endswith("dev.py") and not get_token("SLACK_APP_TOKEN"):
+        raise ErrorInSecrets("SLACK_APP_TOKEN")
 
-    if not get_token("SLACK_APP_TOKEN") and not get_token("SLACK_SIGNING_SECRET"):
-        raise ErrorInConfig(
-            "App requires either SLACK_APP_TOKEN or SLACK_SIGNING_SECRET in secrets.yml. Found neither"
-        )
+    if sys.argv[0].endswith("main.py") and not get_token("SLACK_SIGNING_SECRET"):
+        raise ErrorInSecrets("SLACK_SIGNING_SECRET")
 
-    if not get_config("repos"):
-        raise ErrorInConfig("config.yml does not contain any repositories.")
+    if not get_token("SLACK_BOT_TOKEN"):
+        raise ErrorInSecrets("SLACK_BOT_TOKEN")
 
-    if not get_config("users"):
-        raise ErrorInConfig("Users parameter in config.yml is not set.")
+    github_config = get_config("github")
+    if github_config["enabled"]:
+        if not get_token("GITHUB_TOKEN"):
+            raise ErrorInSecrets("GITHUB_TOKEN")
+        if not github_config["repositories"]:
+            raise ErrorInConfig("github", "repositories")
 
-    if not get_config("channel"):
-        raise ErrorInConfig("Channel parameter in config.yml is not set.")
+    gitlab_config = get_config("gitlab")
+    if gitlab_config["enabled"]:
+        if not get_token("GITLAB_TOKEN"):
+            raise ErrorInSecrets("GITLAB_TOKEN")
+        if not gitlab_config["domain"]:
+            raise ErrorInConfig("gitlab", "domain")
+        if not gitlab_config["projects"]:
+            raise ErrorInConfig("gitlab", "projects")
+
+    app_config = get_config("app")
+    if not app_config["users"]:
+        raise ErrorInConfig("app", "users")
