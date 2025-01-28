@@ -113,10 +113,16 @@ def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
     mock_personal.assert_called_once_with(users=[MOCK_USER], message_no_prs=False)
 
 
-def test_weekly_reminder_fails():
+def test_weekly_reminder_fails_unknown_type():
     """Test the functions raises an error for an incorrect job."""
     with pytest.raises(ValueError):
         weekly_reminder({"reminder_type": "unknown_value"})
+
+
+def test_weekly_reminder_fails_no_channel():
+    """Test the functions raises an error for not having a channel value."""
+    with pytest.raises(ValueError):
+        weekly_reminder({"reminder_type": "global"})
 
 
 

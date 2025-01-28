@@ -72,7 +72,7 @@ def get_config(section: str) -> Union[List, Dict, str]:
                 projects += [f"{group}%2F{project}" for project in data[group]]
             return projects
         case _:
-            raise KeyError(f"No section in config.yml named {section}.")
+            return config_data[section]
 
 
 def validate_required_files() -> None:

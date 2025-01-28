@@ -74,10 +74,11 @@ def test_make_string(mock_get_config, instance):
 def test_make_string_fails(mock_get_config, instance):
     """Test the github name is used if slack name can't be found."""
     mock_get_config.return_value = [MOCK_USER]
-    res = instance.make_string(MOCK_PR)
+    mock_pr_changed = replace(MOCK_PR, author="mock_user_2")
+    res = instance.make_string(mock_pr_changed)
     expected = (
         f"*This PR is older than 30 days. Consider closing it:*"
-        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
+        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_user_2"
     )
     assert res == expected
 

@@ -128,7 +128,7 @@ def test_slash_mrs_mine(mock_get_token, mock_get_config, mock_send_reminders, mo
     mock_get_token.assert_called_once_with("GITLAB_TOKEN")
     mock_respond.assert_any_call("Finding the MRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_mrs.return_value.run.assert_called_once_with(repos=["group&2Fproject"], token=mock_get_token.return_value)
+    mock_find_mrs.return_value.run.assert_called_once_with(projects=["group&2Fproject"], token=mock_get_token.return_value)
     mock_filter_by.assert_any_call(
         obj_list=mock_find_mrs.return_value.run.return_value,
         prop="author",
@@ -147,7 +147,7 @@ def test_slash_mrs_all(mock_get_token, mock_get_config, mock_send_reminders, moc
     mock_get_config.side_effect = [[MOCK_USER], ["group&2Fproject"]]
     mock_filter_by.return_value = [MOCK_USER]
     mock_respond = MagicMock()
-    mock_command = {"user_id": MOCK_USER.slack_id, "text": "mine"}
+    mock_command = {"user_id": MOCK_USER.slack_id, "text": "all"}
     mock_ack = MagicMock()
     slash_mrs(mock_ack, mock_respond, mock_command)
     mock_ack.assert_called_once_with()
@@ -156,8 +156,8 @@ def test_slash_mrs_all(mock_get_token, mock_get_config, mock_send_reminders, moc
     mock_get_token.assert_called_once_with("GITLAB_TOKEN")
     mock_respond.assert_any_call("Finding the MRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_mrs.return_value.run.assert_called_once_with(repos=["group&2Fproject"], token=mock_get_token.return_value)
-    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_filter_by.return_value, True)
+    mock_find_mrs.return_value.run.assert_called_once_with(projects=["group&2Fproject"], token=mock_get_token.return_value)
+    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_find_mrs.return_value.run.return_value, True)
 
 
 @patch("events.slash_commands.get_config")
