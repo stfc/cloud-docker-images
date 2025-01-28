@@ -3,7 +3,7 @@ This module contains events to run in main.py.
 """
 
 import os
-from typing import List
+from typing import List, Dict
 from slack_sdk import WebClient
 from helper.data import User, sort_by, filter_by, PR
 from helper.read_config import get_config, get_token
@@ -46,13 +46,16 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
         )
 
 
-def weekly_reminder(reminder_type: str) -> None:
+def weekly_reminder(message_data: Dict) -> None:
     """
     This function chooses which type of reminder to call based on its arguments.
-    :param reminder_type: Type of reminder to send, global or personal.
+    :param message_data: Data from the POST request.
     """
+    reminder_type = message_data["reminder_type"]
+    channel = message_data.get("channel", "")
     if reminder_type == "global":
-        channel = get_config("channel")
+        if not channel:
+            raise ValueError("Channel not provided in POST message. Cannot complete request.")
         run_global_reminder(channel)
     elif reminder_type == "personal":
         run_personal_reminder(users=get_config("users"), message_no_prs=False)

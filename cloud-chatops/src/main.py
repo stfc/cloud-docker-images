@@ -55,11 +55,10 @@ def slack_events() -> slack_handler.handle:
 @flask_app.route("/slack/schedule", methods=["POST"])
 def slack_schedule() -> str:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
-    schedule_type = request.json.get("type")
     token = request.headers.get("Authorization")
     if token != get_token("SCHEDULED_REMINDER_TOKEN"):
         return "403"
-    weekly_reminder(schedule_type)
+    weekly_reminder(request.json)
     return "200"
 
 

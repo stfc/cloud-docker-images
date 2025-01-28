@@ -104,12 +104,11 @@ def test_run_personal_reminder(
 @patch("events.weekly_reminders.get_config")
 def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
     """Test the correct jobs are run"""
-    mock_get_config.side_effect = ["channel", [MOCK_USER]]
-    weekly_reminder("global")
-    mock_get_config.assert_any_call("channel")
-    mock_global.assert_called_once_with("channel")
+    mock_get_config.return_value = [MOCK_USER]
+    weekly_reminder({"reminder_type": "global", "channel": "mock_channel"})
+    mock_global.assert_called_once_with("mock_channel")
 
-    weekly_reminder("personal")
+    weekly_reminder({"reminder_type": "personal"})
     mock_get_config.assert_any_call("users")
     mock_personal.assert_called_once_with(users=[MOCK_USER], message_no_prs=False)
 
@@ -117,7 +116,7 @@ def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
 def test_weekly_reminder_fails():
     """Test the functions raises an error for an incorrect job."""
     with pytest.raises(ValueError):
-        weekly_reminder("some_incorrect_value")
+        weekly_reminder({"reminder_type": "unknown_value"})
 
 
 
