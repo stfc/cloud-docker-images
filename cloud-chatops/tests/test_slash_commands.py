@@ -9,6 +9,7 @@ from events.slash_commands import (
     slash_find_host,
 )
 
+# pylint: disable=R0801
 MOCK_USER = User(
     real_name="mock user",
     github_name="mock_github",

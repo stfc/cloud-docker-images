@@ -6,7 +6,7 @@ from helper.data import User
 from helper.errors import NoTestCase
 from dev import run_methods, call_method, parse_args, main
 
-
+# pylint: disable=R0801
 MOCK_USER = User(
     real_name="mock user",
     github_name="mock_github",
