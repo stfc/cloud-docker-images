@@ -46,10 +46,13 @@ MOCK_MR = PR(
     labels=["mock_label"],
     repository="mock-project",
     created_at=datetime.fromisoformat("2024-12-15T07:33:56.000+00:00"),
-    )
+)
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
+    real_name="mock user",
+    github_name="mock_github",
+    slack_id="mock_slack",
+    gitlab_name="mock_gitlab",
 )
 
 # pylint: disable=R0801

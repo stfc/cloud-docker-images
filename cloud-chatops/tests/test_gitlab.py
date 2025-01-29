@@ -41,10 +41,7 @@ def test_make_request_ok(mock_requests, mock_get_config, instance):
     mock_ok_request = NonCallableMock()
     mock_requests.get.side_effect = [mock_ok_request]
     mock_get_config.return_value = "mock_domain"
-    res = instance.make_request(
-        "mock_project",
-        "mock_token"
-    )
+    res = instance.make_request("mock_project", "mock_token")
     mock_get_config.assert_called_once_with("gitlab_domain")
     assert res == mock_ok_request.json.return_value
 

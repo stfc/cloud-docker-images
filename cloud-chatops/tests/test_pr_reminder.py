@@ -40,7 +40,10 @@ MOCK_PR_2 = PR(
 )
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
+    real_name="mock user",
+    github_name="mock_github",
+    slack_id="mock_slack",
+    gitlab_name="mock_gitlab",
 )
 
 
@@ -200,4 +203,6 @@ def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_token):
     mock_get_token.assert_called_once_with("SLACK_BOT_TOKEN")
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
     mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
-    mock_pr_reminder.return_value.run.assert_called_once_with(prs=["mock_pr"], channel="mock_channel", message_no_prs=True)
+    mock_pr_reminder.return_value.run.assert_called_once_with(
+        prs=["mock_pr"], channel="mock_channel", message_no_prs=True
+    )

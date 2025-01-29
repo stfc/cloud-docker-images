@@ -8,7 +8,10 @@ from dev import run_methods, call_method, parse_args, main
 
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
+    real_name="mock user",
+    github_name="mock_github",
+    slack_id="mock_slack",
+    gitlab_name="mock_gitlab",
 )
 
 

@@ -10,7 +10,10 @@ from events.slash_commands import (
 )
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack", gitlab_name="mock_gitlab"
+    real_name="mock user",
+    github_name="mock_github",
+    slack_id="mock_slack",
+    gitlab_name="mock_gitlab",
 )
 
 
@@ -19,7 +22,9 @@ MOCK_USER = User(
 @patch("events.slash_commands.send_reminders")
 @patch("events.slash_commands.get_config")
 @patch("events.slash_commands.get_token")
-def test_slash_prs_mine(mock_get_token, mock_get_config, mock_send_reminders, mock_find_prs, mock_filter_by):
+def test_slash_prs_mine(
+    mock_get_token, mock_get_config, mock_send_reminders, mock_find_prs, mock_filter_by
+):
     """Test the function works when users choose "mine" """
     mock_get_config.side_effect = [[MOCK_USER], ["owner/repo"]]
     mock_filter_by.return_value = [MOCK_USER]
@@ -33,13 +38,17 @@ def test_slash_prs_mine(mock_get_token, mock_get_config, mock_send_reminders, mo
     mock_get_token.assert_called_once_with("GITHUB_TOKEN")
     mock_respond.assert_any_call("Finding the PRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_prs.return_value.run.assert_called_once_with(repos=["owner/repo"], token=mock_get_token.return_value)
+    mock_find_prs.return_value.run.assert_called_once_with(
+        repos=["owner/repo"], token=mock_get_token.return_value
+    )
     mock_filter_by.assert_any_call(
         obj_list=mock_find_prs.return_value.run.return_value,
         prop="author",
-        value=MOCK_USER.github_name
+        value=MOCK_USER.github_name,
     )
-    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_filter_by.return_value, True)
+    mock_send_reminders.assert_called_once_with(
+        MOCK_USER.slack_id, mock_filter_by.return_value, True
+    )
 
 
 @patch("events.slash_commands.filter_by")
@@ -47,7 +56,9 @@ def test_slash_prs_mine(mock_get_token, mock_get_config, mock_send_reminders, mo
 @patch("events.slash_commands.send_reminders")
 @patch("events.slash_commands.get_config")
 @patch("events.slash_commands.get_token")
-def test_slash_prs_all(mock_get_token, mock_get_config, mock_send_reminders, mock_find_prs, mock_filter_by):
+def test_slash_prs_all(
+    mock_get_token, mock_get_config, mock_send_reminders, mock_find_prs, mock_filter_by
+):
     """Test the function works when users choose "all" """
     mock_get_config.side_effect = [[MOCK_USER], ["owner/repo"]]
     mock_filter_by.return_value = [MOCK_USER]
@@ -61,8 +72,12 @@ def test_slash_prs_all(mock_get_token, mock_get_config, mock_send_reminders, moc
     mock_get_token.assert_called_once_with("GITHUB_TOKEN")
     mock_respond.assert_any_call("Finding the PRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_prs.return_value.run.assert_called_once_with(repos=["owner/repo"], token=mock_get_token.return_value)
-    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_filter_by.return_value, True)
+    mock_find_prs.return_value.run.assert_called_once_with(
+        repos=["owner/repo"], token=mock_get_token.return_value
+    )
+    mock_send_reminders.assert_called_once_with(
+        MOCK_USER.slack_id, mock_filter_by.return_value, True
+    )
 
 
 @patch("events.slash_commands.get_config")
@@ -114,7 +129,9 @@ def test_slash_find_host(mock_os):
 @patch("events.slash_commands.send_reminders")
 @patch("events.slash_commands.get_config")
 @patch("events.slash_commands.get_token")
-def test_slash_mrs_mine(mock_get_token, mock_get_config, mock_send_reminders, mock_find_mrs, mock_filter_by):
+def test_slash_mrs_mine(
+    mock_get_token, mock_get_config, mock_send_reminders, mock_find_mrs, mock_filter_by
+):
     """Test the function works when users choose "mine" """
     mock_get_config.side_effect = [[MOCK_USER], ["group&2Fproject"]]
     mock_filter_by.return_value = [MOCK_USER]
@@ -128,13 +145,17 @@ def test_slash_mrs_mine(mock_get_token, mock_get_config, mock_send_reminders, mo
     mock_get_token.assert_called_once_with("GITLAB_TOKEN")
     mock_respond.assert_any_call("Finding the MRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_mrs.return_value.run.assert_called_once_with(projects=["group&2Fproject"], token=mock_get_token.return_value)
+    mock_find_mrs.return_value.run.assert_called_once_with(
+        projects=["group&2Fproject"], token=mock_get_token.return_value
+    )
     mock_filter_by.assert_any_call(
         obj_list=mock_find_mrs.return_value.run.return_value,
         prop="author",
-        value=MOCK_USER.gitlab_name
+        value=MOCK_USER.gitlab_name,
     )
-    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_filter_by.return_value, True)
+    mock_send_reminders.assert_called_once_with(
+        MOCK_USER.slack_id, mock_filter_by.return_value, True
+    )
 
 
 @patch("events.slash_commands.filter_by")
@@ -142,7 +163,9 @@ def test_slash_mrs_mine(mock_get_token, mock_get_config, mock_send_reminders, mo
 @patch("events.slash_commands.send_reminders")
 @patch("events.slash_commands.get_config")
 @patch("events.slash_commands.get_token")
-def test_slash_mrs_all(mock_get_token, mock_get_config, mock_send_reminders, mock_find_mrs, mock_filter_by):
+def test_slash_mrs_all(
+    mock_get_token, mock_get_config, mock_send_reminders, mock_find_mrs, mock_filter_by
+):
     """Test the function works when users choose "all" """
     mock_get_config.side_effect = [[MOCK_USER], ["group&2Fproject"]]
     mock_filter_by.return_value = [MOCK_USER]
@@ -156,8 +179,12 @@ def test_slash_mrs_all(mock_get_token, mock_get_config, mock_send_reminders, moc
     mock_get_token.assert_called_once_with("GITLAB_TOKEN")
     mock_respond.assert_any_call("Finding the MRs...")
     mock_filter_by.assert_any_call([MOCK_USER], "slack_id", MOCK_USER.slack_id)
-    mock_find_mrs.return_value.run.assert_called_once_with(projects=["group&2Fproject"], token=mock_get_token.return_value)
-    mock_send_reminders.assert_called_once_with(MOCK_USER.slack_id, mock_find_mrs.return_value.run.return_value, True)
+    mock_find_mrs.return_value.run.assert_called_once_with(
+        projects=["group&2Fproject"], token=mock_get_token.return_value
+    )
+    mock_send_reminders.assert_called_once_with(
+        MOCK_USER.slack_id, mock_find_mrs.return_value.run.return_value, True
+    )
 
 
 @patch("events.slash_commands.get_config")

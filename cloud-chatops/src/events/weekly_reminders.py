@@ -52,7 +52,9 @@ def weekly_reminder(message_data: Dict) -> None:
     channel = message_data.get("channel", "")
     if reminder_type == "global":
         if not channel:
-            raise ValueError("Channel not provided in POST message. Cannot complete request.")
+            raise ValueError(
+                "Channel not provided in POST message. Cannot complete request."
+            )
         run_global_reminder(channel)
     elif reminder_type == "personal":
         run_personal_reminder(users=get_config("users"), message_no_prs=False)

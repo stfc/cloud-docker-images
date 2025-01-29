@@ -31,7 +31,9 @@ def slash_prs(ack, respond, command):
     user = filter_by(users, "slack_id", command["user_id"])[0]
 
     respond("Finding the PRs...")
-    prs = FindPRsGitHub().run(repos=get_config("repos"), token=get_token("GITHUB_TOKEN"))
+    prs = FindPRsGitHub().run(
+        repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
+    )
 
     if command["text"] == "mine":
         prs = filter_by(obj_list=prs, prop="author", value=user.github_name)
@@ -75,7 +77,9 @@ def slash_mrs(ack, respond, command):
     user = filter_by(users, "slack_id", command["user_id"])[0]
 
     respond("Finding the MRs...")
-    prs = FindPRsGitLab().run(projects=get_config("projects"), token=get_token("GITLAB_TOKEN"))
+    prs = FindPRsGitLab().run(
+        projects=get_config("projects"), token=get_token("GITLAB_TOKEN")
+    )
 
     if command["text"] == "mine":
         prs = filter_by(obj_list=prs, prop="author", value=user.gitlab_name)

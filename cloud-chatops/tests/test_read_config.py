@@ -35,7 +35,10 @@ gitlab:
 """
 
 MOCK_USER = User(
-    real_name="Real Name", github_name="github_username", slack_id="slack_id", gitlab_name="gitlab_username"
+    real_name="Real Name",
+    github_name="github_username",
+    slack_id="slack_id",
+    gitlab_name="gitlab_username",
 )
 
 
@@ -129,7 +132,11 @@ def test_get_config_fails():
 def test_validate_required_files_dev(mock_get_token, mock_get_config):
     """Test the validate files function passes when running through dev.py."""
     mock_get_token.return_value = "mock_token"
-    mock_get_config.side_effect = [{"enabled": False}, {"enabled": False}, {"users": ["mock_users"]}]
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": False},
+        {"users": ["mock_users"]},
+    ]
     with patch("sys.argv", ["dev.py"]):
         validate_required_files()
 
@@ -139,7 +146,11 @@ def test_validate_required_files_dev(mock_get_token, mock_get_config):
 def test_validate_required_files_main(mock_get_token, mock_get_config):
     """Test the validate files function passes when running through dev.py."""
     mock_get_token.return_value = "mock_token"
-    mock_get_config.side_effect = [{"enabled": False}, {"enabled": False}, {"users": ["mock_users"]}]
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": False},
+        {"users": ["mock_users"]},
+    ]
     with patch("sys.argv", ["main.py"]):
         validate_required_files()
 
@@ -151,7 +162,10 @@ def test_validate_required_files_dev_fails(mock_get_token):
     with patch("sys.argv", ["dev.py"]):
         with pytest.raises(ErrorInSecrets) as exc:
             validate_required_files()
-        assert exc.value.args[0] == "There is a problem with your secrets.yaml. The secret SLACK_APP_TOKEN is not set."
+        assert (
+            exc.value.args[0]
+            == "There is a problem with your secrets.yaml. The secret SLACK_APP_TOKEN is not set."
+        )
 
 
 @patch("helper.read_config.get_token")
@@ -161,7 +175,10 @@ def test_validate_required_files_main_fails(mock_get_token):
     with patch("sys.argv", ["main.py"]):
         with pytest.raises(ErrorInSecrets) as exc:
             validate_required_files()
-        assert exc.value.args[0] == "There is a problem with your secrets.yaml. The secret SLACK_SIGNING_SECRET is not set."
+        assert (
+            exc.value.args[0]
+            == "There is a problem with your secrets.yaml. The secret SLACK_SIGNING_SECRET is not set."
+        )
 
 
 @patch("helper.read_config.get_token")
@@ -170,7 +187,10 @@ def test_validate_required_files_fail_slack_bot_token(mock_get_token):
     mock_get_token.return_value = ""
     with pytest.raises(ErrorInSecrets) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your secrets.yaml. The secret SLACK_BOT_TOKEN is not set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret SLACK_BOT_TOKEN is not set."
+    )
 
 
 @patch("helper.read_config.get_config")
@@ -181,21 +201,26 @@ def test_validate_required_files_github_token_fails(mock_get_token, mock_get_con
     mock_get_token.side_effect = ["mock_slack_bot_token", ""]
     with pytest.raises(ErrorInSecrets) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your secrets.yaml. The secret GITHUB_TOKEN is not set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret GITHUB_TOKEN is not set."
+    )
 
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_github_repositories_fails(mock_get_token, mock_get_config):
+def test_validate_required_files_github_repositories_fails(
+    mock_get_token, mock_get_config
+):
     """Test the validate files function fails when GitHub repositories are not given."""
-    mock_get_config.return_value = {
-        "enabled": True,
-        "repositories": {}
-    }
+    mock_get_config.return_value = {"enabled": True, "repositories": {}}
     mock_get_token.side_effect = ["mock_slack_bot_token", "mock_github_token"]
     with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your config.yaml. The feature github does not have the parameter repositories set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature github does not have the parameter repositories set."
+    )
 
 
 @patch("helper.read_config.get_config")
@@ -206,7 +231,10 @@ def test_validate_required_files_gitlab_token_fails(mock_get_token, mock_get_con
     mock_get_token.side_effect = ["mock_slack_bot_token", ""]
     with pytest.raises(ErrorInSecrets) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your secrets.yaml. The secret GITLAB_TOKEN is not set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret GITLAB_TOKEN is not set."
+    )
 
 
 @patch("helper.read_config.get_config")
@@ -215,16 +243,19 @@ def test_validate_required_files_gitlab_domain_fails(mock_get_token, mock_get_co
     """Test the validate files function fails when the GitLab domain is not given."""
     mock_get_config.side_effect = [
         {"enabled": False},
-        {
-            "enabled": True,
-            "domain": "",
-            "projects": {}
-        }
+        {"enabled": True, "domain": "", "projects": {}},
     ]
-    mock_get_token.side_effect = ["mock_slack_bot_token", "mock_github_token", "mock_gitlab_token"]
+    mock_get_token.side_effect = [
+        "mock_slack_bot_token",
+        "mock_github_token",
+        "mock_gitlab_token",
+    ]
     with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your config.yaml. The feature gitlab does not have the parameter domain set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature gitlab does not have the parameter domain set."
+    )
 
 
 @patch("helper.read_config.get_config")
@@ -233,24 +264,34 @@ def test_validate_required_files_gitlab_projects_fails(mock_get_token, mock_get_
     """Test the validate files function fails when GitLab projects are not given."""
     mock_get_config.side_effect = [
         {"enabled": False},
-        {
-            "enabled": True,
-            "domain": "gitlab.example.com",
-            "projects": {}
-         }
+        {"enabled": True, "domain": "gitlab.example.com", "projects": {}},
     ]
-    mock_get_token.side_effect = ["mock_slack_bot_token", "mock_github_token", "mock_gitlab_token"]
+    mock_get_token.side_effect = [
+        "mock_slack_bot_token",
+        "mock_github_token",
+        "mock_gitlab_token",
+    ]
     with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your config.yaml. The feature gitlab does not have the parameter projects set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature gitlab does not have the parameter projects set."
+    )
 
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
 def test_validate_required_files_app_users_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when the GitLab token is not given."""
-    mock_get_config.side_effect = [{"enabled": False}, {"enabled": False}, {"users": []}]
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": False},
+        {"users": []},
+    ]
     mock_get_token.side_effect = ["mock_slack_bot_token"]
     with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
-    assert exc.value.args[0] == "There is a problem with your config.yaml. The feature app does not have the parameter users set."
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature app does not have the parameter users set."
+    )

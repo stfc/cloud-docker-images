@@ -1,6 +1,5 @@
 """This module finds all open merge requests from given projects in GitLab."""
 
-
 from typing import List, Dict
 import requests
 from helper.data import PR
