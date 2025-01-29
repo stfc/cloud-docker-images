@@ -10,7 +10,7 @@
 
 ### About
 
-Cloud ChatOps is designed to help encourage developers to complete GitHub pull requests.
+Cloud ChatOps is designed to help encourage developers to complete GitHub/GitLab pull requests.
 Either by getting them approved and merged or closed when they go stale.
 The app notifies authors about their pull requests in Slack through channels or direct messages.
 There are multiple methods of sending these reminders.<br>
@@ -21,7 +21,7 @@ For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](deployments/IN
 
 ### Usage / Features
 
-The main purpose of this app is to remind the team about pull requests they have open across their GitHub repositories.<br>
+The main purpose of this app is to remind the team about pull requests they have open across their GitHub repositories or GitLab projects.<br>
 This is facilitated by the below features which can be found in [main.py](src/main.py).
 
 #### Slash Commands:
@@ -37,10 +37,10 @@ You must send POST requests like the below:<br>
 curl -X POST \
 -H "Content-Type: application/json" \
 -H "Authorization: token myToken" \
---data '{"type":"global | personal"}' \
+--data '{"type":"global | personal", "channel": "ABC123CD45}' \
 https://<your-app-domain>/slack/schedule
 ```
-This triggers either of the below functions depending on the value of "type".<br>
+This triggers either of the below functions depending on the value of "type". Using "global" requires you to provide a channel ID.<br>
 Defined in the [events.py](src/events.py) module:<br>
 - `run_global_reminder()`: sends a message to the pull request channel with every open pull request across the repositories in a thread.
 
