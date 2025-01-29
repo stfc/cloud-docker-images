@@ -104,7 +104,7 @@ jobs:
         run: echo "version=$(cat openstack-rabbit-consumer/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Check if release file has updated
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         id: release_updated
         with:
           filters: |
