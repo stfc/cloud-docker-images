@@ -78,7 +78,7 @@ def main(args: Namespace) -> None:
         slash_find_host(ack, respond)
 
     @app.command("/mrs")
-    def prs(ack, respond, command):
+    def mrs(ack, respond, command):
         """
         This command sends the user a message containing all open merge requests.
         :param command: The return object from Slack API.

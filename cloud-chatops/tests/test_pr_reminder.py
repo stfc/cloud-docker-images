@@ -195,6 +195,7 @@ def test_run_none_found_no_message(
 @patch("slack_reminder_api.pr_reminder.PRReminder")
 @patch("slack_reminder_api.pr_reminder.WebClient")
 def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_token):
+    """Test the send reminders function works."""
     send_reminders("mock_channel", ["mock_pr"], True)
     mock_get_token.assert_called_once_with("SLACK_BOT_TOKEN")
     mock_web_client.assert_called_once_with(token=mock_get_token.return_value)

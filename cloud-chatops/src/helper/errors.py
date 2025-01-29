@@ -18,6 +18,3 @@ class ErrorInSecrets(Exception):
 
 class NoTestCase(LookupError):
     """Error: There is no method to test this event."""
-
-
-

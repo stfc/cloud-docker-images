@@ -36,7 +36,7 @@ def prs(ack, respond, command):
 
 
 @slack_app.command("/mrs")
-def prs(ack, respond, command):
+def mrs(ack, respond, command):
     """See events/slash_commands.py for documentation."""
     slash_mrs(ack, respond, command)
 

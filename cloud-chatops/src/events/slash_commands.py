@@ -1,3 +1,5 @@
+"""This module stores slash command functions. This is to reduce the code in the main and dev modules."""
+
 import os
 from helper.data import filter_by
 from helper.read_config import get_config, get_token

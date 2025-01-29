@@ -114,7 +114,7 @@ class PRReminder:
         message = []
         real_name = ""
         for user in get_config("users"):
-            if user.github_name == pr.author or user.gitlab_name == pr.author:
+            if pr.author in (user.github_name, user.gitlab_name):
                 real_name = user.real_name
         if not real_name:
             real_name = pr.author

@@ -1,11 +1,8 @@
-"""
-This module contains events to run in main.py.
-"""
+"""This module contains the weekly reminder functions."""
 
-import os
 from typing import List, Dict
 from slack_sdk import WebClient
-from helper.data import User, sort_by, filter_by, PR
+from helper.data import User, sort_by, filter_by
 from helper.read_config import get_config, get_token
 from slack_reminder_api.pr_reminder import PRReminder
 from find_pr_api.github import FindPRs as FindPRsGitHub
@@ -63,6 +60,3 @@ def weekly_reminder(message_data: Dict) -> None:
         raise ValueError(
             f'Reminder type {reminder_type} is not supported. Use either "global" or "personal".'
         )
-
-
-

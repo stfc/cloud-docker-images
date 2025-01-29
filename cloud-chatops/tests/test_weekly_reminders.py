@@ -123,6 +123,3 @@ def test_weekly_reminder_fails_no_channel():
     """Test the functions raises an error for not having a channel value."""
     with pytest.raises(ValueError):
         weekly_reminder({"reminder_type": "global"})
-
-
-
