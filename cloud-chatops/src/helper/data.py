@@ -5,7 +5,7 @@ This is preferred over dictionaries as dataclasses make code more readable.
 
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 @dataclass
@@ -86,18 +86,18 @@ class User:
     """Class to store user information"""
 
     real_name: str
-    github_name: str
     slack_id: str
-    gitlab_name: str
+    github_name: Optional[str] = ""
+    gitlab_name: Optional[str] = ""
 
     @classmethod
     def from_config(cls, info: Dict):
         """Create a user class from the app config."""
         return cls(
             real_name=info["real_name"],
-            github_name=info["github_name"],
             slack_id=info["slack_id"],
-            gitlab_name=info["gitlab_name"],
+            github_name=info.get("github_name"),
+            gitlab_name=info.get("gitlab_name"),
         )
 
 
