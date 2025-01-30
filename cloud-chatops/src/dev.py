@@ -12,7 +12,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from helper.errors import NoTestCase
 from helper.read_config import validate_required_files, get_config, get_token
 from events.weekly_reminders import run_global_reminder, run_personal_reminder
-from events.slash_commands import slash_prs, slash_find_host, slash_mrs
+from events.slash_commands import slash_prs
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -67,16 +67,6 @@ def main(args: Namespace) -> None:
     def prs(ack, respond, command):
 
         slash_prs(ack, respond, command)
-
-    @app.command("/mrs")
-    def mrs(ack, respond, command):
-        """
-        This command sends the user a message containing all open merge requests.
-        :param command: The return object from Slack API.
-        :param ack: Slacks acknowledgement command.
-        :param respond: Slacks respond command to respond to the command in chat.
-        """
-        slash_mrs(ack, respond, command)
 
     handler = SocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
     handler.start()
