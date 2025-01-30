@@ -117,15 +117,15 @@ def sort_by(
         raise ValueError(f"Unable to sort list by {prop}") from exc
 
 
-def filter_by(obj_list: List[PR | User], prop: str, value: str) -> List[PR | User]:
+def filter_by(obj_list: List[PR | User], prop: str, values: List[str]) -> List[PR | User]:
     """
     Filter the list of Dataclass objects by property.
     :param obj_list: List of Dataclass objects
     :param prop: Property to filter by
-    :param value: Value to evaluate filter.
+    :param values: Values to filter by.
     :return: Filtered list of Dataclasses.
     """
     try:
-        return list(filter(lambda obj: getattr(obj, prop) == value, obj_list))
+        return list(filter(lambda obj: getattr(obj, prop) in values, obj_list))
     except AttributeError as exc:
         raise ValueError(f"Unable to filter list by {prop}") from exc
