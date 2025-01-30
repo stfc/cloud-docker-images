@@ -1,5 +1,5 @@
 ---
-app:
+app:  # Configuration for the app
   users:
     - real_name: Real Name
       slack_id: slack_id
@@ -7,14 +7,14 @@ app:
       gitlab_name: gitlab_username
 
 
-github:
-  enabled: true
+github:  # Configuration for the GitHub feature
+  enabled: true  # Disable if you do not want GitHub pull request reminders
   repositories:
     <owner>:
       - <repo>
 
-gitlab:
-  enabled: true
+gitlab:  # Configuration for the GitLab feature
+  enabled: true  # Disable if you do not want GitHub pull request reminders
   domain: gitlab.example.com
   projects:
     <group>:

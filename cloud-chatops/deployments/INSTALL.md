@@ -53,37 +53,14 @@ Slack Channel and Member IDs can be found in Slack by:<br>
 - View member / channel details
 - Near the bottom of the About tab there will be an ID with copy button
 
-The `config.yml` should look like the below. There's a template without the comments [here](template_config.yml):
-```yaml
----
----
-app:  # Configuration for the app
-  users:
-    - real_name: Real Name
-      slack_id: slack_id
-      github_name: github_username
-      gitlab_name: gitlab_username
-
-
-github:  # Configuration for the GitHub feature
-  enabled: true  # Disable if you do not want GitHub pull request reminders
-  repositories:
-    <owner>:
-      - <repo>
-
-gitlab:
-  enabled: true  # Disable if you do not want GitHub pull request reminders
-  domain: gitlab.example.com
-  projects:
-    <group>:
-      - <project>
-```
+The `config.yml` should look like this template [here](template_config.yml):
 
 The file `haproxy.cfg` can be copied into the correct directory without any changes.<br>
 
 The file `server.crt` must be your SSL certificate for your domain and public IP address.
-It must not be self-signed as Slack doesn't trust them.
-You also need to ensure that the private key is prepared at the beginning of the file before the certificate.<br>
+It can't be self-signed as Slack's API does not trust them.
+You also need to ensure that the private key is prepared at the beginning of the file before the certificate.
+This is HAProxy specific.<br>
 Such as the below:<br>
 ```
 -----BEGIN PRIVATE KEY-----
@@ -94,22 +71,11 @@ Such as the below:<br>
 -----END CERTIFICATE-----
 ```
 
-The file `app_manifest.yml` needs only one change.
+The file `app_manifest.yml` needs a few changes.
 In the `slash commands` section the URL needs to be changed to your publicly accessible domain.<br>
 
 #### Secrets:
-The `secrets.yml` file should look like the below and there's a template [here](template_secrets.yml)
-```yaml
-  SLACK_BOT_TOKEN: <your-token> # Required
-  
-  # You must have either of the app token or signing secret.
-  SLACK_APP_TOKEN: <your-token> # Development use only
-  SLACK_SIGNING_SECRET: <your-token> # Production use only
-  
-  SCHEDULED_REMINDER_TOKEN: <your-token> # Optional: to use the endpoint /slack/schedule reminder
-  GITHUB_TOKEN: <your-token> # Optional: to find GitHub pull requests
-  GITLAB_TOKEN: <your-token> # Optional: to find GitLab merge requests
-```
+The `secrets.yml` file should look like the template [here](template_secrets.yml)
 Slack:<br>
 - Slack Token information can be found [here](#slack-tokens).<br>
 
@@ -127,11 +93,10 @@ GitLab:<br>
 
 The app can be run from a Docker image, source code or Kubernetes<br>
 
-
 #### Dependencies:
 * If running from a Docker image, ensure Docker is installed (see [installation guide](https://docs.docker.com/engine/install/)) and the user account is in the docker users group 
 * If running the app from source, ensure Python 3.10 or higher is installed. The full list of required python packages can be found in [requirements.txt](../requirements.txt)<br>
-* If running on Kubernetes, this documentation only describes how to apply a deployment. You will need a cluster already set up.
+* If running on Kubernetes, this documentation only describes how to apply a deployment. You need a cluster already set up.
 
 ### Single Node Installation:
 
@@ -144,7 +109,7 @@ This uses docker compose to deploy the ChatOps container and a HAProxy container
 - Retrieved Slack bot user token and signing secret [here](#slack-tokens)
 - Generated a GitHub personal access token [here](#secrets)
 - Installed Docker and Docker Compose [here](https://docs.docker.com/engine/install/ubuntu/)
-- DNS record, public IP address with port 443 open and SSL certificate (valid for HAProxy)
+- DNS record, public IP address with port 443 open and SSL certificate
 
 #### Installation:
 
