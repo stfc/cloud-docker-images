@@ -27,7 +27,6 @@ This is facilitated by the below features which can be found in [main.py](src/ma
 #### Slash Commands:
 These slash commands can be run in any channel the app has access to.<br>
  - `/prs <mine | all>`: sends a private message to the user with a list of open pull requests. Either user authored or by anyone.
- - `/find-host`: responds with the IP of the host running the app, this only works in development instances.
 
 #### Scheduled Events:
 The app has an endpoint at `https://<your-app-domain>/slack/schedule` which listens for requests to trigger reminder messages being sent.<br>

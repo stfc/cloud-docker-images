@@ -68,15 +68,6 @@ def main(args: Namespace) -> None:
 
         slash_prs(ack, respond, command)
 
-    @app.command("/find-host")
-    def find_host(ack, respond):
-        """
-        This command responds to the user with the IP of the host that received the message.
-        :param ack: Slacks acknowledgement command.
-        :param respond: Slacks respond command to respond to the command in chat.
-        """
-        slash_find_host(ack, respond)
-
     @app.command("/mrs")
     def mrs(ack, respond, command):
         """

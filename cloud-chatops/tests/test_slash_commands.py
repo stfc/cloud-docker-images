@@ -112,19 +112,6 @@ def test_slash_prs_no_user(mock_get_config):
     )
 
 
-@patch("events.slash_commands.os")
-def test_slash_find_host(mock_os):
-    """Test that the environment variable is retrieved and responded."""
-    mock_ack = MagicMock()
-    mock_respond = MagicMock()
-    slash_find_host(mock_ack, mock_respond)
-    mock_ack.assert_called_once_with()
-    mock_os.environ.get.assert_called_once_with("HOST_IP")
-    mock_respond.assert_called_once_with(
-        f"The host IP of this node is: {mock_os.environ.get.return_value}"
-    )
-
-
 @patch("events.slash_commands.filter_by")
 @patch("events.slash_commands.FindPRsGitLab")
 @patch("events.slash_commands.send_reminders")

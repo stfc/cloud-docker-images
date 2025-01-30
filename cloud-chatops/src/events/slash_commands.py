@@ -43,17 +43,6 @@ def slash_prs(ack, respond, command):
         send_reminders(user.slack_id, prs, True)
 
 
-def slash_find_host(ack, respond):
-    """
-    Responds to the user with the host IP of the machine that received the command.
-    :param ack: Slacks acknowledgement command.
-    :param respond: Slacks respond command to respond to the command in chat.
-    """
-    ack()
-    host_ip = os.environ.get("HOST_IP")
-    respond(f"The host IP of this node is: {host_ip}")
-
-
 def slash_mrs(ack, respond, command):
     """
     This event sends a message to the user containing open MRs.
