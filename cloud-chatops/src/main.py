@@ -11,7 +11,7 @@ from flask import Flask, request
 
 from helper.read_config import get_token, validate_required_files
 from events.weekly_reminders import weekly_reminder
-from events.slash_commands import slash_prs, slash_mrs
+from events.slash_prs import SlashPRs
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -30,15 +30,10 @@ def handle_message_events(body, logger):
 
 
 @slack_app.command("/prs")
-def prs(ack, respond, command):
-    """See events/slash_commands.py for documentation."""
-    slash_prs(ack, respond, command)
-
-
-@slack_app.command("/mrs")
-def mrs(ack, respond, command):
-    """See events/slash_commands.py for documentation."""
-    slash_mrs(ack, respond, command)
+def prs(ack, respond, body, logger):
+    """See events/slash_prs.py for documentation."""
+    logger.info(body)
+    SlashPRs().run(ack, respond, body)
 
 
 flask_app = Flask(__name__)
@@ -54,6 +49,7 @@ def slack_events() -> slack_handler.handle:
 @flask_app.route("/slack/schedule", methods=["POST"])
 def slack_schedule() -> str:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
+    flask_app.logger.info(request.json())
     token = request.headers.get("Authorization")
     if token != get_token("SCHEDULED_REMINDER_TOKEN"):
         return "403"
