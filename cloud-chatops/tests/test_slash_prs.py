@@ -41,9 +41,13 @@ def test_run_invalid_features(mock_get_config, instance):
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(MagicMock(), mock_respond, {})
-    mock_respond.assert_called_once_with("Neither of the GitHub or GitLab features are enabled.")
-    assert str(exc.value) == ("Neither the GitHub or GitLab features are enabled."
-                              " At least one of these needs to be enabled to function.")
+    mock_respond.assert_called_once_with(
+        "Neither of the GitHub or GitLab features are enabled."
+    )
+    assert str(exc.value) == (
+        "Neither the GitHub or GitLab features are enabled."
+        " At least one of these needs to be enabled to function."
+    )
 
 
 @patch("events.slash_prs.get_config")
@@ -53,9 +57,14 @@ def test_run_invalid_user(mock_get_config, instance):
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(MagicMock(), mock_respond, {"user_id": "some_unknown_user"})
-    mock_respond.assert_called_once_with(f"Could not find your Slack ID some_unknown_user in the user map. "
-                                         f"Please contact the service maintainer to fix this.")
-    assert str(exc.value) == "User with Slack ID some_unknown_user tried using /prs but is not listed in the config."
+    mock_respond.assert_called_once_with(
+        f"Could not find your Slack ID some_unknown_user in the user map. "
+        f"Please contact the service maintainer to fix this."
+    )
+    assert (
+        str(exc.value)
+        == "User with Slack ID some_unknown_user tried using /prs but is not listed in the config."
+    )
 
 
 @patch("events.slash_prs.get_config")
@@ -64,10 +73,16 @@ def test_run_invalid_arguments(mock_get_config, instance):
     mock_get_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
-        instance.run(MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "invalid_arg"})
-    mock_respond.assert_called_once_with("Please provide the correct argument: 'mine' or 'all'.")
-    assert str(exc.value) == ("User tried to run /prs with arguments invalid_arg."
-                              " Failed as arguments provided are not valid.")
+        instance.run(
+            MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "invalid_arg"}
+        )
+    mock_respond.assert_called_once_with(
+        "Please provide the correct argument: 'mine' or 'all'."
+    )
+    assert str(exc.value) == (
+        "User tried to run /prs with arguments invalid_arg."
+        " Failed as arguments provided are not valid."
+    )
 
 
 @patch("events.slash_prs.send_reminders")
@@ -75,7 +90,14 @@ def test_run_invalid_arguments(mock_get_config, instance):
 @patch("events.slash_prs.FindPRsGitLab")
 @patch("events.slash_prs.get_token")
 @patch("events.slash_prs.get_config")
-def test_run(mock_get_config, mock_get_token, mock_gitlab, mock_github, mock_send_reminders, instance):
+def test_run(
+    mock_get_config,
+    mock_get_token,
+    mock_gitlab,
+    mock_github,
+    mock_send_reminders,
+    instance,
+):
     """Test the run method makes the correct calls."""
     mock_get_config.side_effect = [
         [MOCK_USER],
@@ -85,7 +107,7 @@ def test_run(mock_get_config, mock_get_token, mock_gitlab, mock_github, mock_sen
         {"enabled": True},
         ["mock_owner/mock_repo"],
         {"enabled": True},
-        ["mock_group%2Fmock_project"]
+        ["mock_group%2Fmock_project"],
     ]
     mock_get_token.side_effect = ["mock_github_token", "mock_gitlab_token"]
     mock_respond = MagicMock()
@@ -99,6 +121,3 @@ def test_run(mock_get_config, mock_get_token, mock_gitlab, mock_github, mock_sen
         mock_get_config.assert_any_call(call)
     for call in ["GITHUB_TOKEN", "GITLAB_TOKEN"]:
         mock_get_token.assert_any_call(call)
-
-
-

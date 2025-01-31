@@ -117,7 +117,9 @@ def sort_by(
         raise ValueError(f"Unable to sort list by {prop}") from exc
 
 
-def filter_by(obj_list: List[PR | User], prop: str, values: List[str]) -> List[PR | User]:
+def filter_by(
+    obj_list: List[PR | User], prop: str, values: List[str]
+) -> List[PR | User]:
     """
     Filter the list of Dataclass objects by property.
     :param obj_list: List of Dataclass objects

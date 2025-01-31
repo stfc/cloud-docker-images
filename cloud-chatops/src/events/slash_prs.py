@@ -1,4 +1,5 @@
 """This module contains code for the Slack command /prs."""
+
 from typing import List
 from helper.data import filter_by, User
 from helper.read_config import get_config, get_token
@@ -29,14 +30,22 @@ class SlashPRs:
         respond("Finding the PRs...")
         prs = []
         if get_config("github")["enabled"]:
-            prs.extend(FindPRsGitHub().run(
-                repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
-            ))
+            prs.extend(
+                FindPRsGitHub().run(
+                    repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
+                )
+            )
         if get_config("gitlab")["enabled"]:
-            prs.extend(FindPRsGitLab().run(projects=get_config("projects"), token=get_token("GITLAB_TOKEN")))
+            prs.extend(
+                FindPRsGitLab().run(
+                    projects=get_config("projects"), token=get_token("GITLAB_TOKEN")
+                )
+            )
 
         if body["text"].casefold() == "mine":
-            prs = filter_by(obj_list=prs, prop="author", values=[user.github_name, user.gitlab_name])
+            prs = filter_by(
+                obj_list=prs, prop="author", values=[user.github_name, user.gitlab_name]
+            )
 
         send_reminders(user.slack_id, prs, True)
 
@@ -53,7 +62,9 @@ class SlashPRs:
                 f"Could not find your Slack ID {user} in the user map. "
                 f"Please contact the service maintainer to fix this."
             )
-            raise RuntimeError(f"User with Slack ID {user} tried using /prs but is not listed in the config.")
+            raise RuntimeError(
+                f"User with Slack ID {user} tried using /prs but is not listed in the config."
+            )
 
     @staticmethod
     def _check_correct_arguments(body_text: str, respond):
@@ -64,8 +75,10 @@ class SlashPRs:
         """
         if body_text.casefold() not in ["mine", "all"]:
             respond("Please provide the correct argument: 'mine' or 'all'.")
-            raise RuntimeError(f"User tried to run /prs with arguments {body_text}."
-                               f" Failed as arguments provided are not valid.")
+            raise RuntimeError(
+                f"User tried to run /prs with arguments {body_text}."
+                f" Failed as arguments provided are not valid."
+            )
 
     @staticmethod
     def _check_if_features_enabled(respond):
@@ -80,4 +93,3 @@ class SlashPRs:
                 "Neither the GitHub or GitLab features are enabled."
                 " At least one of these needs to be enabled to function."
             )
-
