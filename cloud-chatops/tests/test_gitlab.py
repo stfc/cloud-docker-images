@@ -5,18 +5,18 @@ from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from helper.data import PR, sort_by, filter_by
-from find_pr_api.gitlab import FindPRs
+from find_pr_api.gitlab import GitLab
 
 
 # pylint: disable=R0801
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
-    return FindPRs()
+    return GitLab()
 
 
 @patch("find_pr_api.gitlab.PR")
-@patch("find_pr_api.gitlab.FindPRs.make_request")
+@patch("find_pr_api.gitlab.GitLab.make_request")
 def test_run(mock_make_request, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_project_1 = NonCallableMock()

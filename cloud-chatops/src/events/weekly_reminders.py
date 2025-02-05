@@ -5,7 +5,7 @@ from slack_sdk import WebClient
 from helper.data import User, sort_by, filter_by
 from helper.read_config import get_config, get_token
 from slack_reminder_api.pr_reminder import PRReminder
-from find_pr_api.github import FindPRs as FindPRsGitHub
+from find_pr_api.github import GitHub as FindPRsGitHub
 
 
 def run_global_reminder(channel: str) -> None:

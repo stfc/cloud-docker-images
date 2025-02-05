@@ -6,7 +6,7 @@ from helper.data import PR
 from helper.read_config import get_config
 
 
-class FindPRs:
+class GitLab:
     """This class finds all open merge requests in the given projects."""
 
     def run(self, projects: List, token: str) -> List[PR]:

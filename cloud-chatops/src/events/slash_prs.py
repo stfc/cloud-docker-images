@@ -3,8 +3,8 @@
 from typing import List
 from helper.data import filter_by, User
 from helper.read_config import get_config, get_token
-from find_pr_api.github import FindPRs as FindPRsGitHub
-from find_pr_api.gitlab import FindPRs as FindPRsGitLab
+from find_pr_api.github import GitHub as FindPRsGitHub
+from find_pr_api.gitlab import GitLab as FindPRsGitLab
 from slack_reminder_api.pr_reminder import send_reminders
 
 
