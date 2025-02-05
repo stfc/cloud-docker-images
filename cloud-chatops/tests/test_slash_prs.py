@@ -58,8 +58,8 @@ def test_run_invalid_user(mock_get_config, instance):
     with pytest.raises(RuntimeError) as exc:
         instance.run(MagicMock(), mock_respond, {"user_id": "some_unknown_user"})
     mock_respond.assert_called_once_with(
-        f"Could not find your Slack ID some_unknown_user in the user map. "
-        f"Please contact the service maintainer to fix this."
+        "Could not find your Slack ID some_unknown_user in the user map. "
+        "Please contact the service maintainer to fix this."
     )
     assert (
         str(exc.value)
@@ -85,6 +85,7 @@ def test_run_invalid_arguments(mock_get_config, instance):
     )
 
 
+# pylint: disable = R0913, R0917
 @patch("events.slash_prs.send_reminders")
 @patch("events.slash_prs.FindPRsGitHub")
 @patch("events.slash_prs.FindPRsGitLab")
