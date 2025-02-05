@@ -8,6 +8,7 @@ from find_pr_api.gitlab import FindPRs as FindPRsGitLab
 from slack_reminder_api.pr_reminder import send_reminders
 
 
+# pylint: disable = R0903
 class SlashPRs:
     """Class triggered by the Slack command /prs."""
 
