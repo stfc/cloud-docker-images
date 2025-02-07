@@ -6,9 +6,9 @@ USER root
 
 RUN apt-get update --yes \
     && apt-get install -y --no-install-recommends \
-    nvidia-headless-515 \
-    nvidia-utils-515 \
-    libnvidia-gl-515-server \
+    nvidia-headless-550 \
+    nvidia-utils-550 \
+    libnvidia-gl-550-server \
     libopengl0 && \
     apt-get install --no-install-recommends --yes \
     # The Nvidia cuda toolkit has to be installed after the driver to allow
