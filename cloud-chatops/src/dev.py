@@ -11,7 +11,9 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from helper.errors import NoTestCase
 from helper.read_config import validate_required_files, get_config, get_token
-from events import run_global_reminder, run_personal_reminder
+from events.weekly_reminders import run_global_reminder, run_personal_reminder
+from events.slash_prs import SlashPRs
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -60,6 +62,12 @@ def main(args: Namespace) -> None:
     logging.info("Running Slack App")
 
     app = App(token=get_token("SLACK_BOT_TOKEN"))
+
+    @app.command("/prs")
+    def prs(ack, respond, body, logger):
+        logger.info(body)
+        SlashPRs().run(ack, respond, body)
+
     handler = SocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
     handler.start()
 

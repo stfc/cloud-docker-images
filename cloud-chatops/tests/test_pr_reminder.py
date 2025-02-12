@@ -4,7 +4,7 @@ from dataclasses import replace
 from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
-from slack_reminder_api.pr_reminder import PRReminder
+from slack_reminder_api.pr_reminder import PRReminder, send_reminders
 from helper.data import PR, Message, User
 
 
@@ -40,7 +40,10 @@ MOCK_PR_2 = PR(
 )
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+    real_name="mock user",
+    github_name="mock_github",
+    slack_id="mock_slack",
+    gitlab_name="mock_gitlab",
 )
 
 
@@ -74,10 +77,11 @@ def test_make_string(mock_get_config, instance):
 def test_make_string_fails(mock_get_config, instance):
     """Test the github name is used if slack name can't be found."""
     mock_get_config.return_value = [MOCK_USER]
-    res = instance.make_string(MOCK_PR)
+    mock_pr_changed = replace(MOCK_PR, author="mock_user_2")
+    res = instance.make_string(mock_pr_changed)
     expected = (
         f"*This PR is older than 30 days. Consider closing it:*"
-        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
+        f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_user_2"
     )
     assert res == expected
 
@@ -188,3 +192,17 @@ def test_run_none_found_no_message(
     mock_prs = []
     instance.run(mock_prs, "mock_channel", message_no_prs=False)
     mock_send_message.assert_not_called()
+
+
+@patch("slack_reminder_api.pr_reminder.get_token")
+@patch("slack_reminder_api.pr_reminder.PRReminder")
+@patch("slack_reminder_api.pr_reminder.WebClient")
+def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_token):
+    """Test the send reminders function works."""
+    send_reminders("mock_channel", ["mock_pr"], True)
+    mock_get_token.assert_called_once_with("SLACK_BOT_TOKEN")
+    mock_web_client.assert_called_once_with(token=mock_get_token.return_value)
+    mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
+    mock_pr_reminder.return_value.run.assert_called_once_with(
+        prs=["mock_pr"], channel="mock_channel", message_no_prs=True
+    )

@@ -3,7 +3,7 @@
 from typing import List
 from slack_sdk import WebClient
 from helper.data import PR, Message
-from helper.read_config import get_config
+from helper.read_config import get_config, get_token
 
 
 class PRReminder:
@@ -114,7 +114,7 @@ class PRReminder:
         message = []
         real_name = ""
         for user in get_config("users"):
-            if user.github_name == pr.author:
+            if pr.author in (user.github_name, user.gitlab_name):
                 real_name = user.real_name
         if not real_name:
             real_name = pr.author
@@ -138,3 +138,18 @@ class PRReminder:
         if pr.draft:
             reactions.append("building_construction")
         return reactions
+
+
+def send_reminders(channel: str, prs: List[PR], message_no_prs: bool) -> None:
+    """
+    Sends a message to the given channel for each PR in the list.
+    :param channel: Channel to send messages to
+    :param prs: List of PRs to make messages from
+    :param message_no_prs: Send a message saying there are no reminders to be made.
+    """
+    client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
+    PRReminder(client).run(
+        prs=prs,
+        channel=channel,
+        message_no_prs=message_no_prs,
+    )

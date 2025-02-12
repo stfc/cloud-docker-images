@@ -5,7 +5,7 @@ This is preferred over dictionaries as dataclasses make code more readable.
 
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 @dataclass
@@ -24,9 +24,9 @@ class PR:
     labels: List[str]
 
     @classmethod
-    def from_json(cls, data: Dict):
+    def from_github(cls, data: Dict):
         """
-        Serialise the JSON data into this dataclass structure.
+        Serialise the JSON data from GitHub REST API into this dataclass structure.
         :param data: JSON | Dict HTTP response data
         :return:
         """
@@ -40,6 +40,25 @@ class PR:
             draft=data["draft"],
             labels=[label["name"] for label in data["labels"]],
             repository=data["html_url"].split(sep="/")[5],
+        )
+
+    @classmethod
+    def from_gitlab(cls, data: Dict):
+        """
+        Serialise the JSON data into this dataclass structure.
+        :param data: JSON | Dict HTTP response data
+        :return:
+        """
+        created_at = datetime.fromisoformat(data["created_at"])
+        return cls(
+            title=f"{data['title']} #{data['iid']}",
+            author=data["author"]["username"],
+            url=data["web_url"],
+            stale=cls.is_stale(created_at),
+            created_at=created_at,
+            draft=data["draft"],
+            labels=data["labels"],
+            repository=data["web_url"].split(sep="/")[4],
         )
 
     @staticmethod
@@ -67,16 +86,18 @@ class User:
     """Class to store user information"""
 
     real_name: str
-    github_name: str
     slack_id: str
+    github_name: Optional[str] = ""
+    gitlab_name: Optional[str] = ""
 
     @classmethod
     def from_config(cls, info: Dict):
         """Create a user class from the app config."""
         return cls(
             real_name=info["real_name"],
-            github_name=info["github_name"],
             slack_id=info["slack_id"],
+            github_name=info.get("github_name"),
+            gitlab_name=info.get("gitlab_name"),
         )
 
 
@@ -96,15 +117,17 @@ def sort_by(
         raise ValueError(f"Unable to sort list by {prop}") from exc
 
 
-def filter_by(obj_list: List[PR | User], prop: str, value: str) -> List[PR | User]:
+def filter_by(
+    obj_list: List[PR | User], prop: str, values: List[str]
+) -> List[PR | User]:
     """
     Filter the list of Dataclass objects by property.
     :param obj_list: List of Dataclass objects
     :param prop: Property to filter by
-    :param value: Value to evaluate filter.
+    :param values: Values to filter by.
     :return: Filtered list of Dataclasses.
     """
     try:
-        return list(filter(lambda obj: getattr(obj, prop) == value, obj_list))
+        return list(filter(lambda obj: getattr(obj, prop) in values, obj_list))
     except AttributeError as exc:
         raise ValueError(f"Unable to filter list by {prop}") from exc

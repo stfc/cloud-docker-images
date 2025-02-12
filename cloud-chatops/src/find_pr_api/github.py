@@ -5,7 +5,7 @@ import requests
 from helper.data import PR
 
 
-class FindPRs:
+class GitHub:
     """This class finds all open pull requests in the given repositories. It can also sort them by property."""
 
     def run(self, repos: List, token: str) -> List[PR]:
@@ -19,7 +19,7 @@ class FindPRs:
         for repo in repos:
             responses += self.make_request(repo, token)
 
-        return [PR.from_json(response) for response in responses]
+        return [PR.from_github(response) for response in responses]
 
     @staticmethod
     def make_request(repo: str, token: str) -> List[Dict]:

@@ -9,8 +9,8 @@ features:
   slash_commands:
     - command: /prs
       url: https://<your-domain-here>/slack/events
-      description: Get all open PRs
-      usage_hint: "[all: every pr] [mine: your prs]"
+      description: To find work that you've created, or all open pull requests.
+      usage_hint: "[all: every open PR] [mine: created, assigned or requested PRs]"
       should_escape: false
 oauth_config:
   scopes:

@@ -3,27 +3,42 @@
 from unittest.mock import patch, mock_open
 import pytest
 from helper.data import User
-from helper.errors import ErrorInConfig
+from helper.errors import ErrorInConfig, ErrorInSecrets
 from helper.read_config import get_token, get_config, validate_required_files, get_path
 
 MOCK_CONFIG = """
 ---
-users:
-  - real_name: mock user
-    github_name: mock_github
-    slack_id: mock_slack
-repos:
-  organisation1:
-    - repo1
-    - repo2
-  organisation2:
-    - repo1
-    - repo2
-channel: mock_channel
+app:
+  users:
+    - real_name: Real Name
+      slack_id: slack_id
+      github_name: github_username
+      gitlab_name: gitlab_username
+
+
+github:
+  enabled: true
+  repositories:
+    owner1:
+      - repo1
+    owner2:
+      - repo1
+
+gitlab:
+  enabled: true
+  domain: gitlab.example.com
+  projects:
+    group1:
+      - project1
+    group2:
+      - project1
 """
 
 MOCK_USER = User(
-    real_name="mock user", github_name="mock_github", slack_id="mock_slack"
+    real_name="Real Name",
+    github_name="github_username",
+    slack_id="slack_id",
+    gitlab_name="gitlab_username",
 )
 
 
@@ -56,23 +71,22 @@ def test_get_path_dev_fails(mock_sys, mock_os):
     """Test an error is raised if HOME or HOMEPATH can't be found in the environment."""
     mock_sys.argv = ["dev.py"]
     mock_os.environ = {}
-    with pytest.raises(ErrorInConfig):
+    with pytest.raises(RuntimeError):
         get_path()
 
 
 def test_get_token_fails():
     """Test that an error is raised if trying to access a value that doesn't exist."""
     with patch("builtins.open", mock_open(read_data="mock_token_1: mock_value_1")):
-        res = get_token("mock_token_2")
-        assert res == ""
+        with pytest.raises(KeyError):
+            get_token("mock_token_2")
 
 
 def test_get_token():
     """This test checks that a value is returned when the function is called with a specific token."""
     with patch("builtins.open", mock_open(read_data="mock_token_1: mock_value_1")):
         res = get_token("mock_token_1")
-
-        assert res == "mock_value_1"
+    assert res == "mock_value_1"
 
 
 def test_get_config_users():
@@ -83,22 +97,27 @@ def test_get_config_users():
 
 
 def test_get_config_repos():
-    """This test checks that a list is returned if a string list of repos is read with no comma at the end."""
+    """This test checks that the repos are read and formatted correctly."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
         res = get_config("repos")
         assert res == [
-            "organisation1/repo1",
-            "organisation1/repo2",
-            "organisation2/repo1",
-            "organisation2/repo2",
+            "owner1/repo1",
+            "owner2/repo1",
         ]
 
 
-def test_get_config_channel():
-    """Tests that the channel is returned from the config."""
+def test_get_config_projects():
+    """This test checks that the projects are read and formatted correctly."""
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
-        res = get_config("channel")
-        assert res == "mock_channel"
+        res = get_config("projects")
+        assert res == ["group1%2Fproject1", "group2%2Fproject1"]
+
+
+def test_get_config_gitlab_domain():
+    """Tests that the GitLab domain is returned from the config."""
+    with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)):
+        res = get_config("gitlab_domain")
+        assert res == "gitlab.example.com"
 
 
 def test_get_config_fails():
@@ -110,70 +129,169 @@ def test_get_config_fails():
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_github", "mock_app", "mock_signing"]
+def test_validate_required_files_dev(mock_get_token, mock_get_config):
+    """Test the validate files function passes when running through dev.py."""
+    mock_get_token.return_value = "mock_token"
     mock_get_config.side_effect = [
-        {"owner1": ["repo1"]},
-        {"github1": "slack1"},
-        "mock_channel",
+        {"enabled": False},
+        {"enabled": False},
+        {"users": ["mock_users"]},
     ]
-    validate_required_files()
-
-
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
-def test_validate_required_files_fail_repo(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{}, {"github1": "slack1"}]
-    with pytest.raises(ErrorInConfig):
+    with patch("sys.argv", ["dev.py"]):
         validate_required_files()
 
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_fail_token_first_check(
+def test_validate_required_files_main(mock_get_token, mock_get_config):
+    """Test the validate files function passes when running through dev.py."""
+    mock_get_token.return_value = "mock_token"
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": False},
+        {"users": ["mock_users"]},
+    ]
+    with patch("sys.argv", ["main.py"]):
+        validate_required_files()
+
+
+@patch("helper.read_config.get_token")
+def test_validate_required_files_dev_fails(mock_get_token):
+    """Test the validate files function fails when running through dev.py."""
+    mock_get_token.return_value = ""
+    with patch("sys.argv", ["dev.py"]):
+        with pytest.raises(ErrorInSecrets) as exc:
+            validate_required_files()
+        assert (
+            exc.value.args[0]
+            == "There is a problem with your secrets.yaml. The secret SLACK_APP_TOKEN is not set."
+        )
+
+
+@patch("helper.read_config.get_token")
+def test_validate_required_files_main_fails(mock_get_token):
+    """Test the validate files function fails when running through main.py."""
+    mock_get_token.return_value = ""
+    with patch("sys.argv", ["main.py"]):
+        with pytest.raises(ErrorInSecrets) as exc:
+            validate_required_files()
+        assert (
+            exc.value.args[0]
+            == "There is a problem with your secrets.yaml. The secret SLACK_SIGNING_SECRET is not set."
+        )
+
+
+@patch("helper.read_config.get_token")
+def test_validate_required_files_fail_slack_bot_token(mock_get_token):
+    """Test the validate files function fails when the Slack bot token is not given."""
+    mock_get_token.return_value = ""
+    with pytest.raises(ErrorInSecrets) as exc:
+        validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret SLACK_BOT_TOKEN is not set."
+    )
+
+
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
+def test_validate_required_files_github_token_fails(mock_get_token, mock_get_config):
+    """Test the validate files function fails when the GitHub token is not given."""
+    mock_get_config.return_value = {"enabled": True}
+    mock_get_token.side_effect = ["mock_slack_bot_token", ""]
+    with pytest.raises(ErrorInSecrets) as exc:
+        validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret GITHUB_TOKEN is not set."
+    )
+
+
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
+def test_validate_required_files_github_repositories_fails(
     mock_get_token, mock_get_config
 ):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
-    with pytest.raises(ErrorInConfig):
+    """Test the validate files function fails when GitHub repositories are not given."""
+    mock_get_config.return_value = {"enabled": True, "repositories": {}}
+    mock_get_token.side_effect = ["mock_slack_bot_token", "mock_github_token"]
+    with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature github does not have the parameter repositories set."
+    )
 
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_fail_token_second_check(
-    mock_get_token, mock_get_config
-):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_github", "", ""]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {"github1": "slack1"}]
-    with pytest.raises(ErrorInConfig):
+def test_validate_required_files_gitlab_token_fails(mock_get_token, mock_get_config):
+    """Test the validate files function fails when the GitLab token is not given."""
+    mock_get_config.side_effect = [{"enabled": False}, {"enabled": True}]
+    mock_get_token.side_effect = ["mock_slack_bot_token", ""]
+    with pytest.raises(ErrorInSecrets) as exc:
         validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your secrets.yaml. The secret GITLAB_TOKEN is not set."
+    )
 
 
 @patch("helper.read_config.get_config")
 @patch("helper.read_config.get_token")
-def test_validate_required_files_fail_users(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
-    mock_get_config.side_effect = [{"owner1": ["repo1"]}, {}]
-    with pytest.raises(ErrorInConfig):
-        validate_required_files()
-
-
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
-def test_validate_required_files_fail_channel(mock_get_token, mock_get_config):
-    """Test the validate files function"""
-    mock_get_token.side_effect = ["mock_bot", "mock_app", "mock_github"]
+def test_validate_required_files_gitlab_domain_fails(mock_get_token, mock_get_config):
+    """Test the validate files function fails when the GitLab domain is not given."""
     mock_get_config.side_effect = [
-        {"owner1": ["repo1"]},
-        {"mock_github": "mock_user"},
-        "",
+        {"enabled": False},
+        {"enabled": True, "domain": "", "projects": {}},
     ]
-    with pytest.raises(ErrorInConfig):
+    mock_get_token.side_effect = [
+        "mock_slack_bot_token",
+        "mock_github_token",
+        "mock_gitlab_token",
+    ]
+    with pytest.raises(ErrorInConfig) as exc:
         validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature gitlab does not have the parameter domain set."
+    )
+
+
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
+def test_validate_required_files_gitlab_projects_fails(mock_get_token, mock_get_config):
+    """Test the validate files function fails when GitLab projects are not given."""
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": True, "domain": "gitlab.example.com", "projects": {}},
+    ]
+    mock_get_token.side_effect = [
+        "mock_slack_bot_token",
+        "mock_github_token",
+        "mock_gitlab_token",
+    ]
+    with pytest.raises(ErrorInConfig) as exc:
+        validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature gitlab does not have the parameter projects set."
+    )
+
+
+@patch("helper.read_config.get_config")
+@patch("helper.read_config.get_token")
+def test_validate_required_files_app_users_fails(mock_get_token, mock_get_config):
+    """Test the validate files function fails when the GitLab token is not given."""
+    mock_get_config.side_effect = [
+        {"enabled": False},
+        {"enabled": False},
+        {"users": []},
+    ]
+    mock_get_token.side_effect = ["mock_slack_bot_token"]
+    with pytest.raises(ErrorInConfig) as exc:
+        validate_required_files()
+    assert (
+        exc.value.args[0]
+        == "There is a problem with your config.yaml. The feature app does not have the parameter users set."
+    )

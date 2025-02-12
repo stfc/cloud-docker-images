@@ -9,9 +9,9 @@ from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request
 
-
 from helper.read_config import get_token, validate_required_files
-from events import slash_prs, slash_find_host, weekly_reminder
+from events.weekly_reminders import weekly_reminder
+from events.slash_prs import SlashPRs
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -30,24 +30,10 @@ def handle_message_events(body, logger):
 
 
 @slack_app.command("/prs")
-def prs(ack, respond, command):
-    """
-    This command sends the user a message containing all open pull requests.
-    :param command: The return object from Slack API.
-    :param ack: Slacks acknowledgement command.
-    :param respond: Slacks respond command to respond to the command in chat.
-    """
-    slash_prs(ack, respond, command)
-
-
-@slack_app.command("/find-host")
-def find_host(ack, respond):
-    """
-    This command responds to the user with the IP of the host that received the message.
-    :param ack: Slacks acknowledgement command.
-    :param respond: Slacks respond command to respond to the command in chat.
-    """
-    slash_find_host(ack, respond)
+def prs(ack, respond, body, logger):
+    """See events/slash_prs.py for documentation."""
+    logger.info(body)
+    SlashPRs().run(ack, respond, body)
 
 
 flask_app = Flask(__name__)
@@ -63,11 +49,11 @@ def slack_events() -> slack_handler.handle:
 @flask_app.route("/slack/schedule", methods=["POST"])
 def slack_schedule() -> str:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
-    schedule_type = request.json.get("type")
+    flask_app.logger.info(request.json())
     token = request.headers.get("Authorization")
     if token != get_token("SCHEDULED_REMINDER_TOKEN"):
         return "403"
-    weekly_reminder(schedule_type)
+    weekly_reminder(request.json)
     return "200"
 
 

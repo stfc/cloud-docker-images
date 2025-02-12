@@ -1,76 +1,84 @@
-"""Tests for find_prs.py"""
+"""Tests for gitlab.py"""
 
 from unittest.mock import patch, NonCallableMock
 from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from helper.data import PR, sort_by, filter_by
-from find_pr_api.github import GitHub
+from find_pr_api.gitlab import GitLab
 
 
 # pylint: disable=R0801
 @pytest.fixture(name="instance", scope="function")
 def instance_fixture():
     """Creates a class fixture to use in the tests"""
-    return GitHub()
+    return GitLab()
 
 
-@patch("find_pr_api.github.PR")
-@patch("find_pr_api.github.GitHub.make_request")
+@patch("find_pr_api.gitlab.PR")
+@patch("find_pr_api.gitlab.GitLab.make_request")
 def test_run(mock_make_request, mock_data, instance):
     """Tests the run method returns the correct object"""
-    mock_repo_1 = NonCallableMock()
-    mock_repo_2 = NonCallableMock()
-    mock_repo_1.created_at = 1
-    mock_repo_2.created_at = 2
-    mock_repos = [mock_repo_2, mock_repo_1]
-    res = instance.run(mock_repos, "mock_token")
+    mock_project_1 = NonCallableMock()
+    mock_project_2 = NonCallableMock()
+    mock_project_1.created_at = 1
+    mock_project_2.created_at = 2
+    mock_projects = [mock_project_2, mock_project_1]
+    res = instance.run(mock_projects, "mock_token")
     res = sort_by(res, "created_at", True)
 
-    for repo in mock_repos:
-        mock_make_request.assert_any_call(repo, "mock_token")
+    for project in mock_projects:
+        mock_make_request.assert_any_call(project, "mock_token")
 
     mock_res = list(reversed([call.return_value for call in mock_data.call_arg_list]))
     assert res == mock_res
 
 
-@patch("find_pr_api.github.requests")
-def test_make_request(mock_requests, instance):
-    """Test that requests are made and errors are raised."""
+@patch("find_pr_api.gitlab.get_config")
+@patch("find_pr_api.gitlab.requests")
+def test_make_request_ok(mock_requests, mock_get_config, instance):
+    """Test that a request is made."""
     mock_ok_request = NonCallableMock()
+    mock_requests.get.side_effect = [mock_ok_request]
+    mock_get_config.return_value = "mock_domain"
+    res = instance.make_request("mock_project", "mock_token")
+    mock_get_config.assert_called_once_with("gitlab_domain")
+    assert res == mock_ok_request.json.return_value
+
+
+@patch("find_pr_api.gitlab.get_config")
+@patch("find_pr_api.gitlab.requests")
+def test_make_request_fail(mock_requests, _, instance):
+    """Test that a request is made and an error is raised simulating a failed request."""
     mock_error_request = NonCallableMock()
     mock_error_request.raise_for_status.side_effect = HTTPError
-    mock_requests.get.side_effect = [mock_ok_request, mock_error_request]
-    res = instance.make_request(
-        "https://api.github.com/repos/mock_owner/mock_repo/pulls", "mock_token"
-    )
-    assert res == mock_ok_request.json.return_value
+    mock_requests.get.side_effect = [mock_error_request]
     with pytest.raises(HTTPError):
         instance.make_request(
-            "https://api.github_wrong.com/repos/mock_owner/mock_repo/pulls",
+            "mock_project",
             "mock_token",
         )
 
 
 MOCK_PR_1 = PR(
     title="mock_title #1",
-    author="mock_author",
-    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    author="mock-user",
+    url="https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/205",
     stale=False,
     draft=False,
     labels=["mock_label"],
-    repository="mock_repo",
-    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+    repository="mock-project",
+    created_at=datetime.fromisoformat("2025-01-21T08:45:21.201+00:00"),
 )
 MOCK_PR_2 = PR(
     title="mock_title #2",
     author="mock_author_2",
-    url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
+    url="https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/204",
     stale=True,
     draft=True,
     labels=["mock_label"],
-    repository="mock_repo_2",
-    created_at=datetime.strptime("2024-10-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+    repository="mock-project-2",
+    created_at=datetime.fromisoformat("2024-12-15T07:33:56.000+00:00"),
 )
 
 
@@ -94,7 +102,7 @@ def test_sort_by_fails():
 def test_filter_by():
     """Test the list is filtered correctly."""
     mock_pr_list = [MOCK_PR_1, MOCK_PR_2]
-    res = filter_by(mock_pr_list, "repository", "mock_repo")
+    res = filter_by(mock_pr_list, "repository", "mock-project")
     assert res == [MOCK_PR_1]
 
 
