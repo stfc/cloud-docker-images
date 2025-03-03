@@ -1,4 +1,4 @@
-FROM cschranz/gpu-jupyter:v1.8_cuda-12.5_ubuntu-22.04_python-only
+FROM cschranz/gpu-jupyter:v1.9_cuda-12.6_ubuntu-24.04_python-only
 
 # Switch to root to install packages
 USER root
