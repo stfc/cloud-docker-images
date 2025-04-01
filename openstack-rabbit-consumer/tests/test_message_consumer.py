@@ -185,6 +185,7 @@ def test_initiate_consumer_channel_setup(rabbitpy, gen_login, _, mocked_config):
     rabbitpy.Queue.assert_called_once_with(channel, name="ral.info", durable=True)
     queue = rabbitpy.Queue.return_value
     queue.bind.assert_called_once_with("nova", routing_key="ral.info")
+    queue.bind.assert_called_once_with("nova", routing_key="ral.error")
 
 
 @patch("rabbit_consumer.message_consumer.verify_kerberos_ticket")
