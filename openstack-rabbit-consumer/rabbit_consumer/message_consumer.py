@@ -303,6 +303,8 @@ def initiate_consumer() -> None:
             for exchange in exchanges:
                 logger.debug("Binding to exchange: %s", exchange)
                 queue.bind(exchange, routing_key="ral.info")
+                queue.bind(exchange, routing_key="ral.error")
+
 
             # Consume the messages from generator
             message: rabbitpy.Message
