@@ -12,6 +12,7 @@ from flask import Flask, request
 from helper.read_config import get_token, validate_required_files
 from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
+from events.alerts import post_alert
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -54,6 +55,16 @@ def slack_schedule() -> str:
     if token != get_token("SCHEDULED_REMINDER_TOKEN"):
         return "403"
     weekly_reminder(request.json)
+    return "200"
+
+@flask_app.route("/alerts", methods=["POST"])
+def alerting() -> str:
+    """This function ingests alerts and posts the to Slack."""
+    flask_app.logger.info(request.json())
+    token = request.headers.get("Authorization")
+    if token != get_token("SCHEDULED_REMINDER_TOKEN"):
+        return "403"
+    post_alert(request.json)
     return "200"
 
 
