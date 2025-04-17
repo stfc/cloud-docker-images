@@ -6,6 +6,7 @@ from helper.data import User, sort_by, filter_by
 from helper.read_config import get_config, get_token
 from slack_reminder_api.pr_reminder import PRReminder
 from find_pr_api.github import GitHub as FindPRsGitHub
+from find_pr_api.gitlab import GitLab as FindPRsGitLab
 
 
 def run_global_reminder(channel: str) -> None:
@@ -13,9 +14,17 @@ def run_global_reminder(channel: str) -> None:
     This event sends a message to the specified channel with all open PRs.
     :param channel: Channel ID to send the messages to.
     """
-    unsorted_prs = FindPRsGitHub().run(
-        repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
-    )
+    unsorted_prs = []
+    if get_config("github")["enabled"]:
+        unsorted_prs += FindPRsGitHub().run(
+            repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
+        )
+    if get_config("gitlab")["enabled"]:
+        unsorted_prs += FindPRsGitLab().run(
+            projects=get_config("projects"), token=get_token("GITLAB_TOKEN")
+        )
+
+
     prs = sort_by(unsorted_prs, "created_at", False)
     PRReminder(WebClient(token=get_token("SLACK_BOT_TOKEN"))).run(
         prs=prs,
@@ -29,13 +38,20 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
     :param message_no_prs: Send a message saying there are no PRs open.
     :param users: Users to send reminders to.
     """
-    unsorted_prs = FindPRsGitHub().run(
-        repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
-    )
+    unsorted_prs = []
+    if get_config("github")["enabled"]:
+        unsorted_prs += FindPRsGitHub().run(
+            repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
+        )
+    if get_config("gitlab")["enabled"]:
+        unsorted_prs += FindPRsGitLab().run(
+            projects=get_config("projects"), token=get_token("GITLAB_TOKEN")
+        )
+
     prs = sort_by(unsorted_prs, "created_at", False)
     client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
     for user in users:
-        filtered_prs = filter_by(prs, "author", user.github_name)
+        filtered_prs = filter_by(prs, "author", [user.github_name, user.gitlab_name])
         PRReminder(client).run(
             prs=filtered_prs,
             channel=user.slack_id,

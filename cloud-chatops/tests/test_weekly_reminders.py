@@ -26,32 +26,45 @@ MOCK_USER = User(
 @patch("events.weekly_reminders.WebClient")
 @patch("events.weekly_reminders.get_token")
 @patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.FindPRsGitLab")
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_global_reminder(
     mock_pr_reminder,
-    mock_find_prs,
+    mock_find_prs_gh,
+    mock_find_prs_gl,
     mock_get_config,
     mock_get_token,
     mock_web_client,
     mock_sort_by,
 ):
     """Test global reminder event"""
-    mock_get_token.side_effect = ["mock_github", "mock_slack"]
+    mock_get_token.side_effect = ["mock_github", "mock_gitlab", "mock_slack"]
+    mock_get_config.side_effect = [{"enabled": True}, ["mock_repos"], {"enabled": True}, ["mock_projects"]]
     run_global_reminder("mock_channel")
-    mock_find_prs.return_value.run.assert_called_once_with(
-        repos=mock_get_config.return_value, token="mock_github"
+    mock_find_prs_gh.return_value.run.assert_called_once_with(
+        repos=["mock_repos"], token="mock_github"
     )
+    mock_find_prs_gl.return_value.run.assert_called_once_with(
+        projects=["mock_projects"], token="mock_gitlab"
+    )
+    unsorted_prs = []
+    unsorted_prs += mock_find_prs_gh.return_value.run.return_value
+    unsorted_prs += mock_find_prs_gl.return_value.run.return_value
     mock_sort_by.assert_called_once_with(
-        mock_find_prs.return_value.run.return_value, "created_at", False
+        unsorted_prs, "created_at", False
     )
     mock_web_client.assert_called_once_with(token="mock_slack")
     mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
     mock_pr_reminder.return_value.run.assert_called_once_with(
         prs=mock_sort_by.return_value, channel="mock_channel"
     )
-    mock_get_config.assert_called_once_with("repos")
+    mock_get_config.assert_any_call("repos")
+    mock_get_config.assert_any_call("projects")
+    mock_get_config.assert_any_call("github")
+    mock_get_config.assert_any_call("gitlab")
     mock_get_token.assert_any_call("GITHUB_TOKEN")
+    mock_get_token.assert_any_call("GITLAB_TOKEN")
     mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
 
 
@@ -65,11 +78,13 @@ def test_run_global_reminder(
 @patch("events.weekly_reminders.WebClient")
 @patch("events.weekly_reminders.get_token")
 @patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.FindPRsGitLab")
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_personal_reminder(
     mock_pr_reminder,
-    mock_find_prs,
+    mock_find_prs_gh,
+    mock_find_prs_gl,
     mock_get_config,
     mock_get_token,
     mock_web_client,
@@ -77,27 +92,37 @@ def test_run_personal_reminder(
     mock_sort_by,
 ):
     """Test personal reminder event"""
-    mock_get_token.side_effect = ["mock_github", "mock_slack"]
-    mock_repos = {"mock_owner": ["mock_repo"]}
-    mock_get_config.side_effect = [mock_repos]
+    mock_get_token.side_effect = ["mock_github", "mock_gitlab", "mock_slack"]
+    mock_get_config.side_effect = [{"enabled": True}, ["mock_repos"], {"enabled": True}, ["mock_projects"]]
     run_personal_reminder([MOCK_USER])
-    mock_find_prs.return_value.run.assert_called_once_with(
-        repos=mock_repos, token="mock_github"
+    mock_find_prs_gh.return_value.run.assert_called_once_with(
+        repos=["mock_repos"], token="mock_github"
     )
+    mock_find_prs_gl.return_value.run.assert_called_once_with(
+        projects=["mock_projects"], token="mock_gitlab"
+    )
+    unsorted_prs = []
+    unsorted_prs += mock_find_prs_gh.return_value.run.return_value
+    unsorted_prs += mock_find_prs_gl.return_value.run.return_value
     mock_sort_by.assert_called_once_with(
-        mock_find_prs.return_value.run.return_value, "created_at", False
+        unsorted_prs, "created_at", False
     )
     mock_filter_by.assert_called_once_with(
-        mock_sort_by.return_value, "author", "mock_github"
+        mock_sort_by.return_value, "author", [MOCK_USER.github_name, MOCK_USER.gitlab_name]
     )
-    mock_get_config.assert_any_call("repos")
     mock_web_client.assert_called_once_with(token="mock_slack")
-    mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
+    mock_web_client.assert_called_once_with(token="mock_slack")
+    mock_get_config.assert_any_call("repos")
+    mock_get_config.assert_any_call("projects")
+    mock_get_config.assert_any_call("github")
+    mock_get_config.assert_any_call("gitlab")
     mock_get_token.assert_any_call("GITHUB_TOKEN")
+    mock_get_token.assert_any_call("GITLAB_TOKEN")
+    mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
     mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
     mock_pr_reminder.return_value.run.assert_called_once_with(
         prs=mock_filter_by.return_value,
-        channel="mock_slack",
+        channel=MOCK_USER.slack_id,
         message_no_prs=False,
     )
 
