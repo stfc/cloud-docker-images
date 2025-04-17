@@ -94,10 +94,10 @@ class User:
     def from_config(cls, info: Dict):
         """Create a user class from the app config."""
         return cls(
-            real_name=info["real_name"],
-            slack_id=info["slack_id"],
-            github_name=info.get("github_name"),
-            gitlab_name=info.get("gitlab_name"),
+            real_name=info["realName"],
+            slack_id=info["slackID"],
+            github_name=info.get("githubName"),
+            gitlab_name=info.get("gitlabName"),
         )
 
 

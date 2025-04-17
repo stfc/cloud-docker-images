@@ -10,10 +10,10 @@ MOCK_CONFIG = """
 ---
 app:
   users:
-    - real_name: Real Name
-      slack_id: slack_id
-      github_name: github_username
-      gitlab_name: gitlab_username
+    - realName: Real Name
+      slackID: slack_id
+      githubName: github_username
+      gitlabName: gitlab_username
 
 
 github:

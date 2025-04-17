@@ -81,9 +81,9 @@ def test_from_gitlab():
 def test_from_config():
     """Test that the User object is returned when supplied with info from the config."""
     mock_data = {
-        "real_name": "mock user",
-        "github_name": "mock_github",
-        "slack_id": "mock_slack",
-        "gitlab_name": "mock_gitlab",
+        "realName": "mock user",
+        "slackID": "mock_slack",
+        "githubName": "mock_github",
+        "gitlabName": "mock_gitlab",
     }
     assert MOCK_USER == User.from_config(mock_data)
