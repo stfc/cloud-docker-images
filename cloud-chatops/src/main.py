@@ -3,6 +3,7 @@ This module uses endpoints to run the Slack app.
 It listens for requests from Slack and executes different functions.
 """
 
+import os
 import logging
 
 from slack_bolt import App
@@ -14,7 +15,27 @@ from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
 
 
-logging.basicConfig(level=logging.DEBUG)
+def configure_logging():
+    """Configure logging for Flask and Waitress to output to stdout."""
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    )
+    log_level = getattr(logging, os.environ.get("LOGLEVEL", "INFO").upper())
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    root_logger.addHandler(console_handler)
+
+    logging.getLogger("waitress").setLevel(log_level)
+    logging.getLogger("slack_bolt").setLevel(log_level)
+    logging.getLogger("flask_app").setLevel(log_level)
+
+
+configure_logging()
 
 validate_required_files()
 
