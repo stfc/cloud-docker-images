@@ -4,6 +4,7 @@ It listens for requests from Slack and executes different functions.
 """
 
 import logging
+from typing import Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
@@ -66,24 +67,24 @@ def slack_events() -> slack_handler.handle:
 
 
 @flask_app.route("/slack/schedule", methods=["POST"])
-def slack_schedule() -> str:
+def slack_schedule() -> Tuple[str, int]:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
     flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
     if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
-        return "403"
+        return "Invalid token provided", 403
     weekly_reminder(request.json)
-    return "200"
+    return "OK", 200
 
 @flask_app.route("/alerts", methods=["POST"])
-def alerting() -> str:
+def alerting() -> Tuple[str, int]:
     """This function ingests alerts and posts the to Slack."""
     flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
     if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
-        return "403"
+        return "Invalid token provided", 403
     post_alert(request.json)
-    return "200"
+    return "OK", 200
 
 
 if __name__ == "__main__":
