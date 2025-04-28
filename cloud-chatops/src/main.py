@@ -15,7 +15,25 @@ from events.slash_prs import SlashPRs
 from events.alerts import post_alert
 
 
-logging.basicConfig(level=logging.DEBUG)
+def configure_logging():
+    """Configure logging for Flask and Waitress to output to stdout."""
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    )
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(console_handler)
+
+    logging.getLogger('waitress').setLevel(logging.INFO)
+    logging.getLogger('slack_bolt').setLevel(logging.INFO)
+    logging.getLogger('flask_app').setLevel(logging.INFO)
+
+configure_logging()
 
 validate_required_files()
 
