@@ -6,6 +6,7 @@ should be handled and processed between the consumer and Aquilon
 """
 import json
 import logging
+import os
 import socket
 from typing import Optional, List
 
@@ -299,11 +300,10 @@ def initiate_consumer() -> None:
             logger.debug("Connected to RabbitMQ")
 
             # Durable indicates that the queue will survive a broker restart
-            queue = rabbitpy.Queue(channel, name="ral.info", durable=True)
+            queue = rabbitpy.Queue(channel, name=os.getenv(key="CONSUMER_QUEUE", default="ral.info"), durable=True)
             for exchange in exchanges:
                 logger.debug("Binding to exchange: %s", exchange)
-                queue.bind(exchange, routing_key="ral.info")
-                queue.bind(exchange, routing_key="ral.error")
+                queue.bind(exchange, routing_key=os.getenv(key="CONSUMER_QUEUE", default="ral.info"))
 
 
             # Consume the messages from generator
