@@ -92,9 +92,13 @@ def get_image(vm_data: VmData) -> Optional[Image]:
     Gets the image name from Openstack for the virtual machine.
     """
     server = get_server_details(vm_data)
-    uuid = server.image.id
-    if not uuid:
+
+    if not (server.image and server.image.id):
+        # User has booted from a volume, so we have an image without an ID
+        # or no image at all...
         return None
+
+    uuid = server.image.id
 
     with OpenstackConnection() as conn:
         image = conn.compute.find_image(uuid)

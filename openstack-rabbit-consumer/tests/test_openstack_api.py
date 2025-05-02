@@ -159,3 +159,16 @@ def test_get_image_no_image_id(server_details, vm_data):
 
     result = get_image(vm_data)
     assert not result
+
+
+@patch("rabbit_consumer.openstack_api.get_server_details")
+def test_get_image_no_image(server_details, vm_data):
+    """
+    Tests that get image handles a None type image, since this
+    is another edge-case we've seen when a volume was used
+    """
+    server_details.return_value = NonCallableMock()
+    server_details.return_value.image = None
+
+    result = get_image(vm_data)
+    assert not result
