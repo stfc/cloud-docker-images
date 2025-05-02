@@ -172,3 +172,22 @@ def test_get_image_no_image(server_details, vm_data):
 
     result = get_image(vm_data)
     assert not result
+
+
+@patch("rabbit_consumer.openstack_api.OpenstackConnection")
+@patch("rabbit_consumer.openstack_api.get_server_details")
+def test_get_image_valid_data(server_details, conn, vm_data):
+    """
+    Tests that get image handles a valid image
+    """
+    server_details.return_value = NonCallableMock()
+    server_details.return_value.image.id = "UUID-1234"
+
+    openstack_connection = conn.return_value.__enter__.return_value
+    find_image_result = NonCallableMock()
+    openstack_connection.compute.find_image.return_value = find_image_result
+
+    result = get_image(vm_data)
+
+    openstack_connection.compute.find_image.assert_called_once_with("UUID-1234")
+    assert result == find_image_result
