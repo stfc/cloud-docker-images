@@ -92,8 +92,15 @@ def get_image(vm_data: VmData) -> Optional[Image]:
     Gets the image name from Openstack for the virtual machine.
     """
     server = get_server_details(vm_data)
-    uuid = server.image.id
+
+    try:
+        # This is caused by the user booking from a volume or snapshot
+        uuid = server.image.id
+    except AttributeError:
+        uuid = None
+
     if not uuid:
+        logger.warning("No image or ID found for server %s", server.name)
         return None
 
     with OpenstackConnection() as conn:
