@@ -93,12 +93,15 @@ def get_image(vm_data: VmData) -> Optional[Image]:
     """
     server = get_server_details(vm_data)
 
-    if not (server.image and server.image.id):
-        # User has booted from a volume, so we have an image without an ID
-        # or no image at all...
-        return None
+    try:
+        # This is caused by the user booking from a volume or snapshot
+        uuid = server.image.id
+    except AttributeError:
+        uuid = None
 
-    uuid = server.image.id
+    if not uuid:
+        logger.warning("No image or ID found for server %s", server.name)
+        return None
 
     with OpenstackConnection() as conn:
         image = conn.compute.find_image(uuid)
