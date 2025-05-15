@@ -68,14 +68,26 @@ def slack_events() -> slack_handler.handle:
     return slack_handler.handle(request)
 
 
+# Disabling this allows us to use f-strings in the log messages.
+# pylint: disable=logging-fstring-interpolation
 @flask_app.route("/slack/schedule", methods=["POST"])
 def slack_schedule() -> Tuple[str, int]:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
     flask_app.logger.info(request.json())
     token = request.headers.get("Authorization")
     if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
-        return "Invalid token provided", 403
+        flask_app.logger.warning(
+            f"Request on /slack/schedule by {request.remote_addr} provided an invalid token."
+        )
+        return (
+            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...",
+            403,
+        )
     weekly_reminder(request.json)
+    flask_app.logger.info(
+        f"Request on /slack/schedule by {request.remote_addr} executed successfully"
+        f" for reminder type {request.json()["reminder_type"]}."
+    )
     return "OK", 200
 
 
