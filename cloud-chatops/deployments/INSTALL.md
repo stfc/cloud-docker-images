@@ -1,7 +1,7 @@
 # Deploying Cloud ChatOps
 This document covers the following: creating a Slack Workspace and app, finding / generating Slack and GitHub tokens and deploying the app onto a host. 
 
-> **_NOTE:_** The installation has only been tested on Ubuntu (20.04) Linux Distributions and may need to be modified to work on others such as Rocky Linux.
+> **_NOTE:_** The installation has only been tested on Ubuntu (22.04) Linux Distributions and may need to be modified to work on others such as Rocky Linux.
 
 ## Contents:
 [Quick Start](#single-node-installation)<br>

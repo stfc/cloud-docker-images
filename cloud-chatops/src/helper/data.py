@@ -3,7 +3,7 @@ This module declares the dataclass used to store PR information.
 This is preferred over dictionaries as dataclasses make code more readable.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
@@ -30,7 +30,9 @@ class PR:
         :param data: JSON | Dict HTTP response data
         :return:
         """
-        created_at = datetime.strptime(data["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+        created_at = datetime.strptime(
+            data["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+        ).replace(tzinfo=timezone.utc)
         return cls(
             title=f"{data['title']} #{data['number']}",
             author=data["user"]["login"],
@@ -49,7 +51,9 @@ class PR:
         :param data: JSON | Dict HTTP response data
         :return:
         """
-        created_at = datetime.fromisoformat(data["created_at"])
+        created_at = datetime.fromisoformat(data["created_at"]).replace(
+            tzinfo=timezone.utc
+        )
         return cls(
             title=f"{data['title']} #{data['iid']}",
             author=data["author"]["username"],
@@ -94,10 +98,10 @@ class User:
     def from_config(cls, info: Dict):
         """Create a user class from the app config."""
         return cls(
-            real_name=info["real_name"],
-            slack_id=info["slack_id"],
-            github_name=info.get("github_name"),
-            gitlab_name=info.get("gitlab_name"),
+            real_name=info["realName"],
+            slack_id=info["slackID"],
+            github_name=info.get("githubName"),
+            gitlab_name=info.get("gitlabName"),
         )
 
 
