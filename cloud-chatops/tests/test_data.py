@@ -1,6 +1,6 @@
 """Tests for data.py"""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from helper.data import PR, User
 
 # pylint: disable=R0801
@@ -24,7 +24,9 @@ MOCK_PR = PR(
     draft=False,
     labels=["mock_label"],
     repository="mock_repo",
-    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc
+    ),
 )
 
 MOCK_GITLAB_DATA = {
@@ -45,7 +47,9 @@ MOCK_MR = PR(
     draft=False,
     labels=["mock_label"],
     repository="mock-project",
-    created_at=datetime.fromisoformat("2024-12-15T07:33:56.000+00:00"),
+    created_at=datetime.fromisoformat("2024-12-15T07:33:56.000+00:00").replace(
+        tzinfo=timezone.utc
+    ),
 )
 
 MOCK_USER = User(
@@ -81,9 +85,9 @@ def test_from_gitlab():
 def test_from_config():
     """Test that the User object is returned when supplied with info from the config."""
     mock_data = {
-        "real_name": "mock user",
-        "github_name": "mock_github",
-        "slack_id": "mock_slack",
-        "gitlab_name": "mock_gitlab",
+        "realName": "mock user",
+        "slackID": "mock_slack",
+        "githubName": "mock_github",
+        "gitlabName": "mock_gitlab",
     }
     assert MOCK_USER == User.from_config(mock_data)
