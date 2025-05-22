@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: cloud-chatops
-        image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:7.0.0
+        image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:8.0.1
         env:
           - name: HOST_IP
             valueFrom:

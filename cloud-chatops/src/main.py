@@ -3,7 +3,9 @@ This module uses endpoints to run the Slack app.
 It listens for requests from Slack and executes different functions.
 """
 
+import os
 import logging
+from typing import Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
@@ -14,7 +16,27 @@ from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
 
 
-logging.basicConfig(level=logging.DEBUG)
+def configure_logging():
+    """Configure logging for Flask and Waitress to output to stdout."""
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    )
+    log_level = getattr(logging, os.environ.get("LOGLEVEL", "INFO").upper())
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    root_logger.addHandler(console_handler)
+
+    logging.getLogger("waitress").setLevel(log_level)
+    logging.getLogger("slack_bolt").setLevel(log_level)
+    logging.getLogger("flask_app").setLevel(log_level)
+
+
+configure_logging()
 
 validate_required_files()
 
@@ -47,14 +69,24 @@ def slack_events() -> slack_handler.handle:
 
 
 @flask_app.route("/slack/schedule", methods=["POST"])
-def slack_schedule() -> str:
+def slack_schedule() -> Tuple[str, int]:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
-    flask_app.logger.info(request.json())
+    flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
-    if token != get_token("SCHEDULED_REMINDER_TOKEN"):
-        return "403"
+    if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
+        flask_app.logger.warning(
+            "Request on /slack/schedule by %s provided an invalid token.", request.remote_addr
+        )
+        return (
+            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...",
+            403,
+        )
     weekly_reminder(request.json)
-    return "200"
+    flask_app.logger.info(
+        "Request on /slack/schedule by %s executed successfully "
+        "for reminder type %s.", request.remote_addr, request.json["reminder_type"]
+    )
+    return "OK", 200
 
 
 if __name__ == "__main__":

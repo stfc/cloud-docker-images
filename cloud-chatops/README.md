@@ -36,7 +36,7 @@ You must send POST requests like the below:<br>
 curl -X POST \
 -H "Content-Type: application/json" \
 -H "Authorization: token myToken" \
---data '{"type":"global | personal", "channel": "ABC123CD45}' \
+--data '{"type":"global | personal", "channel": "ABC123CD45"}' \
 https://<your-app-domain>/slack/schedule
 ```
 This triggers either of the below functions depending on the value of "type". Using "global" requires you to provide a channel ID.<br>

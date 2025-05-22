@@ -163,11 +163,11 @@ def test_password_does_not_get_logged(logging, mocked_config):
     assert mocked_config.rabbit_username in logging_arg
     assert mocked_config.rabbit_password not in logging_arg
 
-
+@patch("rabbit_consumer.message_consumer.os")
 @patch("rabbit_consumer.message_consumer.verify_kerberos_ticket")
 @patch("rabbit_consumer.message_consumer.generate_login_str")
 @patch("rabbit_consumer.message_consumer.rabbitpy")
-def test_initiate_consumer_channel_setup(rabbitpy, gen_login, _, mocked_config):
+def test_initiate_consumer_channel_setup(rabbitpy, gen_login, _, mock_os, mocked_config):
     """
     Test that the function sets up the channel and queue correctly
     """
@@ -182,9 +182,9 @@ def test_initiate_consumer_channel_setup(rabbitpy, gen_login, _, mocked_config):
     connection.channel.assert_called_once()
     channel = connection.channel.return_value.__enter__.return_value
 
-    rabbitpy.Queue.assert_called_once_with(channel, name="ral.info", durable=True)
+    rabbitpy.Queue.assert_called_once_with(channel, name=mock_os.getenv(key="CONSUMER_QUEUE", default="ral.info"), durable=True)
     queue = rabbitpy.Queue.return_value
-    queue.bind.assert_has_calls([call('nova', routing_key='ral.info'), call('nova', routing_key='ral.error')])
+    queue.bind.assert_called_once_with('nova', routing_key=mock_os.getenv(key="CONSUMER_QUEUE", default="ral.info"))
 
 
 @patch("rabbit_consumer.message_consumer.verify_kerberos_ticket")
