@@ -60,14 +60,14 @@ jobs:
       if: ${{ github.ref != 'refs/heads/master' }}
       uses: docker/login-action@v3
       with:
-        registry: harbor.stfc.ac.uk
+        registry: staging.harbor.stfc.ac.uk
         username: ${{ secrets.STAGING_HARBOR_USERNAME }}
         password: ${{ secrets.STAGING_HARBOR_TOKEN }}
     - name: Login to Harbor
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/login-action@v3
       with:
-        registry: harbor.stfc.ac.uk
+        registry: staging.harbor.stfc.ac.uk
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_TOKEN }}
     - name: Build & push to staging
@@ -78,14 +78,14 @@ jobs:
         cache-to: type=gha,mode=max
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
-        tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+        tags: "staging.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/build-push-action@v6
       with:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
-        tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
+        tags: "staging.harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
     - name: Inform of tagged name
       if: ${{ github.ref != 'refs/heads/master' }}
       run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
