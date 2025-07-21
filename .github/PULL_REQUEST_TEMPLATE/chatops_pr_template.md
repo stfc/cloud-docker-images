@@ -8,12 +8,15 @@ This should be a brief one or two line description of the PR. Details should be 
 
 ### Submitter:
 
+<!-- Please delete as appropriate. -->
+
+
 Have you done the following?:
 
 * [ ] Labeled the pull request from the following? `major | minor | patch` or `documentation | workflow`
-* [ ] Updated the documentation and template config files?
+* [ ] Updated the documentation?
 * [ ] Added unit tests for new / untested code?
-* [ ] Verified the relevant staging Docker image runs on `dev-cloud-chatops.nubes.rl.ac.uk`?
+* [ ] Deployed the changes onto `dev-cloud-chatops.nubes.rl.ac.uk`?
 
 New / Existing features:
 * [ ] Written integration tests?
