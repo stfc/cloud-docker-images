@@ -2,8 +2,8 @@ services:
   cloud_chatops:
     image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:8.1.0
     volumes:
-      - /etc/chatops/secrets/:/usr/src/app/cloud_chatops/secrets/
-      - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
+      - /opt/chatops/secrets.yml/:/usr/src/app/secrets.yml
+      - /opt/chatops/config.yml/:/usr/src/app/config.yml
     networks:
       - backend
 
@@ -15,4 +15,5 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
+      - /opt/chatops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - /opt/chatops/tls.crt:/usr/local/etc/haproxy/tls.crt
