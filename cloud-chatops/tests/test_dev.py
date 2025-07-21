@@ -37,7 +37,7 @@ def test_parse_args(mock_argparse):
 mock_config = MagicMock()
 
 
-@patch("dev.config", mock_config)
+@patch("dev.CONFIG", mock_config)
 @patch("dev.run_personal_reminder")
 @patch("dev.run_global_reminder")
 def test_call_test(mock_global, mock_personal):
@@ -79,7 +79,7 @@ mock_secrets = Secrets(
 )
 
 
-@patch("dev.secrets", mock_secrets)
+@patch("dev.SECRETS", mock_secrets)
 @patch("dev.SocketModeHandler")
 @patch("dev.App")
 @patch("dev.run_methods")
