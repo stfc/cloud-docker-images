@@ -16,7 +16,7 @@ Have you done the following?:
 * [ ] Labeled the pull request from the following? `major | minor | patch` or `documentation | workflow`
 * [ ] Updated the documentation?
 * [ ] Added unit tests for new / untested code?
-* [ ] Deployed the changes onto `dev-cloud-chatops.nubes.rl.ac.uk`?
+* [ ] Deployed the changes onto `dev-chatops.nubes.rl.ac.uk`?
 
 New / Existing features:
 * [ ] Written integration tests?
