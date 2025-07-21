@@ -81,7 +81,7 @@ def slack_schedule() -> Tuple[str, int]:
             request.remote_addr,
         )
         return (
-            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...",
+            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...'",
             403,
         )
     weekly_reminder(request.json)
