@@ -17,7 +17,7 @@ There are multiple methods of sending these reminders.<br>
 
 ### Deployment
 
-For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](deployments/INSTALL.md)
+For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](INSTALL.md)
 
 ### Usage / Features
 
