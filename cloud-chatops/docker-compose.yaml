@@ -4,13 +4,9 @@ services:
     volumes:
       - /opt/chatops/secrets.yml/:/usr/src/app/secrets.yml
       - /opt/chatops/config.yml/:/usr/src/app/config.yml
-    networks:
-      - backend
 
   haproxy:
     image: haproxytech/haproxy-alpine:2.4
-    networks:
-      - backend
     ports:
       - 80:80
       - 443:443
