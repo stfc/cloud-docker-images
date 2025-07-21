@@ -8,7 +8,8 @@ services:
   haproxy:
     image: haproxytech/haproxy-alpine:2.4
     volumes:
-      - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
+      - /opt/chatops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - /opt/chatops/tls.crt:/usr/local/etc/haproxy/tls.crt
     ports:
       - 80:80
       - 443:443
