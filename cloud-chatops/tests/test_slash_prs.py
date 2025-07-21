@@ -123,6 +123,7 @@ def test_run(
     for call in ["GITHUB_TOKEN", "GITLAB_TOKEN"]:
         mock_get_token.assert_any_call(call)
 
+
 # pylint: disable = R0913, R0917
 @patch("events.slash_prs.send_reminders")
 @patch("events.slash_prs.FindPRsGitHub")
