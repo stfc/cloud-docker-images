@@ -122,3 +122,41 @@ def test_run(
         mock_get_config.assert_any_call(call)
     for call in ["GITHUB_TOKEN", "GITLAB_TOKEN"]:
         mock_get_token.assert_any_call(call)
+
+# pylint: disable = R0913, R0917
+@patch("events.slash_prs.send_reminders")
+@patch("events.slash_prs.FindPRsGitHub")
+@patch("events.slash_prs.FindPRsGitLab")
+@patch("events.slash_prs.get_token")
+@patch("events.slash_prs.get_config")
+def test_failed_command(
+    mock_get_config,
+    mock_get_token,
+    mock_gitlab,
+    mock_github,
+    mock_send_reminders,
+    instance,
+):
+    """Test a response is made that the command failed."""
+    mock_get_config.side_effect = [
+        [MOCK_USER],
+        {"enabled": True},
+        {"enabled": False},
+        {"enabled": True},
+        {"enabled": True},
+        ["mock_owner/mock_repo"],
+        {"enabled": True},
+        ["mock_group%2Fmock_project"],
+    ]
+    mock_get_token.side_effect = ["mock_github_token", "mock_gitlab_token"]
+    mock_respond = MagicMock()
+    mock_gitlab.return_value.run.return_value = [MOCK_PR]
+    mock_github.return_value.run.return_value = [MOCK_PR]
+
+    instance.run(MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "mine"})
+    mock_respond.assert_called_once_with("Finding the PRs...")
+    mock_send_reminders.assert_called_once_with("mock_slack", [MOCK_PR, MOCK_PR], True)
+    for call in ["users", "github", "gitlab", "repos", "projects"]:
+        mock_get_config.assert_any_call(call)
+    for call in ["GITHUB_TOKEN", "GITLAB_TOKEN"]:
+        mock_get_token.assert_any_call(call)
