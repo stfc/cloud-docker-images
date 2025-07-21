@@ -10,8 +10,8 @@ from typing import Tuple
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request, make_response
-
-from helper.config import get_token, validate_required_files
+from helper.validate_config import validate_required_files
+from helper import config as app_config
 from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
 
@@ -37,11 +37,13 @@ def configure_logging():
 
 
 configure_logging()
+config = app_config.load_config()
+secrets = app_config.load_secrets()
 
 validate_required_files()
 
 slack_app = App(
-    token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET")
+    token=secrets.SLACK_BOT_TOKEN, signing_secret=secrets.SLACK_SIGNING_SECRET
 )
 
 
@@ -73,8 +75,8 @@ def slack_schedule() -> Tuple[str, int]:
     """This function checks the request is authorised then passes it to the weekly reminder calls."""
     flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
-    if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
-        flask_app.logger.warning(
+    if token != "token " + secrets.SCHEDULED_REMINDER_TOKEN:
+        flask_app.logger.info(
             "Request on /slack/schedule by %s provided an invalid token.",
             request.remote_addr,
         )
