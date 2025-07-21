@@ -22,7 +22,7 @@ For instructions on how to deploy Cloud ChatOps, see [INSTALL.md](deployments/IN
 ### Usage / Features
 
 The main purpose of this app is to remind the team about pull requests they have open across their GitHub repositories or GitLab projects.<br>
-This is facilitated by the below features which can be found in [main.py](src/main.py).
+This is facilitated by the below features which can be found in [main.py](chatops/main.py).
 
 #### Slash Commands:
 These slash commands can be run in any channel the app has access to.<br>
@@ -40,7 +40,7 @@ curl -X POST \
 https://<your-app-domain>/slack/schedule
 ```
 This triggers either of the below functions depending on the value of "type". Using "global" requires you to provide a channel ID.<br>
-Defined in the [events.py](src/events.py) module:<br>
+Defined in the [events.py](chatops/events.py) module:<br>
 - `run_global_reminder()`: sends a message to the pull request channel with every open pull request across the repositories in a thread.
 
 - `run_personal_reminder()`: sends a message to each user, in the config map, directly with a thread of their open pull requests.
@@ -77,7 +77,7 @@ You also need to change any member / channel IDs in the config to those of the d
 
 Integration tests should be developed / run alongside unit tests when working on the code.<br>
 They offer the benefit of end-to-end functional testing inside a development environment / workspace.<br> 
-Integration tests are run from [dev.py](src/dev.py) using flags to specify which tests to run.<br>
+Integration tests are run from [dev.py](chatops/dev.py) using flags to specify which tests to run.<br>
 `dev.py` always runs the Slack app after the tests so you can test the slash commands.<br>
 
 E.g.
