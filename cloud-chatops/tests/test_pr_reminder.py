@@ -4,7 +4,7 @@ from dataclasses import replace
 from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
-from slack_reminder_api.pr_reminder import PRReminder, send_reminders
+from slack.pr_reminder import PRReminder, send_reminders
 from helper.data import PR, Message, User
 
 

@@ -4,7 +4,8 @@ from unittest.mock import patch, mock_open
 import pytest
 from helper.data import User
 from helper.errors import ErrorInConfig, ErrorInSecrets
-from helper.read_config import get_token, get_config, validate_required_files, get_path
+from helper.read_config import get_token, get_config, validate_required_files
+from helper.config import get_path
 
 MOCK_CONFIG = """
 ---
