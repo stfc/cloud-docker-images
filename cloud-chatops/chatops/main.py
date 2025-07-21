@@ -9,6 +9,7 @@ from typing import Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
+import waitress
 from flask import Flask, request, make_response
 from helper.validate_config import validate_required_files
 from helper import config as app_config
@@ -106,6 +107,4 @@ def health_check():
 
 
 if __name__ == "__main__":
-    from waitress import serve
-
-    serve(flask_app, host="0.0.0.0", port=3000)
+    waitress.serve(flask_app, host="0.0.0.0", port=3000)
