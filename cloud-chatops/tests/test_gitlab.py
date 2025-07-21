@@ -10,7 +10,8 @@ from find_pr.gitlab import GitLab
 
 # pylint: disable=R0801
 @pytest.fixture(name="instance", scope="function")
-def instance_fixture():
+@patch("find_pr.gitlab.get_config")
+def instance_fixture(_):
     """Creates a class fixture to use in the tests"""
     return GitLab()
 
@@ -34,21 +35,18 @@ def test_run(mock_make_request, mock_data, instance):
     assert res == mock_res
 
 
-@patch("find_pr.gitlab.get_config")
 @patch("find_pr.gitlab.requests")
-def test_make_request_ok(mock_requests, mock_get_config, instance):
+def test_make_request_ok(mock_requests, instance):
     """Test that a request is made."""
     mock_ok_request = NonCallableMock()
     mock_requests.get.side_effect = [mock_ok_request]
-    mock_get_config.return_value = "mock_domain"
+    instance.config.gitlab.domain.return_value = "mock_domain"
     res = instance.make_request("mock_project", "mock_token")
-    mock_get_config.assert_called_once_with("gitlab_domain")
     assert res == mock_ok_request.json.return_value
 
 
-@patch("find_pr.gitlab.get_config")
 @patch("find_pr.gitlab.requests")
-def test_make_request_fail(mock_requests, _, instance):
+def test_make_request_fail(mock_requests, instance):
     """Test that a request is made and an error is raised simulating a failed request."""
     mock_error_request = NonCallableMock()
     mock_error_request.raise_for_status.side_effect = HTTPError
