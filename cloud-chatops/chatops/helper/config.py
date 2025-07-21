@@ -1,11 +1,162 @@
-"""This module handles reading data from files such as secrets and user maps."""
+"""Module to load and retrieve the app config."""
 
-from typing import Dict, Union, List
-import sys
 import os
+import sys
+
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 import yaml
-from helper.errors import ErrorInConfig, ErrorInSecrets
+
 from helper.data import User
+
+_CONFIG = None
+_SECRETS = None
+
+
+@dataclass
+class GitHubConfig:
+    """Class to store GitHub config data."""
+
+    enabled: bool
+    repositories: List[str]
+
+    @classmethod
+    def from_config(cls, config: Dict):
+        """
+        Create the class from the config file data.
+        :param config: The GitHub config as a dict from the file.
+        """
+        enabled = config["enabled"]
+        repos = []
+        if enabled:
+            r = config["repositories"]
+            repos = []
+            for owner in r:
+                repos += [f"{owner}/{repo}" for repo in r[owner]]
+        return cls(
+            enabled=enabled,
+            repositories=repos,
+        )
+
+
+@dataclass
+class GitLabConfig:
+    """Class to store GitLab config data."""
+
+    enabled: bool
+    domain: str
+    projects: List[str]
+
+    @classmethod
+    def from_config(cls, config: Dict):
+        """
+        Create the class from the config file data.
+        :param config: The GitLab config as a dict from the file.
+        """
+        enabled = config["enabled"]
+        projects = []
+        domain = ""
+        if enabled:
+            p = config["projects"]
+            projects = []
+            for group in p:
+                projects += [f"{group}%2F{project}" for project in p[group]]
+            domain = config["domain"]
+        return cls(
+            enabled=enabled,
+            domain=domain,
+            projects=projects,
+        )
+
+
+@dataclass
+class Config:
+    """Class to store app config at runtime."""
+
+    users: List[User]
+    github: GitHubConfig
+    gitlab: GitLabConfig
+
+    @classmethod
+    def from_dict(cls, config: Dict):
+        """
+        Create the Config from a file.
+        :param config: The app config as a dict from the file.
+        """
+        users = [User.from_config(user) for user in config["app"]["users"]]
+        github = GitHubConfig.from_config(config["github"])
+        gitlab = GitLabConfig.from_config(config["gitlab"])
+
+        return cls(
+            users=users,
+            github=github,
+            gitlab=gitlab,
+        )
+
+
+def load_config(path: str = None) -> Config:
+    """
+    Loads the config into global variables to be used by other modules.
+    :param path: Path to the config file
+    :return: The config object
+    """
+    if not path:
+        path = get_path() + "config.yml"
+    global _CONFIG  # pylint: disable=W0603
+    if _CONFIG is None:
+        with open(path, "r", encoding="utf-8") as file:
+            __config = yaml.safe_load(file)
+        _CONFIG = Config.from_dict(__config)
+    return _CONFIG
+
+
+def get_config():
+    """
+    Get the config from the global variables without loading it.
+    """
+    if _CONFIG is None:
+        raise RuntimeError(
+            "Configuration has not been loaded. Call load_config() first."
+        )
+    return _CONFIG
+
+
+# pylint: disable=C0103
+@dataclass
+class Secrets:
+    """Class to store secrets at runtime."""
+
+    SLACK_BOT_TOKEN: str
+    SLACK_APP_TOKEN: Optional[str] = ""
+    SLACK_SIGNING_SECRET: Optional[str] = ""
+    SCHEDULED_REMINDER_TOKEN: Optional[str] = ""
+    GITHUB_TOKEN: Optional[str] = ""
+    GITLAB_TOKEN: Optional[str] = ""
+
+
+def load_secrets(path: str = None) -> Secrets:
+    """
+    Loads the secrets into global variables to be used by other modules.
+    :param path: Path to the secrets file
+    :return: The secret object
+    """
+    if not path:
+        path = get_path() + "secrets.yml"
+    global _SECRETS  # pylint: disable=W0603
+    if _SECRETS is None:
+        with open(path, "r", encoding="utf-8") as file:
+            __secrets = yaml.safe_load(file)
+        _SECRETS = Secrets(**__secrets)
+    return _SECRETS
+
+
+def get_secrets():
+    """
+    Get the secrets from the global variables without loading it.
+    """
+    if _SECRETS is None:
+        raise RuntimeError("Secrets have not been loaded. Call load_secrets() first.")
+    return _SECRETS
 
 
 def get_path() -> str:
@@ -30,80 +181,4 @@ def get_path() -> str:
                 ) from exc
 
     # Docker image path
-    return "/usr/src/app/cloud_chatops/"
-
-
-def get_token(secret: str) -> str:
-    """
-    This function reads from the secrets file and returns a specified secret.
-    :param secret: The secret to find
-    :return: The secret as string
-    """
-    path = get_path()
-    with open(path + "secrets/secrets.yml", "r", encoding="utf-8") as secrets:
-        secrets_data = yaml.safe_load(secrets)
-        return secrets_data[secret]
-
-
-def get_config(section: str) -> Union[List, Dict, str]:
-    """
-    This function returns the specified section from the config file.
-    :param section: The section of the config to retrieve.
-    :return: The data retrieved from the config file.
-    """
-    path = get_path()
-    with open(path + "config/config.yml", "r", encoding="utf-8") as config:
-        config_data = yaml.safe_load(config)
-    match section:
-        case "users":
-            return [User.from_config(user) for user in config_data["app"]["users"]]
-        case "repos":
-            data = config_data["github"]["repositories"]
-            repos = []
-            for owner in data:
-                repos += [f"{owner}/{repo}" for repo in data[owner]]
-            return repos
-        case "gitlab_domain":
-            return config_data["gitlab"]["domain"]
-        case "projects":
-            data = config_data["gitlab"]["projects"]
-            projects = []
-            for group in data:
-                projects += [f"{group}%2F{project}" for project in data[group]]
-            return projects
-        case _:
-            return config_data[section]
-
-
-def validate_required_files() -> None:
-    """
-    This function checks that the config.yaml and secrets.yaml are valid.
-    """
-    if sys.argv[0].endswith("dev.py") and not get_token("SLACK_APP_TOKEN"):
-        raise ErrorInSecrets("SLACK_APP_TOKEN")
-
-    if sys.argv[0].endswith("main.py") and not get_token("SLACK_SIGNING_SECRET"):
-        raise ErrorInSecrets("SLACK_SIGNING_SECRET")
-
-    if not get_token("SLACK_BOT_TOKEN"):
-        raise ErrorInSecrets("SLACK_BOT_TOKEN")
-
-    github_config = get_config("github")
-    if github_config["enabled"]:
-        if not get_token("GITHUB_TOKEN"):
-            raise ErrorInSecrets("GITHUB_TOKEN")
-        if not github_config["repositories"]:
-            raise ErrorInConfig("github", "repositories")
-
-    gitlab_config = get_config("gitlab")
-    if gitlab_config["enabled"]:
-        if not get_token("GITLAB_TOKEN"):
-            raise ErrorInSecrets("GITLAB_TOKEN")
-        if not gitlab_config["domain"]:
-            raise ErrorInConfig("gitlab", "domain")
-        if not gitlab_config["projects"]:
-            raise ErrorInConfig("gitlab", "projects")
-
-    app_config = get_config("app")
-    if not app_config["users"]:
-        raise ErrorInConfig("app", "users")
+    return "/usr/src/app/"
