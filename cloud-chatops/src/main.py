@@ -9,7 +9,7 @@ from typing import Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request
+from flask import Flask, request, make_response
 
 from helper.read_config import get_token, validate_required_files
 from events.weekly_reminders import weekly_reminder
@@ -75,7 +75,8 @@ def slack_schedule() -> Tuple[str, int]:
     token = request.headers.get("Authorization")
     if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
         flask_app.logger.warning(
-            "Request on /slack/schedule by %s provided an invalid token.", request.remote_addr
+            "Request on /slack/schedule by %s provided an invalid token.",
+            request.remote_addr,
         )
         return (
             "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...",
@@ -84,9 +85,22 @@ def slack_schedule() -> Tuple[str, int]:
     weekly_reminder(request.json)
     flask_app.logger.info(
         "Request on /slack/schedule by %s executed successfully "
-        "for reminder type %s.", request.remote_addr, request.json["reminder_type"]
+        "for reminder type %s.",
+        request.remote_addr,
+        request.json["reminder_type"],
     )
     return "OK", 200
+
+
+@flask_app.route("/health", methods=["GET"])
+def health_check():
+    """Provides an endpoint to check the health of the API."""
+    flask_app.logger.info("Health check called.")
+    response = make_response()
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = "0"
+    response.status = 200
+    return response
 
 
 if __name__ == "__main__":

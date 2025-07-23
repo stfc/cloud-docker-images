@@ -45,6 +45,12 @@ Defined in the [events.py](src/events.py) module:<br>
 
 - `run_personal_reminder()`: sends a message to each user, in the config map, directly with a thread of their open pull requests.
 
+### Health check
+The app has a health check endpoint at `https://<your-app-domain>/health` which will return "200, OK" if the app is up. 
+```bash
+curl -X GET https://<your-app-domain>/health
+```
+
 ### Testing
 #### Unit Tests
 
