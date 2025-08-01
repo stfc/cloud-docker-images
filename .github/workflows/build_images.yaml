@@ -14,7 +14,9 @@ on:
 jobs:
   setup:
     if: github.event_name != 'pull_request' || !contains('OWNER,MEMBER,COLLABORATOR', github.event.pull_request.author_association)
-    runs-on: ubuntu-latest
+    runs-on: 
+      - self-hosted
+      - label-1
     steps:
     - uses: actions/checkout@v4
       with:
@@ -31,7 +33,9 @@ jobs:
       sha: ${{ steps.metadata.outputs.sha_short }}
   build:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: 
+      - self-hosted
+      - label-1
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +97,8 @@ jobs:
       run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
   finished: # convenient single job name to apply branch protection to
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: 
+      - self-hosted
+      - label-1
     steps: [{run: true}]
     
