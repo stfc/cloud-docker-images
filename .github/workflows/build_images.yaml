@@ -85,13 +85,16 @@ jobs:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
         tags: "staging.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+        build-args: |
+          BUILDKIT_INSECURE_REGISTRIES=1
+        allow: security.insecure
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/build-push-action@v6
       with:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
-        tags: "staging.harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
+        tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
     - name: Inform of tagged name
       if: ${{ github.ref != 'refs/heads/master' }}
       run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
