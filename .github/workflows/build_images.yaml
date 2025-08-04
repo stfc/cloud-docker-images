@@ -85,9 +85,8 @@ jobs:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
         tags: "staging.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
-        build-args: |
-          BUILDKIT_INSECURE_REGISTRIES=1
-        allow: security.insecure
+        run: |
+          echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/build-push-action@v6
