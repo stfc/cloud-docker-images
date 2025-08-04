@@ -51,10 +51,10 @@ jobs:
 #        remove-haskell: 'true'
 #        remove-codeql: 'true'
 #        build-mount-path: '/var/lib/docker/'
-    - name: Allow insecure harbor registry and Restart docker # restart the docker service
-      run: |
-        echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
-        sudo service docker restart
+#    - name: Allow insecure harbor registry and Restart docker # restart the docker service
+#      run: |
+#        echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
+#        sudo service docker restart
     
 #    - name: Trust Harbor CA cert
 #      run: |
