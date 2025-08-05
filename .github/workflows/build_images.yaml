@@ -51,31 +51,15 @@ jobs:
 #        remove-haskell: 'true'
 #        remove-codeql: 'true'
 #        build-mount-path: '/var/lib/docker/'
-    - name: Allow insecure harbor registry and Restart docker # restart the docker service
+
+    - name: Add harbor certificate
       run: |
+        echo | openssl s_client -servername staging.harbor.stfc.ac.uk -connect staging.harbor.stfc.ac.uk:443 2>/dev/null | openssl x509 | sudo tee /usr/local/share/ca-certificates/harbor.crt
+        sudo update-ca-certificates
         echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
         sudo service docker restart
+        sleep 5
 
-    - name: Create custom buildx builder for insecure registry
-      run: |
-    
-        mkdir -p ~/.config/buildkit
-        cat > ~/.config/buildkit/buildkitd.toml << EOF
-        [registry."staging.harbor.stfc.ac.uk"]
-          http = true
-          insecure = true
-        EOF
-    
-        docker buildx create \
-         --name harbor-builder \
-         --driver docker-container \
-         --driver-opt image=moby/buildkit:latest \
-         --buildkitd-flags '--allow-insecure-entitlement security.insecure' \
-         --config ~/.config/buildkit/buildkitd.toml \
-         --use
-
-        docker buildx inspect --bootstrap
-    
     - uses: actions/checkout@v4
     - uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub # increase pull rate limit
