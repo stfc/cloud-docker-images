@@ -52,14 +52,11 @@ jobs:
 #        remove-codeql: 'true'
 #        build-mount-path: '/var/lib/docker/'
 
-    - name: Add harbor certificate
+    - name: Add registry
       run: |
-        echo | openssl s_client -servername staging.harbor.stfc.ac.uk -connect staging.harbor.stfc.ac.uk:443 2>/dev/null | openssl x509 | sudo tee /usr/local/share/ca-certificates/harbor.crt
-        sudo update-ca-certificates
         echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
         sudo service docker restart
-        sleep 5
-
+        
     - uses: actions/checkout@v4
     - uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub # increase pull rate limit
