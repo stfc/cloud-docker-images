@@ -55,6 +55,26 @@ jobs:
       run: |
         echo '{ "insecure-registries": ["staging.harbor.stfc.ac.uk"] }' | sudo tee /etc/docker/daemon.json
         sudo service docker restart
+
+    - name: Create custom buildx builder for insecure registry
+      run: |
+    
+        mkdir -p ~/.config/buildkit
+        cat > ~/.config/buildkit/buildkitd.toml << EOF
+        [registry."staging.harbor.stfc.ac.uk"]
+          http = true
+          insecure = true
+        EOF
+    
+        docker buildx create \
+         --name harbor-builder \
+         --driver docker-container \
+         --driver-opt image=moby/buildkit:latest \
+         --buildkitd-flags '--allow-insecure-entitlement security.insecure' \
+         --config ~/.config/buildkit/buildkitd.toml \
+         --use
+
+        docker buildx inspect --bootstrap
     
     - uses: actions/checkout@v4
     - uses: docker/setup-buildx-action@v3
@@ -87,6 +107,8 @@ jobs:
         push: true
         context: "{{defaultContext}}:${{ matrix.image }}"
         tags: "staging.harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+        allow: |
+          security.insecure
     - name: Build & push to prod
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: docker/build-push-action@v6
