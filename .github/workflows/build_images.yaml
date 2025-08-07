@@ -42,6 +42,7 @@ jobs:
         image: ${{ fromJson(needs.setup.outputs.images) }}
     steps:
     - name: Maximize build space # free up space for building images
+      if: runner.runnerType != 'self-hosted'
       uses: easimon/maximize-build-space@v10
       with:
         root-reserve-mb: 512
