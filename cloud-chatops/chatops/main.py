@@ -57,6 +57,7 @@ def handle_message_events(body, logger):
     """
     logger.info(body)
 
+
 @slack_app.command("/prs")
 def prs(ack, respond, body, logger):
     """
