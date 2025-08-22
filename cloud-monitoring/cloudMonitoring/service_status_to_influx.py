@@ -1,15 +1,15 @@
 import sys
 from typing import Dict, List
 import openstack
-from openstack.compute.v2.hypervisor import Hypervisor
 from openstack.compute.v2.service import Service
 from openstack.network.v2.agent import Agent
+from openstackquery import HypervisorQuery
 from cloudMonitoring.utils import run_scrape, parse_args
 
 
-def get_hypervisor_properties(hypervisor: Hypervisor) -> Dict:
+def get_hypervisor_properties(hypervisor: Dict) -> Dict:
     """
-    This function parses a openstacksdk Hypervisor object to get properties in the correct format
+    This function parses a dict returned by a HypervisorQuery to get properties in the correct format
     to feed into influxdb
     :param hypervisor: hypervisor to extract properties from
     :return: A dictionary of useful properties
@@ -18,19 +18,19 @@ def get_hypervisor_properties(hypervisor: Hypervisor) -> Dict:
         "hv": {
             # this is populated by another command
             "aggregate": "no-aggregate",
-            "memorymax": hypervisor["memory_size"],
-            "memoryused": hypervisor["memory_used"],
-            "memoryavailable": hypervisor["memory_size"] - hypervisor["memory_used"],
+            "memorymax": hypervisor["memory_mb_size"],
+            "memoryused": hypervisor["memory_mb_used"],
+            "memoryavailable": hypervisor["memory_mb_size"] - hypervisor["memory_mb_used"],
             "memperc": round(
-                (hypervisor["memory_used"] / hypervisor["memory_size"]) * 100
+                (hypervisor["memory_mb_used"] / hypervisor["memory_mb_size"]) * 100
             ),
             "cpumax": hypervisor["vcpus"],
             "cpuused": hypervisor["vcpus_used"],
             "cpuavailable": hypervisor["vcpus"] - hypervisor["vcpus_used"],
             "cpuperc": round((hypervisor["vcpus_used"] / hypervisor["vcpus"]) * 100),
             "agent": 1,
-            "state": 1 if hypervisor["state"] == "up" else 0,
-            "statetext": hypervisor["state"].capitalize(),
+            "state": 1 if hypervisor["hypervisor_state"] == "up" else 0,
+            "statetext": hypervisor["hypervisor_state"].capitalize(),
         }
     }
     hv_info = hv_prop_dict["hv"]
@@ -132,8 +132,12 @@ def get_all_hv_details(conn) -> Dict:
     :return: a dictionary of hypervisor status information
     """
     hv_details = {}
-    for hypervisor in conn.list_hypervisors():
-        hv_details[hypervisor["name"]] = get_hypervisor_properties(hypervisor)
+
+    hv_query = HypervisorQuery()
+    hv_query.select_all()
+    hv_query.run(conn.config.name)
+    for hv in hv_query.to_props():
+        hv_details[hv["hypervisor_name"]] = get_hypervisor_properties(hv)
 
     # populate found hypervisors with what aggregate they belong to - so we can filter by aggregate in grafana
     for aggregate in conn.compute.aggregates():

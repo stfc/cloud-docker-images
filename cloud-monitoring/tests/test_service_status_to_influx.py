@@ -20,9 +20,9 @@ def test_get_hypervisor_properties_state_up():
     useful information and returns the result in correct format - when hv state is up
     """
     mock_hv = {
-        "state": "up",
-        "memory_size": 2,
-        "memory_used": 1,
+        "hypervisor_state": "up",
+        "memory_mb_size": 2,
+        "memory_mb_used": 1,
         "vcpus_used": 4,
         "vcpus": 5,
     }
@@ -56,9 +56,9 @@ def test_get_hypervisor_properties_state_down():
     :return:
     """
     mock_hv = {
-        "state": "down",
-        "memory_size": 2,
-        "memory_used": 1,
+        "hypervisor_state": "down",
+        "memory_mb_size": 2,
+        "memory_mb_used": 1,
         "vcpus_used": 4,
         "vcpus": 5,
     }
@@ -315,7 +315,8 @@ def test_get_service_prop_string():
 
 
 @patch("cloudMonitoring.service_status_to_influx.get_hypervisor_properties")
-def test_get_all_hv_details(mock_get_hypervisor_properties):
+@patch("cloudMonitoring.service_status_to_influx.HypervisorQuery")
+def test_get_all_hv_details(mock_hv_query, mock_get_hypervisor_properties):
     """
     tests get_all_hv_details returns dict of hypervisor status information
     - for each hypervisor, call get_hypervisor_properties and store in a dict,
@@ -323,7 +324,7 @@ def test_get_all_hv_details(mock_get_hypervisor_properties):
         that the hv belongs to
     """
     mock_conn = MagicMock()
-    mock_hvs = [{"name": "hv1"}, {"name": "hv2"}, {"name": "hv3"}]
+    mock_hvs = [{"hypervisor_name": "hv1"}, {"hypervisor_name": "hv2"}, {"hypervisor_name": "hv3"}]
 
     mock_aggregates = [
         {"name": "ag1", "hosts": ["hv1", "hv2"]},
@@ -333,11 +334,14 @@ def test_get_all_hv_details(mock_get_hypervisor_properties):
 
     # stubs out getting props
     mock_get_hypervisor_properties.side_effect = [{"hv": {}}, {"hv": {}}, {"hv": {}}]
-    mock_conn.list_hypervisors.return_value = mock_hvs
+    mock_hv_run_obj = mock_hv_query.return_value
+    mock_hv_run_obj.to_props.return_value = mock_hvs
     mock_conn.compute.aggregates.return_value = mock_aggregates
     res = get_all_hv_details(mock_conn)
 
-    mock_conn.list_hypervisors.assert_called_once()
+    mock_hv_query.assert_called_once()
+    mock_hv_run_obj.run.assert_called_once_with(mock_conn.config.name)
+    mock_hv_run_obj.to_props.assert_called_once()
     mock_conn.compute.aggregates.assert_called_once()
 
     mock_get_hypervisor_properties.assert_has_calls([call(hv) for hv in mock_hvs])
