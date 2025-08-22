@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+exclude = "configs*"
+
+[tool.setuptools.packages.find]
+where = ["cloudMonitoring"]
+
+[project]
+name = "cloud-monitoring"
+version = "1.0.0"
+description = "A collection of STFC cloud monitoring scripts"
+authors = [{name = "STFC Cloud Team", email = "cloud-support@stfc.ac.uk"}]
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["python", "openstack"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Openstack Admins :: Monitoring Tools",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "openstacksdk",
+    "openstackquery @ https://github.com/stfc/openstack-query-library/releases/download/v1.2.0/openstackquery-1.2.0-py3-none-any.whl"
+]
+
+[project.urls]
+Repository = "https://github.com/stfc/cloud-docker-images/cloud-monitoring"
+Documentation = "https://github.com/stfc/cloud-docker-images/cloud-monitoring/README.md"
+Issues = "https://github.com/stfc/cloud-docker-images/issues"
+
+# Optional dependency groups
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "pylint",
+]
+
+dev = [
+    "bumpversion"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["cloudMonitoring"]
+testpaths = ["tests"]
+python_files = ["*.py"]
+python_functions = ["test_*"]
+
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.pylint.format]
+max-line-length=118
+disable=[
+    "C00114", # Missing module string - we don't need module strings for the small repo
+    "W1401", # Influxdb required backslashes
+    "R0801" # Duplicate code due to test case
+]
+
+[tool.bumpversion]
+current_version = "1.0.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+tag = false
+allow_dirty = true
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+moveable_tags = []
+commit_args = "--no-verify"
+setup_hooks = []
+pre_commit_hooks = []
+post_commit_hooks = []
