@@ -4,7 +4,7 @@ name: Rabbit Consumer Schedule
 
 on:
   schedule: 
-      - cron: "12 10 * * TUE" # Every Tuesday at 10.12am
+      - cron: "0 10 1 * *" # First day of each month at 10.00am
 
 jobs:
   test_and_lint:
