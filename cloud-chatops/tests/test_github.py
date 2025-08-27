@@ -15,8 +15,8 @@ def instance_fixture():
     return GitHub()
 
 
-@patch("find_pr_api.github.PR")
-@patch("find_pr_api.github.GitHub.make_request")
+@patch("find_pr.github.PR")
+@patch("find_pr.github.GitHub.make_request")
 def test_run(mock_make_request, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_repo_1 = NonCallableMock()
@@ -34,7 +34,7 @@ def test_run(mock_make_request, mock_data, instance):
     assert res == mock_res
 
 
-@patch("find_pr_api.github.requests")
+@patch("find_pr.github.requests")
 def test_make_request(mock_requests, instance):
     """Test that requests are made and errors are raised."""
     mock_ok_request = NonCallableMock()
