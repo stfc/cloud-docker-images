@@ -204,8 +204,8 @@ def main(user_args: List):
     send service status info to influx
     :param user_args: args passed into script by user
     """
-    influxdb_args = parse_args(user_args, description="Get All Service Statuses")
-    run_scrape(influxdb_args, get_all_service_statuses)
+    monitoring_args = parse_args(user_args, description="Get All Service Statuses")
+    run_scrape(monitoring_args, get_all_service_statuses)
 
 
 if __name__ == "__main__":

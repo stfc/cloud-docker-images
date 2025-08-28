@@ -90,7 +90,7 @@ def test_parse_args_valid_args(mock_read_config_file):
     test_dir = Path(__file__).parent
     package_root = test_dir.parent
 
-    res = parse_args([f"{package_root}/configs/influxdb.conf"])
+    res = parse_args([f"{package_root}/monitoring.conf"])
     assert res == mock_read_config_file.return_value
 
 
@@ -121,7 +121,7 @@ def test_parse_args_filepath_read_config_fails(mock_read_config_file):
     package_root = test_dir.parent
 
     # Build path to the config file
-    config_file = package_root / "configs" / "influxdb.conf"
+    config_file = package_root / "monitoring.conf"
 
     with pytest.raises(RuntimeError):
         parse_args([str(config_file)])
