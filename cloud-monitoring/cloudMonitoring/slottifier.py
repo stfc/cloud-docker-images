@@ -350,8 +350,8 @@ def main(user_args: List):
     send slottifier info to influx
     :param user_args: args passed into script by user
     """
-    influxdb_args = parse_args(user_args, description="Get All Service Statuses")
-    run_scrape(influxdb_args, get_slottifier_details)
+    monitoring_args = parse_args(user_args, description="Get All Service Statuses")
+    run_scrape(monitoring_args, get_slottifier_details)
 
 
 if __name__ == "__main__":

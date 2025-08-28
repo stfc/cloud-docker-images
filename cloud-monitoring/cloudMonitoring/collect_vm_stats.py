@@ -165,8 +165,8 @@ def main(user_args: List):
     """
     Main method to collect server statuses for an influxDB instance
     """
-    influxdb_args = parse_args(user_args, description="Get All VM Statuses")
-    run_scrape(influxdb_args, get_all_server_statuses)
+    monitoring_args = parse_args(user_args, description="Get All VM Statuses")
+    run_scrape(monitoring_args, get_all_server_statuses)
 
 
 if __name__ == "__main__":

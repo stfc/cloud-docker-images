@@ -121,8 +121,8 @@ def main(user_args: List):
     send limits to influx
     :param user_args: args passed into script by user
     """
-    influxdb_args = parse_args(user_args, description="Get All Project Limits")
-    run_scrape(influxdb_args, get_all_limits)
+    monitoring_args = parse_args(user_args, description="Get All Project Limits")
+    run_scrape(monitoring_args, get_all_limits)
 
 
 if __name__ == "__main__":

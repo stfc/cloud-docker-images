@@ -8,21 +8,21 @@ from typing import Dict, Callable
 
 def dispatch_command():
     from cloudMonitoring.collect_vm_stats import main as vm_stats_main
-    from cloudMonitoring.limits_to_influx import main as limits_main
+    from cloudMonitoring.limits_to_influx import main as project_stats_main
     from cloudMonitoring.slottifier import main as slottifier_main
-    from cloudMonitoring.service_status_to_influx import main as service_status_main
+    from cloudMonitoring.service_status_to_influx import main as service_stats_main
 
     # Command registry - maps command names to their main functions
     commands: Dict[str, Callable] = {
-        "vm-stats": vm_stats_main,
-        "service-limits": limits_main,
+        "vm-states": vm_stats_main,
+        "project-stats": project_stats_main,
         "slottifier": slottifier_main,
-        "service-status": service_status_main,
+        "service-stats": service_stats_main,
     }
 
     # Check that mandatory args passed - package, command, influx config filepath
     if len(sys.argv) < 3:
-        print("Usage: monitoring <command> <influx-filpath> [args...]", file=sys.stderr)
+        print("Usage: monitoring <command> <config-filpath> [args...]", file=sys.stderr)
         print(f"Available commands: {', '.join(commands.keys())}", file=sys.stderr)
         return 1
 

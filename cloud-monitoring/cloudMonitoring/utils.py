@@ -52,7 +52,7 @@ def post_to_influxdb(
 
 def parse_args(inp_args, description: str = "scrape metrics script") -> Dict:
     """
-    This function parses influxdb args from a filepath passed into script when its run.
+    This function parses monitoring args from a filepath passed into script when its run.
     The only thing the scripts takes as input is the path to the config file.
     :param description: The description of the script to print on help command
     :param inp_args: input arguments passed when a 'gather metrics' script is run
@@ -61,7 +61,7 @@ def parse_args(inp_args, description: str = "scrape metrics script") -> Dict:
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
-        "config_filepath", type=Path, help="Path to influxdb config file"
+        "config_filepath", type=Path, help="Path to monitoring config file"
     )
     try:
         args = parser.parse_args(inp_args)
@@ -75,7 +75,7 @@ def parse_args(inp_args, description: str = "scrape metrics script") -> Dict:
         return read_config_file(args.config_filepath)
     except configparser.Error as exp:
         raise RuntimeError(
-            f"could not read influxdb config file '{args.config_filepath}'"
+            f"could not read monitoring config file '{args.config_filepath}'"
         ) from exp
 
 
