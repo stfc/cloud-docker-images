@@ -9,13 +9,18 @@ from argparse import Namespace
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
+from helper import config as app_config
 from helper.errors import NoTestCase
-from helper.read_config import validate_required_files, get_config, get_token
+from helper.validate_config import validate_required_files
 from events.weekly_reminders import run_global_reminder, run_personal_reminder
 from events.slash_prs import SlashPRs
 
 
 logging.basicConfig(level=logging.DEBUG)
+config = app_config.load_config()
+secrets = app_config.load_secrets()
+
+validate_required_files()
 
 
 def run_methods(args) -> None:
@@ -45,7 +50,7 @@ def call_method(event: str, args: Namespace) -> None:
         case "global":
             run_global_reminder(args.channel)
         case "personal":
-            users = get_config("users")
+            users = config.users
             run_personal_reminder(users)
         case _:
             raise NoTestCase(f"There is not test case for {event}")
@@ -61,14 +66,14 @@ def main(args: Namespace) -> None:
     logging.info("Completed tests.")
     logging.info("Running Slack App")
 
-    app = App(token=get_token("SLACK_BOT_TOKEN"))
+    app = App(token=secrets.SLACK_BOT_TOKEN)
 
     @app.command("/prs")
     def prs(ack, respond, body, logger):
         logger.info(body)
         SlashPRs().run(ack, respond, body)
 
-    handler = SocketModeHandler(app, get_token("SLACK_APP_TOKEN"))
+    handler = SocketModeHandler(app, secrets.SLACK_APP_TOKEN)
     handler.start()
 
 
@@ -87,5 +92,4 @@ def parse_args() -> Namespace:
 
 if __name__ == "__main__":  # pragma: no cover
     arguments = parse_args()
-    validate_required_files()
     main(arguments)

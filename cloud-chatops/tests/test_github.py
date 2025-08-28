@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from helper.data import PR, sort_by, filter_by
-from find_pr_api.github import GitHub
+from find_pr.github import GitHub
 
 
 # pylint: disable=R0801
