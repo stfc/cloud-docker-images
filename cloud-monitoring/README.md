@@ -32,7 +32,7 @@ You can create a docker container and run a script `slottifier.py` by running:
 ``` docker run --rm harbor.stfc.ac.uk/stfc-cloud/cloud-monitoring:latest \
     --volume /tmp/monitoring.conf:/app/monitoring.conf \
     --volume /tmp/clouds.yaml:/etc/openstack/clouds.yaml \ 
-    slottifier /app/monitoring.conf
+    slottifier
 ```
 
 ## Local Python Package
@@ -56,8 +56,7 @@ docker build . -t cloud-monitoring:1
 docker run --rm cloud-monitoring:1 \
     --volume /tmp/monitoring.conf:/app/monitoring.conf \
     --volume /tmp/clouds.yaml:/etc/openstack/clouds.yaml \ 
-    slottifier /app/monitoring.conf
-
+    slottifier
 ```
 
 # Usage
@@ -100,3 +99,16 @@ This script collects various service statuses, usages and limits for all hypervi
 `python -m cloudMonitoring vm-states /tmp/monitoring.conf`
 
 This script is used to total the number of virtual machines in running, shutoff, errored and build states
+
+
+# Creating Cron jobs
+You can create a cron job like so:
+```commandline
+sudo tee /etc/cron.d/service-stats.cron > /dev/null << 'EOF'
+# run every hour
+0 * * * * root docker run --rm harbor.stfc.ac.uk/stfc-cloud/cloud-monitoring:latest \    
+    --volume /tmp/monitoring.conf:/app/monitoring.conf \
+    --volume /tmp/clouds.yaml:/etc/openstack/clouds.yaml \ 
+    slottifier
+EOF
+```
