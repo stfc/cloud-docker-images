@@ -20,8 +20,8 @@ def dispatch_command():
         "service-stats": service_stats_main,
     }
 
-    # Check that mandatory args passed - package, command, influx config filepath
-    if len(sys.argv) < 3:
+    # Check that mandatory args passed - package and command
+    if len(sys.argv) < 2:
         print("Usage: monitoring <command> <config-filpath> [args...]", file=sys.stderr)
         print(f"Available commands: {', '.join(commands.keys())}", file=sys.stderr)
         return 1

@@ -1,3 +1,4 @@
+import os
 import configparser
 from configparser import ConfigParser
 from typing import Dict, Tuple, Callable
@@ -61,7 +62,11 @@ def parse_args(inp_args, description: str = "scrape metrics script") -> Dict:
 
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
-        "config_filepath", type=Path, help="Path to monitoring config file"
+        "config_filepath",
+        type=Path,
+        help="Path to monitoring config file",
+        nargs='?',
+        default=Path(os.getcwd()) / "monitoring.conf"
     )
     try:
         args = parser.parse_args(inp_args)
