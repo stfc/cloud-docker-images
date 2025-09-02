@@ -1,24 +1,24 @@
 # Cloud Monitoring
 ------------------
 
-This python package bundles together a collection of cloud monitoring scripts for our openstack cloud.
+This python package bundles together a collection of cloud monitoring scripts for our OpenStack cloud.
 
 These scripts can be used to collect metrics that will be formatted and pushed to a time-series database. At the moment 
-this time-series database is influxDB and the monitoring scripts are hardcoded to work only with it.
+this time-series database is InfluxDB and the monitoring scripts are hardcoded to work only with it.
 
 
 # Prerequisites
 
-You need to have influxDB DB running, and credentials to write to it 
-For local testing - you can spin up a local influxdb: https://docs.influxdata.com/influxdb/v2/get-started/setup/
+You need to have InfluxDB DB running, and credentials to write to it 
+For local testing - you can spin up a local InfluxDB: https://docs.influxdata.com/influxdb/v2/get-started/setup/
 
-You also need admin access to a Openstack Cloud you're interested in collecting metrics for - from a `clouds.yaml`
+You also need admin access to an OpenStack Cloud you're interested in collecting metrics for - from a `clouds.yaml`
 
 Once you've got a DB running and admin credentials, you can copy `monitoring.conf` to the `/tmp` folder
 `cp monitoring.conf /tmp/`
-and edit it to add influxdb hostname, username and password. 
+and edit it to add InfluxDB hostname, username and password. 
 
-(Optional) If you're clouds.yaml contains multiple cloud accounts - you'll also want to set the cloud config name to use. 
+(Optional) If your clouds.yaml file contains multiple cloud accounts, you'll also want to set the cloud config name to use. 
 Leave it as default `openstack` if it only contains one.
 
 # Installation
@@ -111,4 +111,58 @@ sudo tee /etc/cron.d/service-stats.cron > /dev/null << 'EOF'
     --volume /tmp/clouds.yaml:/etc/openstack/clouds.yaml \ 
     slottifier
 EOF
+```
+
+# Kubernetes Installation
+## 1. Prerequisites
+You will need:
+- A Kubernetes cluster, with access to management via Kubectl
+- A configured `monitoring.conf` file
+- A `clouds.yaml` file
+
+
+Create a namespace to isolate the jobs:
+``` bash
+kubectl create namespace cloud-monitoring
+```
+
+## 2. Create Secrets
+Upload your configuration files as Kubernetes secrets:
+
+```bash
+kubectl create secret generic monitoring-conf-secret \
+  --from-file=monitoring.conf=/path/to/monitoring.conf \
+  -n cloud-monitoring
+```
+
+``` bash
+kubectl create secret generic clouds-yaml-secret \
+  --from-file=clouds.yaml=/path/to/clouds.yaml \
+  -n cloud-monitoring
+```
+These secrets will be mounted into the containers at runtime.
+
+## 3. Deploy the CronJobs
+Apply each CronJob:
+
+``` bash
+kubectl apply -f deploy/cronjob-slottifier.yaml -n cloud-monitoring
+kubectl apply -f deploy/cronjob-project-stats.yaml -n cloud-monitoring
+kubectl apply -f deploy/cronjob-service-stats.yaml -n cloud-monitoring
+kubectl apply -f deploy/cronjob-vm-states.yaml -n cloud-monitoring
+```
+
+Each job will run hourly (0 * * * *).
+
+## 4. Verify CronJobs
+Check that the relevant jobs are scheduled:
+``` bash
+kubectl get cronjobs -n cloud-monitoring
+```
+
+To see the logs of the most recent job, run:
+``` bash
+kubectl get jobs -n cloud-monitoring  # Find the latest Job created from the CronJob
+
+kubectl logs job/<job-name> -n cloud-monitoring
 ```

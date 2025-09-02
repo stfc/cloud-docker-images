@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cloudMonitoring-slottifier
+spec:
+  schedule: "0 * * * *"  # every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cloud-monitoring-slottifier
+              image: harbor.stfc.ac.uk/stfc-cloud/cloud-monitoring:latest
+              args:
+                - slottifier
+              volumeMounts:
+                - name: monitoring-config
+                  mountPath: /app/monitoring.conf
+                  subPath: monitoring.conf
+                - name: openstack-clouds
+                  mountPath: /etc/openstack/clouds.yaml
+                  subPath: clouds.yaml
+          restartPolicy: OnFailure
+          volumes:
+            - name: monitoring-config
+              secret:
+                secretName: monitoring-conf-secret
+            - name: openstack-clouds
+              secret:
+                secretName: openstack-clouds-secret
