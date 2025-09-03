@@ -3,7 +3,7 @@
 from typing import List
 from slack_sdk import WebClient
 from helper.data import PR, Message
-from helper.config import get_config, get_token
+from helper.config import get_config, get_secrets
 
 
 class PRReminder:
@@ -11,6 +11,8 @@ class PRReminder:
 
     def __init__(self, client: WebClient):
         self.client = client
+        self.secrets = get_secrets()
+        self.config = get_config()
 
     def run(
         self,
@@ -104,8 +106,7 @@ class PRReminder:
             messages.append(Message(text=string, reactions=reactions))
         return messages
 
-    @staticmethod
-    def make_string(pr: PR) -> str:
+    def make_string(self, pr: PR) -> str:
         """
         Creates string from PR data.
         :param pr: PR data
@@ -113,7 +114,7 @@ class PRReminder:
         """
         message = []
         real_name = ""
-        for user in get_config("users"):
+        for user in self.config.users:
             if pr.author in (user.github_name, user.gitlab_name):
                 real_name = user.real_name
         if not real_name:
@@ -147,7 +148,7 @@ def send_reminders(channel: str, prs: List[PR], message_no_prs: bool) -> None:
     :param prs: List of PRs to make messages from
     :param message_no_prs: Send a message saying there are no reminders to be made.
     """
-    client = WebClient(token=get_token("SLACK_BOT_TOKEN"))
+    client = WebClient(token=get_secrets().SLACK_BOT_TOKEN)
     PRReminder(client).run(
         prs=prs,
         channel=channel,
