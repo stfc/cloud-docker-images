@@ -4,13 +4,14 @@ from dataclasses import replace
 from datetime import datetime
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
-from slack_reminder_api.pr_reminder import PRReminder, send_reminders
+
+from notify.slack import PRReminder, send_reminders
 from helper.data import PR, Message, User
 
 
 @pytest.fixture(name="instance", scope="function")
-@patch("slack_reminder_api.pr_reminder.get_config", MagicMock())
-@patch("slack_reminder_api.pr_reminder.get_secrets", MagicMock())
+@patch("notify.slack.get_config", MagicMock())
+@patch("notify.slack.get_secrets", MagicMock())
 def instance_fixture():
     """Fixture for class instance."""
     return PRReminder(NonCallableMock())
@@ -193,9 +194,9 @@ def test_run_none_found_no_message(
     mock_send_message.assert_not_called()
 
 
-@patch("slack_reminder_api.pr_reminder.get_secrets")
-@patch("slack_reminder_api.pr_reminder.PRReminder")
-@patch("slack_reminder_api.pr_reminder.WebClient")
+@patch("notify.slack.get_secrets")
+@patch("notify.slack.PRReminder")
+@patch("notify.slack.WebClient")
 def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_secrets):
     """Test the send reminders function works."""
     send_reminders("mock_channel", [MOCK_PR], True)
