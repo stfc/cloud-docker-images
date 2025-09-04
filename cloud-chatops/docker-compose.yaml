@@ -1,0 +1,15 @@
+services:
+  cloud_chatops:
+    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:9.0.0
+    volumes:
+      - /opt/chatops/secrets.yml/:/usr/src/app/secrets.yml
+      - /opt/chatops/config.yml/:/usr/src/app/config.yml
+
+  haproxy:
+    image: haproxytech/haproxy-alpine:2.4
+    volumes:
+      - /opt/chatops/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - /opt/chatops/tls.crt:/usr/local/etc/haproxy/tls.crt
+    ports:
+      - 80:80
+      - 443:443
