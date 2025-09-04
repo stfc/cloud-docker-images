@@ -10,7 +10,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from helper import config as app_config
-from helper.errors import NoTestCase
+from helper.exceptions import NoTestCase
 from helper.validate_config import validate_required_files
 from events.weekly_reminders import run_global_reminder, run_personal_reminder
 from events.slash_prs import SlashPRs

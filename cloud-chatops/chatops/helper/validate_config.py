@@ -1,7 +1,7 @@
 """This module handles reading data from files such as secrets and user maps."""
 
 import sys
-from helper.errors import ErrorInConfig, ErrorInSecrets
+from helper.exceptions import ErrorInConfig, ErrorInSecrets
 from helper.config import get_config, get_secrets
 
 
