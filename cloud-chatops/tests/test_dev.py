@@ -3,7 +3,7 @@
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
 from helper.data import User
-from helper.errors import NoTestCase
+from helper.exceptions import NoTestCase
 from helper.config import Secrets
 from dev import run_methods, call_method, parse_args, main
 

@@ -1,6 +1,6 @@
-"""Tests for helper.errors"""
+"""Tests for helper.exceptions"""
 
-from helper.errors import ErrorInSecrets, ErrorInConfig
+from helper.exceptions import ErrorInSecrets, ErrorInConfig
 import pytest
 
 
