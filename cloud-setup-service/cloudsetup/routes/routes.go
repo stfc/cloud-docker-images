@@ -1,16 +1,21 @@
 package routes
 
 import (
-	"cloudsetup/controllers"
 	"net/http"
 )
 
-type Controllers struct {
-	UsernameServiceController *controllers.UsernameServiceController
+type RouteController interface {
+	Serve(w http.ResponseWriter, r *http.Request)
 }
 
-func RegisterRoutes(mux *http.ServeMux, ctrls *Controllers) {
-	mux.HandleFunc("/getusername", ctrls.UsernameServiceController.GetUsernameHandler)
+type AllControllers struct {
+	UsernameServiceController RouteController
+	HealthServiceController   RouteController
+}
+
+func RegisterRoutes(mux *http.ServeMux, ctrls *AllControllers) {
+	mux.HandleFunc("/getusername", ctrls.UsernameServiceController.Serve)
 	// add more routes here for adding more setup scripts
+	mux.HandleFunc("/health", ctrls.HealthServiceController.Serve)
 
 }

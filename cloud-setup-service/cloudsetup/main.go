@@ -15,82 +15,92 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 )
 
-type Clients struct {
+type ExternalClients struct {
 	ComputeClient  *gophercloud.ServiceClient
 	IdentityClient *gophercloud.ServiceClient
 }
 
-func setupClients(ctx context.Context) (*Clients, error) {
-	authOpts, endpointOpts, tlsConfig, err := clouds.Parse(clouds.WithCloudName("dev"))
+// Package-level variables for mocking external dependencies
+var (
+	cloudsParse             = clouds.Parse
+	configNewProviderClient = config.NewProviderClient
+	openstackNewComputeV2   = openstack.NewComputeV2
+	openstackNewIdentityV3  = openstack.NewIdentityV3
+	httpListenAndServe      = http.ListenAndServe
+	osGetenv                = os.Getenv
+	slogInfo                = slog.Info
+	slogError               = slog.Error
+)
+
+func setupExternalClients(ctx context.Context, cloudAccount string) (*ExternalClients, error) {
+	authOpts, endpointOpts, tlsConfig, err := cloudsParse(clouds.WithCloudName(cloudAccount))
 	if err != nil {
 		return nil, err
 	}
 	authOpts.AllowReauth = true
 
-	provider, err := config.NewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
+	provider, err := configNewProviderClient(ctx, authOpts, config.WithTLSConfig(tlsConfig))
 	if err != nil {
 		return nil, err
 	}
 
-	computeClient, err := openstack.NewComputeV2(provider, endpointOpts)
+	computeClient, err := openstackNewComputeV2(provider, endpointOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	identityClient, err := openstack.NewIdentityV3(provider, endpointOpts)
+	identityClient, err := openstackNewIdentityV3(provider, endpointOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Clients{
+	return &ExternalClients{
 		ComputeClient:  computeClient,
 		IdentityClient: identityClient,
 	}, nil
 }
 
-func setupControllers(clients *Clients) *routes.Controllers {
-
+func setupControllers(clients *ExternalClients) *routes.AllControllers {
 	// setup controllers here
 	usercontroller := &controllers.UsernameServiceController{
 		ComputeClient:  clients.ComputeClient,
 		IdentityClient: clients.IdentityClient,
 	}
-
-	ctrls := &routes.Controllers{
+	ctrls := &routes.AllControllers{
 		UsernameServiceController: usercontroller,
 	}
 	return ctrls
 }
 
-func setupRoutes(ctrls *routes.Controllers) *http.ServeMux {
+func setupRoutes(ctrls *routes.AllControllers) *http.ServeMux {
 	mux := http.NewServeMux()
 	routes.RegisterRoutes(mux, ctrls)
 	return mux
 }
 
 func serve(addr string, handler http.Handler) error {
-	slog.Info("Starting server", "addr", addr)
-	return http.ListenAndServe(addr, handler)
+	slogInfo("Starting server", "addr", addr)
+	return httpListenAndServe(addr, handler)
 }
 
 func main() {
 	ctx := context.Background()
-	clients, err := setupClients(ctx)
+	clients, err := setupExternalClients(ctx, "openstack")
 	if err != nil {
-		slog.Error("Failed to setup clients", "error", err)
+		slogError("Failed to setup clients", "error", err)
 		panic(err)
 	}
 
 	ctrls := setupControllers(clients)
 	mux := setupRoutes(ctrls)
 
-	addr := os.Getenv("ADDR")
+	addr := osGetenv("ADDR")
 	if addr == "" {
 		addr = ":80"
 	}
 
 	if err := serve(addr, mux); err != nil {
-		slog.Error("Server failed", "error", err)
+		slogError("Server failed", "error", err)
 		panic(err)
 	}
 }
