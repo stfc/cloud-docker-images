@@ -30,7 +30,7 @@ MOCK_USER = User(
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_global_reminder(
-    mock_pr_reminder,
+    mock_slack,
     mock_find_prs_gh,
     mock_find_prs_gl,
     mock_get_config,
@@ -58,8 +58,8 @@ def test_run_global_reminder(
     unsorted_prs += mock_find_prs_gl.return_value.run.return_value
     mock_sort_by.assert_called_once_with(unsorted_prs, "created_at", False)
     mock_web_client.assert_called_once_with(token="mock_slack")
-    mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
-    mock_pr_reminder.return_value.run.assert_called_once_with(
+    mock_slack.assert_called_once_with(mock_web_client.return_value)
+    mock_slack.return_value.run.assert_called_once_with(
         prs=mock_sort_by.return_value, channel="mock_channel"
     )
     mock_get_config.assert_any_call("repos")
@@ -85,7 +85,7 @@ def test_run_global_reminder(
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_personal_reminder(
-    mock_pr_reminder,
+    mock_slack,
     mock_find_prs_gh,
     mock_find_prs_gl,
     mock_get_config,
@@ -127,8 +127,8 @@ def test_run_personal_reminder(
     mock_get_token.assert_any_call("GITHUB_TOKEN")
     mock_get_token.assert_any_call("GITLAB_TOKEN")
     mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
-    mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
-    mock_pr_reminder.return_value.run.assert_called_once_with(
+    mock_slack.assert_called_once_with(mock_web_client.return_value)
+    mock_slack.return_value.run.assert_called_once_with(
         prs=mock_filter_by.return_value,
         channel=MOCK_USER.slack_id,
         message_no_prs=False,
