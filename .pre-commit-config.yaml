@@ -3,3 +3,19 @@ repos:
     rev: 22.10.0
     hooks:
       - id: black
+  - repo: local
+    hooks:
+    - id: chatops-pytest
+      name: pytest
+      entry: pytest cloud-chatops/tests
+      language: system
+      types: [python]
+      files: cloud-chatops
+
+    - id: chatops-pylint
+      name: pylint
+      entry: pylint cloud-chatops/chatops cloud-chatops/tests --rcfile=cloud-chatops/.pylintrc
+      language: system
+      types: [python]
+      files: ^cloud-chatops/
+
