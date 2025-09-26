@@ -7,7 +7,6 @@ services:
 
   haproxy:
     image: haproxytech/haproxy-alpine:2.4
-      - backend
     volumes:
       - /etc/chatops/config/:/usr/src/app/cloud_chatops/config/
     ports:
