@@ -8,4 +8,4 @@ max-line-length=120
 disable=
 
 [MASTER]
-init-hook='import sys; sys.path.append("chatops")'
+init-hook='import sys; sys.path.append("cloud-chatops/chatops"); sys.path.append("chatops")'
