@@ -29,7 +29,7 @@ MOCK_USER = User(
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_global_reminder(
-    mock_slack,
+    mock_pr_reminder,
     mock_find_prs_gh,
     mock_find_prs_gl,
     mock_get_config,
@@ -73,7 +73,7 @@ def test_run_global_reminder(
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
 def test_run_personal_reminder(
-    mock_slack,
+    mock_pr_reminder,
     mock_find_prs_gh,
     mock_find_prs_gl,
     mock_get_config,
