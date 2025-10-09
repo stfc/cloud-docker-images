@@ -3,7 +3,7 @@
 from typing import List
 from slack_sdk import WebClient
 from helper.data import PR, Message
-from helper.read_config import get_config, get_token
+from helper.config import get_config, get_token
 
 
 class PRReminder:

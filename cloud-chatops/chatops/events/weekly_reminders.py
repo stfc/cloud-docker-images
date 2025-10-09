@@ -3,7 +3,7 @@
 from typing import List, Dict
 from slack_sdk import WebClient
 from helper.data import User, sort_by, filter_by
-from helper.read_config import get_config, get_token
+from helper.config import get_config, get_token
 from notify.slack import PRReminder
 from find_pr.github import GitHub as FindPRsGitHub
 from find_pr.gitlab import GitLab as FindPRsGitLab

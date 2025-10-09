@@ -11,7 +11,7 @@ from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request, make_response
 
-from helper.read_config import get_token, validate_required_files
+from helper.config import get_token, validate_required_files
 from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
 

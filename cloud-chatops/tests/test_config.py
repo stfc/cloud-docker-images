@@ -1,10 +1,10 @@
-"""This test file covers all tests for the read_config module."""
+"""This test file covers all tests for the config module."""
 
 from unittest.mock import patch, mock_open
 import pytest
 from helper.data import User
 from helper.errors import ErrorInConfig, ErrorInSecrets
-from helper.read_config import get_token, get_config, validate_required_files, get_path
+from helper.config import get_token, get_config, validate_required_files, get_path
 
 MOCK_CONFIG = """
 ---
@@ -47,8 +47,8 @@ def test_get_path_prod():
     assert get_path() == "/usr/src/app/cloud_chatops/"
 
 
-@patch("helper.read_config.os")
-@patch("helper.read_config.sys")
+@patch("helper.config.os")
+@patch("helper.config.sys")
 def test_get_path_dev_linux(mock_sys, mock_os):
     """Test the development path is returned for a system using the HOME environment variable."""
     mock_sys.argv = ["dev.py"]
@@ -56,8 +56,8 @@ def test_get_path_dev_linux(mock_sys, mock_os):
     assert get_path() == "/home/mock/dev_cloud_chatops/"
 
 
-@patch("helper.read_config.os")
-@patch("helper.read_config.sys")
+@patch("helper.config.os")
+@patch("helper.config.sys")
 def test_get_path_dev_windows(mock_sys, mock_os):
     """Test the development path is returned for a system using the HOMEPATH environment variable."""
     mock_sys.argv = ["dev.py"]
@@ -65,8 +65,8 @@ def test_get_path_dev_windows(mock_sys, mock_os):
     assert get_path() == "\\home\\mock\\dev_cloud_chatops\\"
 
 
-@patch("helper.read_config.os")
-@patch("helper.read_config.sys")
+@patch("helper.config.os")
+@patch("helper.config.sys")
 def test_get_path_dev_fails(mock_sys, mock_os):
     """Test an error is raised if HOME or HOMEPATH can't be found in the environment."""
     mock_sys.argv = ["dev.py"]
@@ -127,8 +127,8 @@ def test_get_config_fails():
             get_config("unknown")
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_dev(mock_get_token, mock_get_config):
     """Test the validate files function passes when running through dev.py."""
     mock_get_token.return_value = "mock_token"
@@ -141,8 +141,8 @@ def test_validate_required_files_dev(mock_get_token, mock_get_config):
         validate_required_files()
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_main(mock_get_token, mock_get_config):
     """Test the validate files function passes when running through dev.py."""
     mock_get_token.return_value = "mock_token"
@@ -155,7 +155,7 @@ def test_validate_required_files_main(mock_get_token, mock_get_config):
         validate_required_files()
 
 
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_token")
 def test_validate_required_files_dev_fails(mock_get_token):
     """Test the validate files function fails when running through dev.py."""
     mock_get_token.return_value = ""
@@ -168,7 +168,7 @@ def test_validate_required_files_dev_fails(mock_get_token):
         )
 
 
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_token")
 def test_validate_required_files_main_fails(mock_get_token):
     """Test the validate files function fails when running through main.py."""
     mock_get_token.return_value = ""
@@ -181,7 +181,7 @@ def test_validate_required_files_main_fails(mock_get_token):
         )
 
 
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_token")
 def test_validate_required_files_fail_slack_bot_token(mock_get_token):
     """Test the validate files function fails when the Slack bot token is not given."""
     mock_get_token.return_value = ""
@@ -193,8 +193,8 @@ def test_validate_required_files_fail_slack_bot_token(mock_get_token):
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_github_token_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when the GitHub token is not given."""
     mock_get_config.return_value = {"enabled": True}
@@ -207,8 +207,8 @@ def test_validate_required_files_github_token_fails(mock_get_token, mock_get_con
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_github_repositories_fails(
     mock_get_token, mock_get_config
 ):
@@ -223,8 +223,8 @@ def test_validate_required_files_github_repositories_fails(
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_gitlab_token_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when the GitLab token is not given."""
     mock_get_config.side_effect = [{"enabled": False}, {"enabled": True}]
@@ -237,8 +237,8 @@ def test_validate_required_files_gitlab_token_fails(mock_get_token, mock_get_con
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_gitlab_domain_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when the GitLab domain is not given."""
     mock_get_config.side_effect = [
@@ -258,8 +258,8 @@ def test_validate_required_files_gitlab_domain_fails(mock_get_token, mock_get_co
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_gitlab_projects_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when GitLab projects are not given."""
     mock_get_config.side_effect = [
@@ -279,8 +279,8 @@ def test_validate_required_files_gitlab_projects_fails(mock_get_token, mock_get_
     )
 
 
-@patch("helper.read_config.get_config")
-@patch("helper.read_config.get_token")
+@patch("helper.config.get_config")
+@patch("helper.config.get_token")
 def test_validate_required_files_app_users_fails(mock_get_token, mock_get_config):
     """Test the validate files function fails when the GitLab token is not given."""
     mock_get_config.side_effect = [

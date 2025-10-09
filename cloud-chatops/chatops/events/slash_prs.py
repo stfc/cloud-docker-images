@@ -2,7 +2,7 @@
 
 from typing import List
 from helper.data import filter_by, User
-from helper.read_config import get_config, get_token
+from helper.config import get_config, get_token
 from find_pr.github import GitHub as FindPRsGitHub
 from find_pr.gitlab import GitLab as FindPRsGitLab
 from notify.slack import send_reminders

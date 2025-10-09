@@ -3,7 +3,7 @@
 from typing import List, Dict
 import requests
 from helper.data import PR
-from helper.read_config import get_config
+from helper.config import get_config
 
 
 class GitLab:
