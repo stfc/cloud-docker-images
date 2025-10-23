@@ -29,8 +29,8 @@ MOCK_PR = PR(
 
 
 @pytest.fixture(name="instance")
-@patch("events.slash_prs.get_config", MagicMock())
-@patch("events.slash_prs.get_secrets", MagicMock())
+@patch("events.slash_prs.load_config", MagicMock())
+@patch("events.slash_prs.load_secrets", MagicMock())
 def fixture_instance():
     """Create a class instance for testing."""
     return SlashPRs()
@@ -70,10 +70,10 @@ def test_run_invalid_user(instance):
     )
 
 
-@patch("events.slash_prs.get_config")
-def test_run_invalid_arguments(mock_get_config, instance):
+@patch("events.slash_prs.load_config")
+def test_run_invalid_arguments(mock_load_config, instance):
     """Test an error is raised when the given arguments are not valid."""
-    mock_get_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
+    mock_load_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(

@@ -2,7 +2,7 @@
 
 from typing import List
 from helper.data import filter_by, User
-from helper.config import get_config, get_secrets
+from helper.config import load_config, load_secrets
 from find_pr.github import GitHub as FindPRsGitHub
 from find_pr.gitlab import GitLab as FindPRsGitLab
 from notify.slack import send_reminders
@@ -14,8 +14,8 @@ class SlashPRs:
 
     def __init__(self):
         """Read the config and store the data."""
-        self.config = get_config()
-        self.secrets = get_secrets()
+        self.config = load_config()
+        self.secrets = load_secrets()
 
     def run(self, ack, respond, body) -> None:
         """

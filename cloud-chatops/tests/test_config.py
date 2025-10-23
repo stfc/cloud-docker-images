@@ -1,10 +1,9 @@
 """This test file covers all tests for the config module."""
 
 from unittest.mock import patch, mock_open
+from pathlib import Path
 import pytest
 from helper.config import (
-    get_secrets,
-    get_config,
     load_config,
     load_secrets,
     get_path,
@@ -52,46 +51,43 @@ GITLAB_TOKEN: mock_gitlab_token
 
 def test_get_path_prod():
     """Test the production path is returned"""
-    assert get_path() == "/usr/src/app/"
+    assert get_path() == Path("/usr/src/app/")
 
 
-@patch("helper.config.os")
+@patch("helper.config.os.environ", {"HOME": "/home/mock"})
 @patch("helper.config.sys")
-def test_get_path_dev_linux(mock_sys, mock_os):
+def test_get_path_dev_linux(mock_sys):
     """Test the development path is returned for a system using the HOME environment variable."""
     mock_sys.argv = ["dev.py"]
-    mock_os.environ = {"HOME": "/home/mock"}
-    assert get_path() == "/home/mock/dev_cloud_chatops/"
+    assert get_path() == Path("/home/mock/dev_cloud_chatops/")
 
 
-@patch("helper.config.os")
+@patch("helper.config.os.environ", {"HOMEPATH":"c:\\home\\mock"})
 @patch("helper.config.sys")
-def test_get_path_dev_windows(mock_sys, mock_os):
+def test_get_path_dev_windows(mock_sys):
     """Test the development path is returned for a system using the HOMEPATH environment variable."""
     mock_sys.argv = ["dev.py"]
-    mock_os.environ = {"HOMEPATH": "\\home\\mock"}
-    assert get_path() == "\\home\\mock\\dev_cloud_chatops\\"
+    assert get_path() == Path("c:\\home\\mock/dev_cloud_chatops")
 
 
-@patch("helper.config.os")
+@patch("helper.config.os.environ", {})
 @patch("helper.config.sys")
-def test_get_path_dev_fails(mock_sys, mock_os):
+def test_get_path_dev_fails(mock_sys):
     """Test an error is raised if HOME or HOMEPATH can't be found in the environment."""
     mock_sys.argv = ["dev.py"]
-    mock_os.environ = {}
     with pytest.raises(RuntimeError):
         get_path()
 
 
-@patch("helper.config._CONFIG", None)
 @patch("helper.config.get_path")
 def test_load_config(mock_get_path):
     """Test the load_config function reads the mock config file and provides the data in the correct structure."""
-    mock_get_path.return_value = "mock_path/"
+    mock_path = Path("mock_path/")
+    mock_get_path.return_value = mock_path
     with patch("builtins.open", mock_open(read_data=MOCK_CONFIG)) as mock_file:
         res = load_config()
     mock_get_path.assert_called_once_with()
-    mock_file.assert_called_once_with("mock_path/config.yml", "r", encoding="utf-8")
+    mock_file.assert_called_once_with(mock_path / "config.yml", "r", encoding="utf-8")
 
     assert res.github.enabled is True
     assert res.github.repositories == ["owner1/repo1", "owner2/repo1"]
@@ -108,15 +104,15 @@ def test_load_config(mock_get_path):
     ]
 
 
-@patch("helper.config._SECRETS", None)
 @patch("helper.config.get_path")
 def test_load_secrets(mock_get_path):
     """Test the load_secrets function reads the mock config file and provides the data in the correct structure."""
-    mock_get_path.return_value = "mock_path/"
+    mock_path = Path("mock_path/")
+    mock_get_path.return_value = mock_path
     with patch("builtins.open", mock_open(read_data=MOCK_SECRETS)) as mock_file:
         res = load_secrets()
     mock_get_path.assert_called_once_with()
-    mock_file.assert_called_once_with("mock_path/secrets.yml", "r", encoding="utf-8")
+    mock_file.assert_called_once_with(mock_path / "secrets.yml", "r", encoding="utf-8")
 
     assert res.SLACK_BOT_TOKEN == "mock_slack_bot_token"
     assert res.SLACK_APP_TOKEN == "mock_slack_app_token"
@@ -124,29 +120,3 @@ def test_load_secrets(mock_get_path):
     assert res.SCHEDULED_REMINDER_TOKEN == "mock_scheduled_reminder_token"
     assert res.GITHUB_TOKEN == "mock_github_token"
     assert res.GITLAB_TOKEN == "mock_gitlab_token"
-
-
-@patch("helper.config._SECRETS", None)
-def test_get_secrets_fails():
-    """Test an error is raised when secrets are not preloaded."""
-    with pytest.raises(RuntimeError):
-        get_secrets()
-
-
-@patch("helper.config._SECRETS", True)
-def test_get_secrets():
-    """Test the global variable is returned."""
-    assert get_secrets()
-
-
-@patch("helper.config._CONFIG", None)
-def test_get_config_fails():
-    """Test an error is raised when the config is not preloaded."""
-    with pytest.raises(RuntimeError):
-        get_config()
-
-
-@patch("helper.config._CONFIG", True)
-def test_get_config():
-    """Test the global variable is returned."""
-    assert get_config()

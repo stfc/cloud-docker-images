@@ -2,15 +2,13 @@
 
 import os
 import sys
+from pathlib import Path
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 import yaml
 
 from helper.data import User
-
-_CONFIG = None
-_SECRETS = None
 
 
 @dataclass
@@ -94,31 +92,17 @@ class Config:
         )
 
 
-def load_config(path: str = None) -> Config:
+def load_config(path: Union[str, Path] = '') -> Config:
     """
-    Loads the config into global variables to be used by other modules.
+    Reads the config file into the Config dataclass and returns it.
     :param path: Path to the config file
     :return: The config object
     """
     if not path:
-        path = get_path() + "config.yml"
-    global _CONFIG  # pylint: disable=W0603
-    if _CONFIG is None:
-        with open(path, "r", encoding="utf-8") as file:
-            __config = yaml.safe_load(file)
-        _CONFIG = Config.from_dict(__config)
-    return _CONFIG
-
-
-def get_config():
-    """
-    Get the config from the global variables without loading it.
-    """
-    if _CONFIG is None:
-        raise RuntimeError(
-            "Configuration has not been loaded. Call load_config() first."
-        )
-    return _CONFIG
+        path = get_path() / "config.yml"
+    with open(path, "r", encoding="utf-8") as file:
+        _config = yaml.safe_load(file)
+    return Config.from_dict(_config)
 
 
 # pylint: disable=C0103
@@ -134,32 +118,20 @@ class Secrets:
     GITLAB_TOKEN: Optional[str] = ""
 
 
-def load_secrets(path: str = None) -> Secrets:
+def load_secrets(path: Union[str, Path] = '') -> Secrets:
     """
-    Loads the secrets into global variables to be used by other modules.
+    Read the secrets file and return the Secrets dataclass.
     :param path: Path to the secrets file
     :return: The secret object
     """
     if not path:
-        path = get_path() + "secrets.yml"
-    global _SECRETS  # pylint: disable=W0603
-    if _SECRETS is None:
-        with open(path, "r", encoding="utf-8") as file:
-            __secrets = yaml.safe_load(file)
-        _SECRETS = Secrets(**__secrets)
-    return _SECRETS
+        path = get_path() / 'secrets.yml'
+    with open(path, "r", encoding="utf-8") as file:
+        _secrets = yaml.safe_load(file)
+    return Secrets(**_secrets)
 
 
-def get_secrets():
-    """
-    Get the secrets from the global variables without loading it.
-    """
-    if _SECRETS is None:
-        raise RuntimeError("Secrets have not been loaded. Call load_secrets() first.")
-    return _SECRETS
-
-
-def get_path() -> str:
+def get_path() -> Path:
     """
     Determine which path to use for reading secrets.
     This differs between development and production environments.
@@ -169,16 +141,16 @@ def get_path() -> str:
         # Using dev secrets here for local testing as it runs the app.
         # in a separate Slack Workspace than the production app.
         # This means the slash commands won't be picked up by the production app.
-        try:
-            # Try multiple paths for Linux / Windows differences
-            return f"{os.environ['HOME']}/dev_cloud_chatops/"
-        except KeyError:
-            try:
-                return f"{os.environ['HOMEPATH']}\\dev_cloud_chatops\\"
-            except KeyError as exc:
-                raise RuntimeError(
+        home_path = os.environ.get('HOME','') if os.environ.get('HOME','') else os.environ.get('HOMEPATH','')
+        if not home_path:
+            raise RuntimeError(
                     "Are you trying to run locally? Couldn't find HOME or HOMEPATH in your environment variables."
-                ) from exc
-
+                )
+        path = Path(home_path) / 'dev_cloud_chatops'
+        if not path.exists:
+            raise RuntimeError (
+                f"Could not find the path {path} on the system."
+            )
+        return path
     # Docker image path
-    return "/usr/src/app/"
+    return Path("/usr/src/app/")

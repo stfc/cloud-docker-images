@@ -40,6 +40,7 @@ def configure_logging():
 
 
 configure_logging()
+
 config = app_config.load_config()
 secrets = app_config.load_secrets()
 
@@ -88,7 +89,7 @@ def slack_schedule() -> Tuple[str, int]:
     flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
     if token != "token " + secrets.SCHEDULED_REMINDER_TOKEN:
-        flask_app.logger.info(
+        flask_app.logger.warning(
             "Request on /slack/schedule by %s provided an invalid token.",
             request.remote_addr,
         )

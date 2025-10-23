@@ -3,7 +3,7 @@
 from typing import List, Dict
 from slack_sdk import WebClient
 from helper.data import User, sort_by, filter_by
-from helper.config import get_config, get_secrets
+from helper.config import load_config, load_secrets
 from notify.slack import PRReminder
 from find_pr.github import GitHub as FindPRsGitHub
 from find_pr.gitlab import GitLab as FindPRsGitLab
@@ -14,8 +14,8 @@ def run_global_reminder(channel: str) -> None:
     This event sends a message to the specified channel with all open PRs.
     :param channel: Channel ID to send the messages to.
     """
-    config = get_config()
-    secrets = get_secrets()
+    config = load_config()
+    secrets = load_secrets()
     unsorted_prs = []
     if config.github.enabled:
         unsorted_prs += FindPRsGitHub().run(
@@ -39,8 +39,8 @@ def run_personal_reminder(users: List[User], message_no_prs: bool = False) -> No
     :param message_no_prs: Send a message saying there are no PRs open.
     :param users: Users to send reminders to.
     """
-    config = get_config()
-    secrets = get_secrets()
+    config = load_config()
+    secrets = load_secrets()
     unsorted_prs = []
     if config.github.enabled:
         unsorted_prs += FindPRsGitHub().run(
@@ -67,7 +67,7 @@ def weekly_reminder(message_data: Dict) -> None:
     This function chooses which type of reminder to call based on its arguments.
     :param message_data: Data from the POST request.
     """
-    config = get_config()
+    config = load_config()
     reminder_type = message_data["reminder_type"]
     channel = message_data.get("channel", "")
     if reminder_type == "global":

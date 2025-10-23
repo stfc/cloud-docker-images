@@ -3,7 +3,7 @@
 from typing import List
 from slack_sdk import WebClient
 from helper.data import PR, Message
-from helper.config import get_config, get_secrets
+from helper.config import load_config, load_secrets
 
 
 class PRReminder:
@@ -11,8 +11,8 @@ class PRReminder:
 
     def __init__(self, client: WebClient):
         self.client = client
-        self.secrets = get_secrets()
-        self.config = get_config()
+        self.secrets = load_secrets()
+        self.config = load_config()
 
     def run(
         self,
@@ -148,7 +148,7 @@ def send_reminders(channel: str, prs: List[PR], message_no_prs: bool) -> None:
     :param prs: List of PRs to make messages from
     :param message_no_prs: Send a message saying there are no reminders to be made.
     """
-    client = WebClient(token=get_secrets().SLACK_BOT_TOKEN)
+    client = WebClient(token=load_secrets().SLACK_BOT_TOKEN)
     PRReminder(client).run(
         prs=prs,
         channel=channel,

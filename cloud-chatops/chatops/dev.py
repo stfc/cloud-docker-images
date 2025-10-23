@@ -17,8 +17,8 @@ from events.slash_prs import SlashPRs
 
 
 logging.basicConfig(level=logging.DEBUG)
-CONFIG = None
-SECRETS = None
+config = None
+secrets = None
 
 
 def run_methods(args) -> None:
@@ -48,7 +48,7 @@ def call_method(event: str, args: Namespace) -> None:
         case "global":
             run_global_reminder(args.channel)
         case "personal":
-            users = CONFIG.users
+            users = config.users
             run_personal_reminder(users)
         case _:
             raise NoTestCase(f"There is not test case for {event}")
@@ -64,14 +64,14 @@ def main(args: Namespace) -> None:
     logging.info("Completed tests.")
     logging.info("Running Slack App")
 
-    app = App(token=SECRETS.SLACK_BOT_TOKEN)
+    app = App(token=secrets.SLACK_BOT_TOKEN)
 
     @app.command("/prs")
     def prs(ack, respond, body, logger):
         logger.info(body)
         SlashPRs().run(ack, respond, body)
 
-    handler = SocketModeHandler(app, SECRETS.SLACK_APP_TOKEN)
+    handler = SocketModeHandler(app, secrets.SLACK_APP_TOKEN)
     handler.start()
 
 
@@ -89,8 +89,8 @@ def parse_args() -> Namespace:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    CONFIG = app_config.load_config()
-    SECRETS = app_config.load_secrets()
+    config = app_config.load_config()
+    secrets = app_config.load_secrets()
     validate_required_files()
     arguments = parse_args()
     main(arguments)

@@ -10,7 +10,7 @@ from find_pr.gitlab import GitLab
 
 # pylint: disable=R0801
 @pytest.fixture(name="instance", scope="function")
-@patch("find_pr.gitlab.get_config")
+@patch("find_pr.gitlab.load_config")
 def instance_fixture(_):
     """Creates a class fixture to use in the tests"""
     return GitLab()

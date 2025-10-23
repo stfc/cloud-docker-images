@@ -3,7 +3,7 @@
 from typing import List, Dict
 import requests
 from helper.data import PR
-from helper.config import get_config
+from helper.config import load_config
 
 
 class GitLab:
@@ -11,7 +11,7 @@ class GitLab:
 
     def __init__(self):
         """Initialise the class with the config."""
-        self.config = get_config()
+        self.config = load_config()
 
     def run(self, projects: List, token: str) -> List[PR]:
         """

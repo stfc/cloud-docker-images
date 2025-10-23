@@ -10,8 +10,8 @@ from helper.data import PR, Message, User
 
 
 @pytest.fixture(name="instance", scope="function")
-@patch("notify.slack.get_config", MagicMock())
-@patch("notify.slack.get_secrets", MagicMock())
+@patch("notify.slack.load_config", MagicMock())
+@patch("notify.slack.load_secrets", MagicMock())
 def instance_fixture():
     """Fixture for class instance."""
     return PRReminder(NonCallableMock())
@@ -194,14 +194,14 @@ def test_run_none_found_no_message(
     mock_send_message.assert_not_called()
 
 
-@patch("notify.slack.get_secrets")
+@patch("notify.slack.load_secrets")
 @patch("notify.slack.PRReminder")
 @patch("notify.slack.WebClient")
-def test_send_reminders(mock_web_client, mock_pr_reminder, mock_get_secrets):
+def test_send_reminders(mock_web_client, mock_pr_reminder, mock_load_secrets):
     """Test the send reminders function works."""
     send_reminders("mock_channel", [MOCK_PR], True)
     mock_web_client.assert_called_once_with(
-        token=mock_get_secrets.return_value.SLACK_BOT_TOKEN
+        token=mock_load_secrets.return_value.SLACK_BOT_TOKEN
     )
     mock_pr_reminder.assert_called_once_with(mock_web_client.return_value)
     mock_pr_reminder.return_value.run.assert_called_once_with(

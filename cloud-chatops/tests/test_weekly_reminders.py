@@ -23,8 +23,8 @@ MOCK_USER = User(
 # pylint: disable=R0913
 @patch("events.weekly_reminders.sort_by")
 @patch("events.weekly_reminders.WebClient")
-@patch("events.weekly_reminders.get_secrets")
-@patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.load_secrets")
+@patch("events.weekly_reminders.load_config")
 @patch("events.weekly_reminders.FindPRsGitLab")
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
@@ -32,14 +32,14 @@ def test_run_global_reminder(
     mock_pr_reminder,
     mock_find_prs_gh,
     mock_find_prs_gl,
-    mock_get_config,
-    mock_get_secrets,
+    mock_load_config,
+    mock_load_secrets,
     mock_web_client,
     mock_sort_by,
 ):
     """Test global reminder event"""
-    mock_config = mock_get_config.return_value
-    mock_secrets = mock_get_secrets.return_value
+    mock_config = mock_load_config.return_value
+    mock_secrets = mock_load_secrets.return_value
     mock_config.github.enabled = True
     mock_config.gitlab.enabled = True
     run_global_reminder("mock_channel")
@@ -67,8 +67,8 @@ def test_run_global_reminder(
 @patch("events.weekly_reminders.sort_by")
 @patch("events.weekly_reminders.filter_by")
 @patch("events.weekly_reminders.WebClient")
-@patch("events.weekly_reminders.get_secrets")
-@patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.load_secrets")
+@patch("events.weekly_reminders.load_config")
 @patch("events.weekly_reminders.FindPRsGitLab")
 @patch("events.weekly_reminders.FindPRsGitHub")
 @patch("events.weekly_reminders.PRReminder")
@@ -76,15 +76,15 @@ def test_run_personal_reminder(
     mock_pr_reminder,
     mock_find_prs_gh,
     mock_find_prs_gl,
-    mock_get_config,
-    mock_get_secrets,
+    mock_load_config,
+    mock_load_secrets,
     mock_web_client,
     mock_filter_by,
     mock_sort_by,
 ):
     """Test personal reminder event"""
-    mock_config = mock_get_config.return_value
-    mock_secrets = mock_get_secrets.return_value
+    mock_config = mock_load_config.return_value
+    mock_secrets = mock_load_secrets.return_value
     mock_config.github.enabled = True
     mock_config.gitlab.enabled = True
 
@@ -115,10 +115,10 @@ def test_run_personal_reminder(
 
 @patch("events.weekly_reminders.run_global_reminder")
 @patch("events.weekly_reminders.run_personal_reminder")
-@patch("events.weekly_reminders.get_config")
-def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
+@patch("events.weekly_reminders.load_config")
+def test_weekly_reminder(mock_load_config, mock_personal, mock_global):
     """Test the correct jobs are run"""
-    mock_get_config.return_value.users = [MOCK_USER]
+    mock_load_config.return_value.users = [MOCK_USER]
     weekly_reminder({"reminder_type": "global", "channel": "mock_channel"})
     mock_global.assert_called_once_with("mock_channel")
 
@@ -126,14 +126,14 @@ def test_weekly_reminder(mock_get_config, mock_personal, mock_global):
     mock_personal.assert_called_once_with(users=[MOCK_USER], message_no_prs=False)
 
 
-@patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.load_config")
 def test_weekly_reminder_fails_unknown_type(_):
     """Test the functions raises an error for an incorrect job."""
     with pytest.raises(ValueError):
         weekly_reminder({"reminder_type": "unknown_value"})
 
 
-@patch("events.weekly_reminders.get_config")
+@patch("events.weekly_reminders.load_config")
 def test_weekly_reminder_fails_no_channel(_):
     """Test the functions raises an error for not having a channel value."""
     with pytest.raises(ValueError):

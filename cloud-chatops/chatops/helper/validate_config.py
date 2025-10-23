@@ -2,15 +2,15 @@
 
 import sys
 from helper.exceptions import ErrorInConfig, ErrorInSecrets
-from helper.config import get_config, get_secrets
+from helper.config import load_config, load_secrets
 
 
 def validate_required_files() -> None:
     """
     This function checks that the config.yaml and secrets.yaml are valid.
     """
-    config = get_config()
-    secrets = get_secrets()
+    config = load_config()
+    secrets = load_secrets()
 
     if sys.argv[0].endswith("dev.py") and not secrets.SLACK_APP_TOKEN:
         raise ErrorInSecrets("SLACK_APP_TOKEN")
