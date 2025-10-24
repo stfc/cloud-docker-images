@@ -52,6 +52,8 @@ class SlashPRs:
         # Catch all errors as this stage.
         # It does not matter what we catch as we re-throw the error anyway.
         # We just need a stop gap to let the user know something has gone wrong.
+        # This is because the exception will not propogate to the user as the
+        # message has been acknowledge at the start of the function.
         except Exception as error:
             respond("Something has gone wrong. Please contact the service owner.")
             raise error
