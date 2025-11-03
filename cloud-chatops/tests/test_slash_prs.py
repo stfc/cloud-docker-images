@@ -1,11 +1,11 @@
 """Unit tests for events.slash_commands/slash_prs.py"""
 
-from unittest.mock import patch, MagicMock
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
-from helper.data import User, PR
 from events.slash_prs import SlashPRs
+from helper.data import PR, User
 
 # pylint: disable=R0801
 MOCK_USER = User(
@@ -124,19 +124,15 @@ def test_failed_command(
 ):
     """Test a response is made that the command failed."""
 
-    def raise_error():
-        """Raise an error so we can force the except statement"""
-        raise RuntimeError()
-
     mock_respond = MagicMock()
-    mock_github.return_value.run.side_effect = raise_error
+    mock_github.return_value.run.side_effect = RuntimeError
     instance.config.github.enabled = True
     instance.config.gitlab.enabled = True
     with pytest.raises(Exception):
         instance.run(
             MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "mine"}
         )
-        mock_respond.assert_any_call("Finding the PRs...")
-        mock_respond.assert_any_call(
-            "Something has gone wrong. Please contact the service owner."
-        )
+    mock_respond.assert_any_call("Finding the PRs...")
+    mock_respond.assert_any_call(
+        "Something has gone wrong. Please contact the service owner."
+    )

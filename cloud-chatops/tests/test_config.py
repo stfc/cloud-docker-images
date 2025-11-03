@@ -1,13 +1,10 @@
 """This test file covers all tests for the config module."""
 
-from unittest.mock import patch, mock_open
 from pathlib import Path
+from unittest.mock import mock_open, patch
+
 import pytest
-from helper.config import (
-    load_config,
-    load_secrets,
-    get_path,
-)
+from helper.config import get_path, load_config, load_secrets
 from helper.data import User
 
 MOCK_CONFIG = """
@@ -56,18 +53,22 @@ def test_get_path_prod():
 
 @patch("helper.config.os.environ", {"HOME": "/home/mock"})
 @patch("helper.config.sys")
-def test_get_path_dev_linux(mock_sys):
+@patch("helper.config.Path.exists", return_value=True)
+def test_get_path_dev_linux(mock_exists, mock_sys):
     """Test the development path is returned for a system using the HOME environment variable."""
     mock_sys.argv = ["dev.py"]
     assert get_path() == Path("/home/mock/dev_cloud_chatops/")
+    mock_exists.assert_called_once()
 
 
-@patch("helper.config.os.environ", {"HOMEPATH":"c:\\home\\mock"})
+@patch("helper.config.os.environ", {"HOMEPATH": "c:\\home\\mock"})
 @patch("helper.config.sys")
-def test_get_path_dev_windows(mock_sys):
+@patch("helper.config.Path.exists", return_value=True)
+def test_get_path_dev_windows(mock_exists, mock_sys):
     """Test the development path is returned for a system using the HOMEPATH environment variable."""
     mock_sys.argv = ["dev.py"]
     assert get_path() == Path("c:\\home\\mock/dev_cloud_chatops")
+    mock_exists.assert_called_once()
 
 
 @patch("helper.config.os.environ", {})
@@ -77,6 +78,17 @@ def test_get_path_dev_fails(mock_sys):
     mock_sys.argv = ["dev.py"]
     with pytest.raises(RuntimeError):
         get_path()
+
+
+@patch("helper.config.os.environ", {"HOME": "/home/mock"})
+@patch("helper.config.sys")
+@patch("helper.config.Path.exists", return_value=False)
+def test_get_path_dev_path_missing(mock_exists, mock_sys):
+    """Test an error is raised if the dev_cloud_chatops path does not exist."""
+    mock_sys.argv = ["dev.py"]
+    with pytest.raises(RuntimeError, match=r"Could not find the path"):
+        get_path()
+    mock_exists.assert_called_once()
 
 
 @patch("helper.config.get_path")
