@@ -2,15 +2,20 @@
 
 from typing import List
 from helper.data import filter_by, User
-from helper.read_config import get_config, get_token
-from find_pr_api.github import GitHub as FindPRsGitHub
-from find_pr_api.gitlab import GitLab as FindPRsGitLab
+from helper.config import load_config, load_secrets
+from find_pr.github import GitHub as FindPRsGitHub
+from find_pr.gitlab import GitLab as FindPRsGitLab
 from notify.slack import send_reminders
 
 
 # pylint: disable = R0903
 class SlashPRs:
     """Class triggered by the Slack command /prs."""
+
+    def __init__(self):
+        """Read the config and store the data."""
+        self.config = load_config()
+        self.secrets = load_secrets()
 
     def run(self, ack, respond, body) -> None:
         """
@@ -20,28 +25,38 @@ class SlashPRs:
         :param respond: Slacks respond command to respond to the command in chat.
         """
         ack()
-        users = get_config("users")
 
         self._check_if_features_enabled(respond)
-        self._check_user_exists(body["user_id"], users, respond)
+        self._check_user_exists(body["user_id"], self.config.users, respond)
         self._check_correct_arguments(body["text"], respond)
 
-        user = filter_by(users, "slack_id", [body["user_id"]])[0]
+        user = filter_by(self.config.users, "slack_id", [body["user_id"]])[0]
 
         respond("Finding the PRs...")
         prs = []
-        if get_config("github")["enabled"]:
-            prs.extend(
-                FindPRsGitHub().run(
-                    repos=get_config("repos"), token=get_token("GITHUB_TOKEN")
+        try:
+            if self.config.github.enabled:
+                prs.extend(
+                    FindPRsGitHub().run(
+                        repos=self.config.github.repositories,
+                        token=self.secrets.GITHUB_TOKEN,
+                    )
                 )
-            )
-        if get_config("gitlab")["enabled"]:
-            prs.extend(
-                FindPRsGitLab().run(
-                    projects=get_config("projects"), token=get_token("GITLAB_TOKEN")
+            if self.config.gitlab.enabled:
+                prs.extend(
+                    FindPRsGitLab().run(
+                        projects=self.config.gitlab.projects,
+                        token=self.secrets.GITLAB_TOKEN,
+                    )
                 )
-            )
+        # Catch all errors as this stage.
+        # It does not matter what we catch as we re-throw the error anyway.
+        # We just need a stop gap to let the user know something has gone wrong.
+        # This is because the exception will not propogate to the user as the
+        # message has been acknowledge at the start of the function.
+        except Exception as error:
+            respond("Something has gone wrong. Please contact the service owner.")
+            raise error
 
         if body["text"].casefold() == "mine":
             prs = filter_by(
@@ -81,14 +96,13 @@ class SlashPRs:
                 f" Failed as arguments provided are not valid."
             )
 
-    @staticmethod
-    def _check_if_features_enabled(respond):
+    def _check_if_features_enabled(self, respond):
         """
         Checks that the minimum features are enabled.
         For example, both or either of the GitLab and GitHub features must be enabled.
         :param respond: Slack respond function.
         """
-        if not get_config("github")["enabled"] and not get_config("gitlab")["enabled"]:
+        if not self.config.github.enabled and not self.config.gitlab.enabled:
             respond("Neither of the GitHub or GitLab features are enabled.")
             raise RuntimeError(
                 "Neither the GitHub or GitLab features are enabled."

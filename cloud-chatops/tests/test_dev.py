@@ -1,9 +1,10 @@
 """Unit tests for dev.py"""
 
-from unittest.mock import patch, NonCallableMock
+from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
 from helper.data import User
-from helper.errors import NoTestCase
+from helper.exceptions import NoTestCase
+from helper.config import Secrets
 from dev import run_methods, call_method, parse_args, main
 
 # pylint: disable=R0801
@@ -33,18 +34,20 @@ def test_parse_args(mock_argparse):
     assert res == mock_argparse.ArgumentParser.return_value.parse_args.return_value
 
 
-@patch("dev.get_config")
+mock_config = MagicMock()
+
+
+@patch("dev.config", mock_config)
 @patch("dev.run_personal_reminder")
 @patch("dev.run_global_reminder")
-def test_call_test(mock_global, mock_personal, mock_get_config):
+def test_call_test(mock_global, mock_personal):
     """Test the call test function"""
-    mock_get_config.return_value = [MOCK_USER]
     mock_args = NonCallableMock()
     call_method("channel", mock_args)
     call_method("global", mock_args)
     mock_global.assert_called_once_with(mock_args.channel)
     call_method("personal", mock_args)
-    mock_personal.assert_called_once_with([MOCK_USER])
+    mock_personal.assert_called_once_with(mock_config.users)
     with pytest.raises(NoTestCase):
         call_method("unexpected", mock_args)
 
@@ -71,18 +74,20 @@ def test_run_methods_invalid():
         run_methods(mock_args)
 
 
-@patch("dev.get_token")
+mock_secrets = Secrets(
+    SLACK_BOT_TOKEN="mock_slack_bot_token", SLACK_APP_TOKEN="mock_slack_app_token"
+)
+
+
+@patch("dev.secrets", mock_secrets)
 @patch("dev.SocketModeHandler")
 @patch("dev.App")
 @patch("dev.run_methods")
-def test_main(mock_run_methods, mock_app, mock_socket, mock_get_token):
+def test_main(mock_run_methods, mock_app, mock_socket):
     """Test the main method calls the correct functions."""
     mock_args = NonCallableMock()
-    mock_get_token.side_effect = ["mock_bot_token", "mock_app_token"]
     main(mock_args)
     mock_run_methods.assert_called_once_with(mock_args)
-    mock_app.assert_called_once_with(token="mock_bot_token")
-    mock_get_token.assert_any_call("SLACK_BOT_TOKEN")
-    mock_get_token.assert_any_call("SLACK_APP_TOKEN")
-    mock_socket.assert_called_once_with(mock_app.return_value, "mock_app_token")
+    mock_app.assert_called_once_with(token="mock_slack_bot_token")
+    mock_socket.assert_called_once_with(mock_app.return_value, "mock_slack_app_token")
     mock_socket.return_value.start.assert_called_once_with()

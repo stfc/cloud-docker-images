@@ -1,11 +1,11 @@
 """Unit tests for events.slash_commands/slash_prs.py"""
 
-from unittest.mock import patch, MagicMock
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
-from helper.data import User, PR
 from events.slash_prs import SlashPRs
+from helper.data import PR, User
 
 # pylint: disable=R0801
 MOCK_USER = User(
@@ -29,15 +29,17 @@ MOCK_PR = PR(
 
 
 @pytest.fixture(name="instance")
+@patch("events.slash_prs.load_config", MagicMock())
+@patch("events.slash_prs.load_secrets", MagicMock())
 def fixture_instance():
     """Create a class instance for testing."""
     return SlashPRs()
 
 
-@patch("events.slash_prs.get_config")
-def test_run_invalid_features(mock_get_config, instance):
+def test_run_invalid_features(instance):
     """Test an error is raised when no features are enabled in the config."""
-    mock_get_config.side_effect = [[MOCK_USER], {"enabled": False}, {"enabled": False}]
+    instance.config.github.enabled = False
+    instance.config.gitlab.enabled = False
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(MagicMock(), mock_respond, {})
@@ -50,10 +52,11 @@ def test_run_invalid_features(mock_get_config, instance):
     )
 
 
-@patch("events.slash_prs.get_config")
-def test_run_invalid_user(mock_get_config, instance):
+def test_run_invalid_user(instance):
     """Test an error is raised when the given user is not in the config."""
-    mock_get_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
+    instance.config.github.enabled = True
+    instance.config.gitlab.enabled = True
+    instance.config.users = [MOCK_USER]
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(MagicMock(), mock_respond, {"user_id": "some_unknown_user"})
@@ -67,10 +70,10 @@ def test_run_invalid_user(mock_get_config, instance):
     )
 
 
-@patch("events.slash_prs.get_config")
-def test_run_invalid_arguments(mock_get_config, instance):
+@patch("events.slash_prs.load_config")
+def test_run_invalid_arguments(mock_load_config, instance):
     """Test an error is raised when the given arguments are not valid."""
-    mock_get_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
+    mock_load_config.side_effect = [[MOCK_USER], {"enabled": True}, {"enabled": True}]
     mock_respond = MagicMock()
     with pytest.raises(RuntimeError) as exc:
         instance.run(
@@ -89,36 +92,47 @@ def test_run_invalid_arguments(mock_get_config, instance):
 @patch("events.slash_prs.send_reminders")
 @patch("events.slash_prs.FindPRsGitHub")
 @patch("events.slash_prs.FindPRsGitLab")
-@patch("events.slash_prs.get_token")
-@patch("events.slash_prs.get_config")
 def test_run(
-    mock_get_config,
-    mock_get_token,
     mock_gitlab,
     mock_github,
     mock_send_reminders,
     instance,
 ):
     """Test the run method makes the correct calls."""
-    mock_get_config.side_effect = [
-        [MOCK_USER],
-        {"enabled": True},
-        {"enabled": True},
-        {"enabled": True},
-        {"enabled": True},
-        ["mock_owner/mock_repo"],
-        {"enabled": True},
-        ["mock_group%2Fmock_project"],
-    ]
-    mock_get_token.side_effect = ["mock_github_token", "mock_gitlab_token"]
     mock_respond = MagicMock()
     mock_gitlab.return_value.run.return_value = [MOCK_PR]
     mock_github.return_value.run.return_value = [MOCK_PR]
+    instance.config.github.enabled = True
+    instance.config.gitlab.enabled = True
 
     instance.run(MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "mine"})
+    mock_github.return_value.run.assert_called_once_with(
+        repos=instance.config.github.repositories, token=instance.secrets.GITHUB_TOKEN
+    )
+    mock_gitlab.return_value.run.assert_called_once_with(
+        projects=instance.config.gitlab.projects, token=instance.secrets.GITLAB_TOKEN
+    )
     mock_respond.assert_called_once_with("Finding the PRs...")
     mock_send_reminders.assert_called_once_with("mock_slack", [MOCK_PR, MOCK_PR], True)
-    for call in ["users", "github", "gitlab", "repos", "projects"]:
-        mock_get_config.assert_any_call(call)
-    for call in ["GITHUB_TOKEN", "GITLAB_TOKEN"]:
-        mock_get_token.assert_any_call(call)
+
+
+# pylint: disable = R0913, R0917
+@patch("events.slash_prs.FindPRsGitHub")
+def test_failed_command(
+    mock_github,
+    instance,
+):
+    """Test a response is made that the command failed."""
+
+    mock_respond = MagicMock()
+    mock_github.return_value.run.side_effect = RuntimeError
+    instance.config.github.enabled = True
+    instance.config.gitlab.enabled = True
+    with pytest.raises(Exception):
+        instance.run(
+            MagicMock(), mock_respond, {"user_id": "mock_slack", "text": "mine"}
+        )
+    mock_respond.assert_any_call("Finding the PRs...")
+    mock_respond.assert_any_call(
+        "Something has gone wrong. Please contact the service owner."
+    )

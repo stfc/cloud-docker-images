@@ -5,18 +5,19 @@ from datetime import datetime
 import pytest
 from requests.exceptions import HTTPError
 from helper.data import PR, sort_by, filter_by
-from find_pr_api.gitlab import GitLab
+from find_pr.gitlab import GitLab
 
 
 # pylint: disable=R0801
 @pytest.fixture(name="instance", scope="function")
-def instance_fixture():
+@patch("find_pr.gitlab.load_config")
+def instance_fixture(_):
     """Creates a class fixture to use in the tests"""
     return GitLab()
 
 
-@patch("find_pr_api.gitlab.PR")
-@patch("find_pr_api.gitlab.GitLab.make_request")
+@patch("find_pr.gitlab.PR")
+@patch("find_pr.gitlab.GitLab.make_request")
 def test_run(mock_make_request, mock_data, instance):
     """Tests the run method returns the correct object"""
     mock_project_1 = NonCallableMock()
@@ -34,21 +35,18 @@ def test_run(mock_make_request, mock_data, instance):
     assert res == mock_res
 
 
-@patch("find_pr_api.gitlab.get_config")
-@patch("find_pr_api.gitlab.requests")
-def test_make_request_ok(mock_requests, mock_get_config, instance):
+@patch("find_pr.gitlab.requests")
+def test_make_request_ok(mock_requests, instance):
     """Test that a request is made."""
     mock_ok_request = NonCallableMock()
     mock_requests.get.side_effect = [mock_ok_request]
-    mock_get_config.return_value = "mock_domain"
+    instance.config.gitlab.domain.return_value = "mock_domain"
     res = instance.make_request("mock_project", "mock_token")
-    mock_get_config.assert_called_once_with("gitlab_domain")
     assert res == mock_ok_request.json.return_value
 
 
-@patch("find_pr_api.gitlab.get_config")
-@patch("find_pr_api.gitlab.requests")
-def test_make_request_fail(mock_requests, _, instance):
+@patch("find_pr.gitlab.requests")
+def test_make_request_fail(mock_requests, instance):
     """Test that a request is made and an error is raised simulating a failed request."""
     mock_error_request = NonCallableMock()
     mock_error_request.raise_for_status.side_effect = HTTPError

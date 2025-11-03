@@ -1,6 +1,6 @@
 """
-This module uses endpoints to run the Slack app.
-It listens for requests from Slack and executes different functions.
+Initialise the app.
+Set up logging and define routes and events.
 """
 
 import os
@@ -9,15 +9,18 @@ from typing import Tuple
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
+import waitress
 from flask import Flask, request, make_response
-
-from helper.read_config import get_token, validate_required_files
+from helper.validate_config import validate_required_files
+from helper import config as app_config
 from events.weekly_reminders import weekly_reminder
 from events.slash_prs import SlashPRs
 
 
 def configure_logging():
-    """Configure logging for Flask and Waitress to output to stdout."""
+    """
+    Configure logging for Flask, Waitress and Slack Bolt to output to stdout.
+    """
     formatter = logging.Formatter(
         "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
     )
@@ -38,22 +41,29 @@ def configure_logging():
 
 configure_logging()
 
+config = app_config.load_config()
+secrets = app_config.load_secrets()
+
 validate_required_files()
 
 slack_app = App(
-    token=get_token("SLACK_BOT_TOKEN"), signing_secret=get_token("SLACK_SIGNING_SECRET")
+    token=secrets.SLACK_BOT_TOKEN, signing_secret=secrets.SLACK_SIGNING_SECRET
 )
 
 
 @slack_app.event("message")
 def handle_message_events(body, logger):
-    """This method handles message events and logs them."""
+    """
+    This method handles message events and logs them.
+    """
     logger.info(body)
 
 
 @slack_app.command("/prs")
 def prs(ack, respond, body, logger):
-    """See events/slash_prs.py for documentation."""
+    """
+    See :py:func: `~chatops.events.SlashPRs.run`
+    """
     logger.info(body)
     SlashPRs().run(ack, respond, body)
 
@@ -64,22 +74,27 @@ slack_handler = SlackRequestHandler(slack_app)
 
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events() -> slack_handler.handle:
-    """This function makes requests to the Slack App from the Flask request."""
+    """
+    Take Slack Events from the Flask app and give them to the Slack Handler to handle them.
+    """
     return slack_handler.handle(request)
 
 
 @flask_app.route("/slack/schedule", methods=["POST"])
 def slack_schedule() -> Tuple[str, int]:
-    """This function checks the request is authorised then passes it to the weekly reminder calls."""
+    """
+    Provides a route to trigger weekly Slack reminders.
+    Authenticates the request based on token provided.
+    """
     flask_app.logger.info(request.json)
     token = request.headers.get("Authorization")
-    if token != "token " + get_token("SCHEDULED_REMINDER_TOKEN"):
+    if token != "token " + secrets.SCHEDULED_REMINDER_TOKEN:
         flask_app.logger.warning(
             "Request on /slack/schedule by %s provided an invalid token.",
             request.remote_addr,
         )
         return (
-            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...",
+            "Invalid token provided. Please make sure your token is in the format 'token gh_abc123...'",
             403,
         )
     weekly_reminder(request.json)
@@ -104,6 +119,4 @@ def health_check():
 
 
 if __name__ == "__main__":
-    from waitress import serve
-
-    serve(flask_app, host="0.0.0.0", port=3000)
+    waitress.serve(flask_app, host="0.0.0.0", port=3000)
