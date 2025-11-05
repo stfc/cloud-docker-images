@@ -96,6 +96,7 @@ def is_valid_project(project: Project) -> bool:
     :param project: project to check
     :return: boolean, True if project should be accounted for in limits
     """
+    # we ignore rally and heat created projects because they are testing ones
     invalid_strings = ["_rally", "844"]
     return all(string not in project["name"] for string in invalid_strings)
 
