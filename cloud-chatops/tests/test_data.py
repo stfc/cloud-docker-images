@@ -20,7 +20,12 @@ MOCK_PR = PR(
     title="mock_title #1",
     author="mock_author",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    stale=True,
+    stale=(
+        datetime.now().replace(tzinfo=timezone.utc)
+        - datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+    ).days,
     draft=False,
     labels=["mock_label"],
     repository="mock_repo",
@@ -43,7 +48,12 @@ MOCK_MR = PR(
     title="mock_title #1",
     author="mock-user",
     url="https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/205",
-    stale=True,
+    stale=(
+        datetime.now().replace(tzinfo=timezone.utc)
+        - datetime.fromisoformat("2024-12-15T07:33:56.000+00:00").replace(
+            tzinfo=timezone.utc
+        )
+    ).days,
     draft=False,
     labels=["mock_label"],
     repository="mock-project",
@@ -63,13 +73,13 @@ MOCK_USER = User(
 
 
 def test_is_stale_false():
-    """Test that is_stale returns false for a PR less than 30 days old."""
+    """Test that is_stale returns false for a PR less than 14 days old."""
     assert not PR.is_stale(datetime.now())
 
 
 def test_is_stale_true():
-    """Test that is_stale returns false for a PR 30 days or older."""
-    assert PR.is_stale(datetime.now() - timedelta(days=30))
+    """Test that is_stale returns false for a PR 14 days or older."""
+    assert PR.is_stale(datetime.now() - timedelta(days=14))
 
 
 def test_from_github():

@@ -3,7 +3,7 @@ This module declares the dataclass used to store PR information.
 This is preferred over dictionaries as dataclasses make code more readable.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
@@ -19,7 +19,7 @@ class PR:
     url: str
     created_at: datetime
     draft: bool
-    stale: bool
+    stale: int
     repository: str
     labels: List[str]
 
@@ -66,15 +66,15 @@ class PR:
         )
 
     @staticmethod
-    def is_stale(created_at: datetime) -> bool:
+    def is_stale(created_at: datetime) -> int:
         """
         Returns if a PR is stale or not.
         :param created_at: When the PR was created
         """
         opened_date = created_at.replace(tzinfo=None)
         datetime_now = datetime.now().replace(tzinfo=None)
-        time_cutoff = datetime_now - timedelta(days=30)
-        return opened_date <= time_cutoff
+        age = (datetime_now - opened_date).days
+        return age if age >= 14 else 0
 
 
 @dataclass

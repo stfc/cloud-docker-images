@@ -121,7 +121,7 @@ class PRReminder:
             real_name = pr.author
 
         if pr.stale:
-            message.append("*This PR is older than 30 days. Consider closing it:*")
+            message.append(f"*This PR is {pr.stale} days old. Get it moving!*")
         message.append(f"Pull Request: <{pr.url}|{pr.title}>")
         message.append(f"Author: {real_name}")
         return "\n".join(message)
