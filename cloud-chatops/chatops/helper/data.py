@@ -19,7 +19,7 @@ class PR:
     url: str
     created_at: datetime
     draft: bool
-    stale: int
+    age: int
     repository: str
     labels: List[str]
 
@@ -37,7 +37,7 @@ class PR:
             title=f"{data['title']} #{data['number']}",
             author=data["user"]["login"],
             url=data["html_url"],
-            stale=cls.pr_age(created_at),
+            age=cls.pr_age(created_at),
             created_at=created_at,
             draft=data["draft"],
             labels=[label["name"] for label in data["labels"]],
@@ -58,7 +58,7 @@ class PR:
             title=f"{data['title']} #{data['iid']}",
             author=data["author"]["username"],
             url=data["web_url"],
-            stale=cls.pr_age(created_at),
+            age=cls.pr_age(created_at),
             created_at=created_at,
             draft=data["draft"],
             labels=data["labels"],

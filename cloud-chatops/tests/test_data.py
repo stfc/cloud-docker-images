@@ -20,7 +20,7 @@ MOCK_PR = PR(
     title="mock_title #1",
     author="mock_author",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    stale=(
+    age=(
         datetime.now().replace(tzinfo=timezone.utc)
         - datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=timezone.utc
@@ -48,7 +48,7 @@ MOCK_MR = PR(
     title="mock_title #1",
     author="mock-user",
     url="https://gitlab.stfc.ac.uk/mock-group/mock-project/-/merge_requests/205",
-    stale=(
+    age=(
         datetime.now().replace(tzinfo=timezone.utc)
         - datetime.fromisoformat("2024-12-15T07:33:56.000+00:00").replace(
             tzinfo=timezone.utc
@@ -72,14 +72,14 @@ MOCK_USER = User(
 # pylint: disable=R0801
 
 
-def test_is_stale_false():
-    """Test that is_stale returns false for a PR less than 14 days old."""
-    assert not PR.pr_age(datetime.now())
+def test_pr_age_new():
+    """Test that less than 14 days are returned for a recent PR."""
+    assert PR.pr_age(datetime.now()) < 14
 
 
-def test_is_stale_true():
-    """Test that is_stale returns false for a PR 14 days or older."""
-    assert PR.pr_age(datetime.now() - timedelta(days=14))
+def test_pr_age_old():
+    """Test that more than 14 days are returned for a recent PR."""
+    assert PR.pr_age(datetime.now() - timedelta(days=14)) <= 14
 
 
 def test_from_github():

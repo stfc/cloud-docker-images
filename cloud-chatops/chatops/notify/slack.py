@@ -120,8 +120,8 @@ class PRReminder:
         if not real_name:
             real_name = pr.author
 
-        if pr.stale:
-            message.append(f"*This PR is {pr.stale} days old. Get it moving!*")
+        if pr.age:
+            message.append(f"*This PR is {pr.age} days old. Get it moving!*")
         message.append(f"Pull Request: <{pr.url}|{pr.title}>")
         message.append(f"Author: {real_name}")
         return "\n".join(message)
@@ -134,7 +134,7 @@ class PRReminder:
         :return: Reactions
         """
         reactions = []
-        if pr.stale:
+        if pr.age >= 14:
             reactions.append("alarm_clock")
         if pr.draft:
             reactions.append("building_construction")

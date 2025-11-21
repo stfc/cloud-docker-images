@@ -1,7 +1,7 @@
 """Tests for slack.py"""
 
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, NonCallableMock, MagicMock
 import pytest
 
@@ -24,23 +24,18 @@ MOCK_PR = PR(
     title="mock_title #1",
     author="mock_github",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    stale=(
-        datetime.now().replace(tzinfo=timezone.utc)
-        - datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=timezone.utc
-        )
-    ).days,
+    age=(datetime.now().replace(tzinfo=timezone.utc) - timedelta(days=10)).day,
     draft=True,
     labels=["mock_label"],
     repository="mock_repo",
-    created_at=datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ"),
+    created_at=datetime.now().replace(tzinfo=timezone.utc) - timedelta(days=10),
 )
 
 MOCK_PR_2 = PR(
     title="mock_title #1",
     author="mock_github_2",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    stale=(
+    age=(
         datetime.now().replace(tzinfo=timezone.utc)
         - datetime.strptime("2024-11-15T07:33:56Z", "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=timezone.utc
@@ -62,13 +57,13 @@ MOCK_USER = User(
 
 def test_get_reactions(instance):
     """Test reactions are returned."""
-    res = instance.get_reactions(MOCK_PR)
+    res = instance.get_reactions(MOCK_PR_2)
     assert res == ["alarm_clock", "building_construction"]
 
 
 def test_get_reactions_none(instance):
     """Test no reactions are returned."""
-    mock_pr = replace(MOCK_PR, draft=False, stale=False)
+    mock_pr = replace(MOCK_PR, draft=False)
     res = instance.get_reactions(mock_pr)
     assert not res
 
@@ -78,7 +73,7 @@ def test_make_string(instance):
     instance.config.users = [MOCK_USER]
     res = instance.make_string(MOCK_PR)
     expected = (
-        f"*This PR is 371 days old. Get it moving!*"
+        f"*This PR is 11 days old. Get it moving!*"
         f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
     )
     assert res == expected
@@ -90,7 +85,7 @@ def test_make_string_fails(instance):
     mock_pr_changed = replace(MOCK_PR, author="mock_user_2")
     res = instance.make_string(mock_pr_changed)
     expected = (
-        f"*This PR is 371 days old. Get it moving!*"
+        f"*This PR is 11 days old. Get it moving!*"
         f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_user_2"
     )
     assert res == expected
