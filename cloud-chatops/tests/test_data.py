@@ -74,12 +74,12 @@ MOCK_USER = User(
 
 def test_is_stale_false():
     """Test that is_stale returns false for a PR less than 14 days old."""
-    assert not PR.is_stale(datetime.now())
+    assert not PR.pr_age(datetime.now())
 
 
 def test_is_stale_true():
     """Test that is_stale returns false for a PR 14 days or older."""
-    assert PR.is_stale(datetime.now() - timedelta(days=14))
+    assert PR.pr_age(datetime.now() - timedelta(days=14))
 
 
 def test_from_github():

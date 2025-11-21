@@ -37,7 +37,7 @@ class PR:
             title=f"{data['title']} #{data['number']}",
             author=data["user"]["login"],
             url=data["html_url"],
-            stale=cls.is_stale(created_at),
+            stale=cls.pr_age(created_at),
             created_at=created_at,
             draft=data["draft"],
             labels=[label["name"] for label in data["labels"]],
@@ -58,7 +58,7 @@ class PR:
             title=f"{data['title']} #{data['iid']}",
             author=data["author"]["username"],
             url=data["web_url"],
-            stale=cls.is_stale(created_at),
+            stale=cls.pr_age(created_at),
             created_at=created_at,
             draft=data["draft"],
             labels=data["labels"],
@@ -66,9 +66,9 @@ class PR:
         )
 
     @staticmethod
-    def is_stale(created_at: datetime) -> int:
+    def pr_age(created_at: datetime) -> int:
         """
-        Returns if a PR is stale or not.
+        Returns the age of the PR in days.
         :param created_at: When the PR was created
         """
         opened_date = created_at.replace(tzinfo=None)
