@@ -24,7 +24,7 @@ MOCK_PR = PR(
     title="mock_title #1",
     author="mock_github",
     url="https://api.github.com/repos/mock_owner/mock_repo/pulls",
-    age=(datetime.now().replace(tzinfo=timezone.utc) - timedelta(days=10)).day,
+    age=10,
     draft=True,
     labels=["mock_label"],
     repository="mock_repo",
@@ -73,7 +73,7 @@ def test_make_string(instance):
     instance.config.users = [MOCK_USER]
     res = instance.make_string(MOCK_PR)
     expected = (
-        f"*This PR is 11 days old. Get it moving!*"
+        f"*This PR is 10 days old. Get it moving!*"
         f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock user"
     )
     assert res == expected
@@ -85,7 +85,7 @@ def test_make_string_fails(instance):
     mock_pr_changed = replace(MOCK_PR, author="mock_user_2")
     res = instance.make_string(mock_pr_changed)
     expected = (
-        f"*This PR is 11 days old. Get it moving!*"
+        f"*This PR is 10 days old. Get it moving!*"
         f"\nPull Request: <{MOCK_PR.url}|{MOCK_PR.title}>\nAuthor: mock_user_2"
     )
     assert res == expected
