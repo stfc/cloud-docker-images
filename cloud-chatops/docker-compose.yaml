@@ -1,6 +1,6 @@
 services:
   cloud_chatops:
-    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:9.1.0
+    image: harbor.stfc.ac.uk/stfc-cloud/cloud-chatops:9.1.1
     volumes:
       - /opt/chatops/secrets.yml/:/usr/src/app/secrets.yml
       - /opt/chatops/config.yml/:/usr/src/app/config.yml
