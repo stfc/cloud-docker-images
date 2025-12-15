@@ -8,42 +8,12 @@ import (
 	"os"
 
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/openstack"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
-	"github.com/gophercloud/gophercloud/v2/openstack/config"
-	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/users"
 )
 
-var identityClient *gophercloud.ServiceClient
-var computeClient *gophercloud.ServiceClient
-
-func init() {
-	ctx := context.Background()
-
-	var err error
-	authOptions, endpointOptions, tlsConfig, err := clouds.Parse(clouds.WithCloudName("openstack"))
-	if err != nil {
-		panic(err)
-	}
-
-	authOptions.AllowReauth = true
-
-	providerClient, err := config.NewProviderClient(ctx, authOptions, config.WithTLSConfig(tlsConfig))
-	if err != nil {
-		panic(err)
-	}
-
-	computeClient, err = openstack.NewComputeV2(providerClient, endpointOptions)
-	if err != nil {
-		slog.Error("Failed to initilize compute client")
-		panic(err)
-	}
-	identityClient, err = openstack.NewIdentityV3(providerClient, endpointOptions)
-	if err != nil {
-		slog.Error("Failed to initilize compute client")
-		panic(err)
-	}
+type service struct {
+	client OpenstackClient
 }
 
 func getServerUserID(computeClient *gophercloud.ServiceClient, serverID string) (string, error) {
@@ -66,8 +36,8 @@ func getUsername(identityClient *gophercloud.ServiceClient, userID string) (stri
 		slog.Error("Failed to get user details", "ID", userID)
 		return "", err
 	}
-	return userDetails.Name, nil
 
+	return userDetails.Name, nil
 }
 
 func main() {
@@ -77,7 +47,12 @@ func main() {
 		addr = ":80"
 	}
 
-	http.HandleFunc("/getusername", getUserHandler)
+	var client OpenstackClient
+	client.New("openstack")
+
+	service := service{client: client}
+
+	http.HandleFunc("/getusername", service.getUserHandler)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		slog.Error("Failed to start server", "addr", addr)
@@ -85,15 +60,15 @@ func main() {
 	}
 }
 
-func getUserHandler(w http.ResponseWriter, r *http.Request) {
+func (s service) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	serverID := r.URL.Query().Get("serverID")
-	userID, err := getServerUserID(computeClient, serverID)
+	userID, err := getServerUserID(s.client.identityClient, serverID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	name, err := getUsername(identityClient, userID)
+	name, err := getUsername(s.client.identityClient, userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
