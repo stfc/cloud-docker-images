@@ -4,6 +4,10 @@ COPY . .
 RUN go mod download && go mod verify
 RUN go build -o username .
 
+# Run the tests in the container
+FROM BuildStage AS TestStage
+RUN go test -v ./...
+
 FROM alpine:latest AS FinalStage
 WORKDIR /
 COPY --from=BuildStage /app/username /username
