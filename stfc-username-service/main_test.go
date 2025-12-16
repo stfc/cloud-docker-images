@@ -60,7 +60,7 @@ func TestUserNameSuccess(t *testing.T) {
 			url := "/users/" + tt.arg
 			fakeserver.Mux.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Add("Content-Type", "application/json")
-				fmt.Fprintf(w, `
+				_, err := fmt.Fprintf(w, `
 							{
 								"user": 
 									{
@@ -69,6 +69,10 @@ func TestUserNameSuccess(t *testing.T) {
 									}
 							}
 						`)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 			})
 			c := client.ServiceClient(fakeserver)
 
@@ -128,7 +132,7 @@ func TestServerUserIDSuccess(t *testing.T) {
 			url := "/servers/" + tt.arg
 			fakeserver.Mux.HandleFunc(url, func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Add("Content-Type", "application/json")
-				fmt.Fprintf(w, `
+				_, err := fmt.Fprintf(w, `
 							{
 								"server": 
 									{
@@ -137,6 +141,10 @@ func TestServerUserIDSuccess(t *testing.T) {
 									}
 							}
 						`)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
 			})
 			c := client.ServiceClient(fakeserver)
 
