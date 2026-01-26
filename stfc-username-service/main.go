@@ -40,26 +40,6 @@ func getUsername(identityClient *gophercloud.ServiceClient, userID string) (stri
 	return userDetails.Name, nil
 }
 
-func main() {
-
-	addr := os.Getenv("ADDR")
-	if addr == "" {
-		addr = ":80"
-	}
-
-	var client OpenstackClient
-	client.New("openstack")
-
-	service := service{client: client}
-
-	http.HandleFunc("/getusername", service.getUserHandler)
-	err := http.ListenAndServe(addr, nil)
-	if err != nil {
-		slog.Error("Failed to start server", "addr", addr)
-		panic(err)
-	}
-}
-
 func (s service) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	serverID := r.URL.Query().Get("serverID")
@@ -77,5 +57,25 @@ func (s service) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+}
+
+func main() {
+
+	addr := os.Getenv("ADDR")
+	if addr == "" {
+		addr = ":80"
+	}
+
+	var client OpenstackClient
+	client.New("openstack")
+
+	service := service{client: client}
+
+	http.HandleFunc("/getusername", service.getUserHandler)
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		slog.Error("Failed to start server", "addr", addr)
+		panic(err)
 	}
 }
