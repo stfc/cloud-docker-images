@@ -11,6 +11,7 @@ import (
 
 type response func()
 
+// Test error on returned status code 404
 func TestUserNameFailure(t *testing.T) {
 	tests := []struct {
 		desc      string
@@ -40,6 +41,7 @@ func TestUserNameFailure(t *testing.T) {
 	}
 }
 
+// Test username is returned when user is present
 func TestUserNameSuccess(t *testing.T) {
 	tests := []struct {
 		desc      string
@@ -83,6 +85,7 @@ func TestUserNameSuccess(t *testing.T) {
 	}
 }
 
+// Test error when server 404 status code returned
 func TestServerUserIDFailure(t *testing.T) {
 	tests := []struct {
 		desc      string
@@ -112,6 +115,7 @@ func TestServerUserIDFailure(t *testing.T) {
 	}
 }
 
+// Test server ID is returned when a server is found
 func TestServerUserIDSuccess(t *testing.T) {
 	tests := []struct {
 		desc      string

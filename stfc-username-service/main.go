@@ -16,8 +16,8 @@ type service struct {
 	client OpenstackClient
 }
 
+// Get the user ID associated with a given server
 func getServerUserID(computeClient *gophercloud.ServiceClient, serverID string) (string, error) {
-	// Get the user ID associated with a given server
 	server := servers.Get(context.TODO(), computeClient, serverID)
 	serverDetails, err := server.Extract()
 	if err != nil {
@@ -28,8 +28,8 @@ func getServerUserID(computeClient *gophercloud.ServiceClient, serverID string) 
 	return serverDetails.UserID, nil
 }
 
+// Get the username associated with a given user ID
 func getUsername(identityClient *gophercloud.ServiceClient, userID string) (string, error) {
-	// Get the username associated with a given user ID
 	user := users.Get(context.TODO(), identityClient, userID)
 	userDetails, err := user.Extract()
 	if err != nil {
@@ -40,6 +40,7 @@ func getUsername(identityClient *gophercloud.ServiceClient, userID string) (stri
 	return userDetails.Name, nil
 }
 
+// Handle requests to the path: .../getusername?serverID=<ID>
 func (s service) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	serverID := r.URL.Query().Get("serverID")

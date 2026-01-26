@@ -10,11 +10,14 @@ import (
 	"github.com/gophercloud/gophercloud/v2/openstack/config/clouds"
 )
 
+// Struct containing openstack service clients for interacting with the API
 type OpenstackClient struct {
 	computeClient  *gophercloud.ServiceClient
 	identityClient *gophercloud.ServiceClient
 }
 
+// Creates a new client which can be used to interact with the API
+// uses a cloud defined in cloud.yaml
 func (c *OpenstackClient) New(cloud string) {
 	ctx := context.Background()
 
