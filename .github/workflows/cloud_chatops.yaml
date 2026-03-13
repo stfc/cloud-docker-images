@@ -133,7 +133,7 @@ jobs:
         run: echo "version=$(cat cloud-chatops/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Check if release file has updated
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: release_updated
         with:
           filters: |
