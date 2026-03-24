@@ -66,7 +66,7 @@ jobs:
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          push: false
+          push: true
           context: "{{defaultContext}}:stfc-username-service"
           tags: "harbor.stfc.ac.uk/stfc-cloud-staging/stfc-username-service:${{ steps.commit_sha.outputs.sha_short }}"
 
