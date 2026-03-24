@@ -44,7 +44,7 @@ func getUsername(identityClient *gophercloud.ServiceClient, userID string) (stri
 func (s service) getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	serverID := r.URL.Query().Get("serverID")
-	userID, err := getServerUserID(s.client.identityClient, serverID)
+	userID, err := getServerUserID(s.client.computeClient, serverID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
