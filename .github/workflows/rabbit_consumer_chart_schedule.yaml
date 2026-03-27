@@ -65,7 +65,7 @@ jobs:
         run: echo "version=$(cat openstack-rabbit-consumer/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Build and push on version change
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: steps.release_updated.outputs.version == 'true'
         with:
           cache-from: type=gha
