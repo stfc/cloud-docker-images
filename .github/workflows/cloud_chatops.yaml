@@ -68,8 +68,8 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Login to Harbor
-      # https://github.com/docker/login-action/releases
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+      # https://github.com/docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2/releases
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
         with:
           registry: harbor.stfc.ac.uk
           username: ${{ secrets.STAGING_HARBOR_USERNAME }}
@@ -131,7 +131,7 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Login to Harbor
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
         with:
           registry: harbor.stfc.ac.uk
           username: ${{ secrets.HARBOR_USERNAME }}
@@ -142,7 +142,7 @@ jobs:
         run: echo "version=$(cat cloud-chatops/version.txt)" >> $GITHUB_OUTPUT
 
       - name: Check if release file has updated
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c
         id: release_updated
         with:
           filters: |
