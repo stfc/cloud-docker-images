@@ -12,10 +12,12 @@ on:
       - "exporters/**"
       - ".github/workflows/codeql.yaml"
       - ".github/workflows/build_images.yaml"
-  schedule: [{ cron: "14 14 * * TUE" }] # Every Tuesday at 14:14
+  schedule: [ { cron: "14 14 * * TUE" } ] # Every Tuesday at 14:14
 jobs:
   setup:
-    if: github.event_name != 'pull_request' || !contains('OWNER,MEMBER,COLLABORATOR', github.event.pull_request.author_association)
+    if: github.event_name != 'pull_request' ||
+      !contains('OWNER,MEMBER,COLLABORATOR',
+      github.event.pull_request.author_association)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -80,18 +82,32 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           context: "{{defaultContext}}:${{ matrix.image }}"
-          tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
+          tags: "harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{
+            needs.setup.outputs.sha }}"
+      - name: Inform of tagged name
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{
+          matrix.image }}:${{ needs.setup.outputs.sha }}"
+      - name: Get release tag for later
+        id: release_tag
+        run: echo "version=$(cat ${{ matrix.image }}/version.txt)" >> $GITHUB_OUTPUT
+      - name: Check if release file has updated
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c
+        id: release_updated
+        with:
+          filters: |
+            version:
+              - '${{ matrix.image }}/version.txt'
       - name: Build & push to prod
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           push: true
           context: "{{defaultContext}}:${{ matrix.image }}"
-          tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:latest"
-      - name: Inform of tagged name
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: echo "::notice title=published::harbor.stfc.ac.uk/stfc-cloud-staging/${{ matrix.image }}:${{ needs.setup.outputs.sha }}"
-  finished: # convenient single job name to apply branch protection to
+          tags: "harbor.stfc.ac.uk/stfc-cloud/${{ matrix.image }}:v${{
+            steps.release_tag.outputs.version }}"
+  finished:
+    # convenient single job name to apply branch protection to
     needs: build
     runs-on: ubuntu-latest
-    steps: [{ run: true }]
+    steps: [ { run: true } ]
