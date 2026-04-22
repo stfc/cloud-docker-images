@@ -2,6 +2,8 @@ FROM golang:1.25-alpine AS build-stage
 
 WORKDIR /
 ENV GOBIN=/
+
+# ipmi exporter version also goes in version.txt
 RUN go install github.com/prometheus-community/ipmi_exporter@v1.10.1
 
 FROM alpine:latest AS build-release-stage
