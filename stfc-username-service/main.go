@@ -74,6 +74,7 @@ func main() {
 	service := service{client: client}
 
 	http.HandleFunc("/getusername", service.getUserHandler)
+	http.HandleFunc("/cgi-bin/get_username.sh", service.getUserHandler)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		slog.Error("Failed to start server", "addr", addr)
