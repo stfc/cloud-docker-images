@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2023 United Kingdom Research and Innovation
 """
-This file defines methods to be used to interact with the 
+This file defines methods to be used to interact with the
 Aquilon API
 """
+
 import logging
 import subprocess
 from typing import Optional, List
@@ -80,7 +81,7 @@ def setup_requests(
         logger.error("%s: Failed: %s", desc, response.text)
         logger.error(url)
         raise ConnectionError(
-            f"Failed {desc}: {response.status_code} -" "{response.text}"
+            f"Failed {desc}: {response.status_code} - {response.text}"
         )
 
     logger.debug("Success: %s ", desc)
