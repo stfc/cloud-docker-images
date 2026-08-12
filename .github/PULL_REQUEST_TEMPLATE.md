@@ -1,4 +1,33 @@
-Click the `Preview` tab and select a PR template:
+### Description:
 
-- [PR for Cloud ChatOps](?expand=1&template=chatops_pr_template.md)
-- [PR for notebook image](?expand=1&template=notebook_pr_template.md)
+<!--
+This should be a brief one or two line description of the PR. Details should be contained in commit messages.
+-->
+
+---
+
+### Submitter:
+
+<!-- Please delete as appropriate. -->
+
+
+Have you done the following?:
+
+* [ ] Labeled the pull request from the following? `major | minor | patch` or `documentation | workflow`
+* [ ] Updated the documentation?
+* [ ] Added unit tests for new / untested code?
+* [ ] Deployed the changes onto `dev-chatops.nubes.rl.ac.uk` or staging for this new image for code changes?
+
+New / Existing features:
+* [ ] Written integration tests?
+* [ ] Configured the Slack Application with new commands or permission scope changes?
+* [ ] Updated the `version.txt` and `docker-compose.yml` files?
+
+---
+
+### Reviewer:
+
+Have you checked the following?:
+* [ ] Version change is appropriate to the code changes? Semantic versioning documentation [here](https://semver.org/)
+* [ ] Unit test code coverage is acceptable?
+* [ ] Do the CI jobs pass?

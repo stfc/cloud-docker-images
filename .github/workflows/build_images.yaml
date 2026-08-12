@@ -2,13 +2,11 @@ name: docker_images
 on:
   push:
     paths:
-      - "notebooks/**"
       - "exporters/**"
       - ".github/workflows/codeql.yaml"
       - ".github/workflows/build_images.yaml"
   pull_request:
     paths:
-      - "notebooks/**"
       - "exporters/**"
       - ".github/workflows/codeql.yaml"
       - ".github/workflows/build_images.yaml"
