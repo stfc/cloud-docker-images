@@ -1,4 +1,4 @@
-from cloudMonitoring.structs.slottifier_entry import SlottifierEntry
+from cloudmon.structs.slottifier_entry import SlottifierEntry
 
 
 def test_add():

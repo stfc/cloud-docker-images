@@ -1,5 +1,5 @@
 from unittest.mock import NonCallableMock, Mock, patch
-from cloudMonitoring.collect_vm_stats import (
+from cloudmon.collect_vm_stats import (
     number_servers_active,
     number_servers_build,
     number_servers_error,
@@ -85,7 +85,7 @@ def test_number_servers_shutoff():
     assert num_returned == 3
 
 
-@patch("cloudMonitoring.collect_vm_stats.connect")
+@patch("cloudmon.collect_vm_stats.connect")
 def test_get_all_server_statuses(mock_connect):
     """
     Tests that get_all_server_statuses calls appropriate functions and returns
@@ -121,8 +121,8 @@ def test_get_all_server_statuses(mock_connect):
     )
 
 
-@patch("cloudMonitoring.collect_vm_stats.run_scrape")
-@patch("cloudMonitoring.collect_vm_stats.parse_args")
+@patch("cloudmon.collect_vm_stats.run_scrape")
+@patch("cloudmon.collect_vm_stats.parse_args")
 def test_main(mock_parse_args, mock_run_scrape):
     """
     tests main function calls run_scrape utility function properly

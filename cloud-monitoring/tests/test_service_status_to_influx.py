@@ -1,6 +1,6 @@
 from unittest.mock import patch, call, NonCallableMock, MagicMock
 
-from cloudMonitoring.service_status_to_influx import (
+from cloudmon.service_status_to_influx import (
     get_hypervisor_properties,
     get_service_properties,
     get_agent_properties,
@@ -174,7 +174,7 @@ def test_convert_to_data_string_no_items():
     assert convert_to_data_string(NonCallableMock(), {}) == ""
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_service_prop_string")
+@patch("cloudmon.service_status_to_influx.get_service_prop_string")
 def test_convert_to_data_string_one_hv_one_service(mock_get_service_prop_string):
     """
     Tests convert_to_data_string works with single entry in details
@@ -199,7 +199,7 @@ def test_convert_to_data_string_one_hv_one_service(mock_get_service_prop_string)
     mock_get_service_prop_string.assert_called_once_with({"prop1": "val1"})
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_service_prop_string")
+@patch("cloudmon.service_status_to_influx.get_service_prop_string")
 def test_convert_to_data_string_one_hv_multi_service(mock_get_service_prop_string):
     """
     Tests convert_to_data_string works with single entry in details with multiple service binaries
@@ -237,7 +237,7 @@ def test_convert_to_data_string_one_hv_multi_service(mock_get_service_prop_strin
     )
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_service_prop_string")
+@patch("cloudmon.service_status_to_influx.get_service_prop_string")
 def test_convert_to_data_string_multi_item(mock_get_service_prop_string):
     """
     Tests convert_to_data_string works with multiple entries in dict for details
@@ -314,8 +314,8 @@ def test_get_service_prop_string():
     assert get_service_prop_string(props) == expected_result
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_hypervisor_properties")
-@patch("cloudMonitoring.service_status_to_influx.HypervisorQuery")
+@patch("cloudmon.service_status_to_influx.get_hypervisor_properties")
+@patch("cloudmon.service_status_to_influx.HypervisorQuery")
 def test_get_all_hv_details(mock_hv_query, mock_get_hypervisor_properties):
     """
     tests get_all_hv_details returns dict of hypervisor status information
@@ -324,7 +324,11 @@ def test_get_all_hv_details(mock_hv_query, mock_get_hypervisor_properties):
         that the hv belongs to
     """
     mock_conn = MagicMock()
-    mock_hvs = [{"hypervisor_name": "hv1"}, {"hypervisor_name": "hv2"}, {"hypervisor_name": "hv3"}]
+    mock_hvs = [
+        {"hypervisor_name": "hv1"},
+        {"hypervisor_name": "hv2"},
+        {"hypervisor_name": "hv3"},
+    ]
 
     mock_aggregates = [
         {"name": "ag1", "hosts": ["hv1", "hv2"]},
@@ -353,7 +357,7 @@ def test_get_all_hv_details(mock_hv_query, mock_get_hypervisor_properties):
     }
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_service_properties")
+@patch("cloudmon.service_status_to_influx.get_service_properties")
 def test_update_with_service_statuses(mock_get_service_properties):
     """
     tests update_with_service_statuses, for each service found, get its properties
@@ -402,7 +406,7 @@ def test_update_with_service_statuses(mock_get_service_properties):
     }
 
 
-@patch("cloudMonitoring.service_status_to_influx.get_agent_properties")
+@patch("cloudmon.service_status_to_influx.get_agent_properties")
 def test_update_with_agent_statuses(mock_get_agent_properties):
     """
     tests update_with_agent_statuses, for each network agent found, get its properties
@@ -440,11 +444,11 @@ def test_update_with_agent_statuses(mock_get_agent_properties):
     }
 
 
-@patch("cloudMonitoring.service_status_to_influx.openstack")
-@patch("cloudMonitoring.service_status_to_influx.get_all_hv_details")
-@patch("cloudMonitoring.service_status_to_influx.update_with_service_statuses")
-@patch("cloudMonitoring.service_status_to_influx.update_with_agent_statuses")
-@patch("cloudMonitoring.service_status_to_influx.convert_to_data_string")
+@patch("cloudmon.service_status_to_influx.openstack")
+@patch("cloudmon.service_status_to_influx.get_all_hv_details")
+@patch("cloudmon.service_status_to_influx.update_with_service_statuses")
+@patch("cloudmon.service_status_to_influx.update_with_agent_statuses")
+@patch("cloudmon.service_status_to_influx.convert_to_data_string")
 def test_get_all_service_statuses(
     mock_convert,
     mock_get_agent_statuses,
@@ -476,8 +480,8 @@ def test_get_all_service_statuses(
     assert res == mock_convert.return_value
 
 
-@patch("cloudMonitoring.service_status_to_influx.run_scrape")
-@patch("cloudMonitoring.service_status_to_influx.parse_args")
+@patch("cloudmon.service_status_to_influx.run_scrape")
+@patch("cloudmon.service_status_to_influx.parse_args")
 def test_main(mock_parse_args, mock_run_scrape):
     """
     tests main function calls run_scrape utility function properly

@@ -1,5 +1,7 @@
 from unittest.mock import NonCallableMock, MagicMock, patch, call
-from cloudMonitoring.slottifier import (
+import pytest
+
+from cloudmon.slottifier import (
     get_hv_info,
     get_flavor_requirements,
     get_valid_flavors_for_aggregate,
@@ -11,9 +13,9 @@ from cloudMonitoring.slottifier import (
     get_slottifier_details,
     main,
 )
-import pytest
 
-from cloudMonitoring.structs.slottifier_entry import SlottifierEntry
+
+from cloudmon.structs.slottifier_entry import SlottifierEntry
 
 
 @pytest.fixture(name="mock_hypervisors")
@@ -497,8 +499,8 @@ def test_calculate_slots_on_hv_calculates_used_gpu_capacity():
     assert res.max_gpu_slots_capacity_enabled == 5
 
 
-@patch("cloudMonitoring.slottifier.openstack")
-@patch("cloudMonitoring.slottifier.HypervisorQuery")
+@patch("cloudmon.slottifier.openstack")
+@patch("cloudmon.slottifier.HypervisorQuery")
 def test_get_openstack_resources(
     mock_hypervisor_query, mock_openstack
 ):  # do I use self?
@@ -541,7 +543,7 @@ def test_get_openstack_resources(
     }
 
 
-@patch("cloudMonitoring.slottifier.get_hv_info")
+@patch("cloudmon.slottifier.get_hv_info")
 def test_get_all_hv_info_for_aggregate_with_valid_data(
     mock_get_hv_info, mock_hypervisors, mock_compute_services
 ):
@@ -606,8 +608,8 @@ def test_get_all_hv_info_for_aggregate_with_empty_aggregate(
     )
 
 
-@patch("cloudMonitoring.slottifier.get_flavor_requirements")
-@patch("cloudMonitoring.slottifier.calculate_slots_on_hv")
+@patch("cloudmon.slottifier.get_flavor_requirements")
+@patch("cloudmon.slottifier.calculate_slots_on_hv")
 def test_update_slots_one_flavor_one_hv(
     mock_calculate_slots_on_hv, mock_get_flavor_requirements
 ):
@@ -628,8 +630,8 @@ def test_update_slots_one_flavor_one_hv(
     assert res == {"flv1": 2}
 
 
-@patch("cloudMonitoring.slottifier.get_flavor_requirements")
-@patch("cloudMonitoring.slottifier.calculate_slots_on_hv")
+@patch("cloudmon.slottifier.get_flavor_requirements")
+@patch("cloudmon.slottifier.calculate_slots_on_hv")
 def test_update_slots_one_flavor_multi_hv(
     mock_calculate_slots_on_hv, mock_get_flavor_requirements
 ):
@@ -653,8 +655,8 @@ def test_update_slots_one_flavor_multi_hv(
     assert res == {"flv1": 4}
 
 
-@patch("cloudMonitoring.slottifier.get_flavor_requirements")
-@patch("cloudMonitoring.slottifier.calculate_slots_on_hv")
+@patch("cloudmon.slottifier.get_flavor_requirements")
+@patch("cloudmon.slottifier.calculate_slots_on_hv")
 def test_update_slots_multi_flavor_multi_hv(
     mock_calculate_slots_on_hv, mock_get_flavor_requirements
 ):
@@ -687,11 +689,11 @@ def test_update_slots_multi_flavor_multi_hv(
     assert res == {"flv1": 4, "flv2": 0}
 
 
-@patch("cloudMonitoring.slottifier.get_openstack_resources")
-@patch("cloudMonitoring.slottifier.get_valid_flavors_for_aggregate")
-@patch("cloudMonitoring.slottifier.get_all_hv_info_for_aggregate")
-@patch("cloudMonitoring.slottifier.update_slots")
-@patch("cloudMonitoring.slottifier.convert_to_data_string")
+@patch("cloudmon.slottifier.get_openstack_resources")
+@patch("cloudmon.slottifier.get_valid_flavors_for_aggregate")
+@patch("cloudmon.slottifier.get_all_hv_info_for_aggregate")
+@patch("cloudmon.slottifier.update_slots")
+@patch("cloudmon.slottifier.convert_to_data_string")
 def test_get_slottifier_details_one_aggregate(
     mock_convert_to_data_string,
     mock_update_slots,
@@ -732,8 +734,8 @@ def test_get_slottifier_details_one_aggregate(
     assert res == mock_convert_to_data_string.return_value
 
 
-@patch("cloudMonitoring.slottifier.run_scrape")
-@patch("cloudMonitoring.slottifier.parse_args")
+@patch("cloudmon.slottifier.run_scrape")
+@patch("cloudmon.slottifier.parse_args")
 def test_main(mock_parse_args, mock_run_scrape):
     """
     tests main function calls run_scrape utility function properly

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["cloudMonitoring"]
+where = ["cloudmon"]
 
 [project]
 name = "cloud-monitoring"
@@ -42,7 +42,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["cloudMonitoring"]
+pythonpath = ["cloudmon"]
 testpaths = ["tests"]
 python_files = ["*.py"]
 python_functions = ["test_*"]
@@ -56,7 +56,7 @@ include = '\.pyi?$'
 [tool.pylint.format]
 max-line-length=118
 disable=[
-    "C00114", # Missing module string - we don't need module strings for the small repo
+    "C0114", # Missing module string - we don't need module strings for the small repo
     "W1401", # Influxdb required backslashes
     "R0801" # Duplicate code due to test case
 ]

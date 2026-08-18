@@ -2,7 +2,7 @@ import sys
 from typing import Dict, List
 import openstack
 from openstack.identity.v3.project import Project
-from cloudMonitoring.utils import run_scrape, parse_args
+from cloudmon.utils import run_scrape, parse_args
 
 
 def convert_to_data_string(instance: str, limit_details: Dict) -> str:

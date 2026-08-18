@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files for installation
-COPY cloudMonitoring/ ./cloudMonitoring/
+COPY cloudmon/ ./cloudmon/
 COPY pyproject.toml .
 COPY README.md .
 
@@ -23,7 +23,7 @@ RUN chown -R monitoring:monitoring /app
 USER monitoring
 
 # Set the entrypoint to your package's main module
-ENTRYPOINT ["python", "-m", "cloudMonitoring"]
+ENTRYPOINT ["python", "-m", "cloudmon"]
 
 # Default command (can be overridden)
 CMD ["--help"]
