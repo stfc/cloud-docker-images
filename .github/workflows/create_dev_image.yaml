@@ -1,0 +1,168 @@
+name: Create a Dev Image
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: harbor.stfc.ac.uk
+  IMAGE_NAMESPACE: stfc-cloud-staging
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      image_paths: ${{ steps.detect.outputs.image_paths }}
+    steps:
+      # https://github.com/actions/checkout/releases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+
+          # find changed files
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+
+          # for each changed file, find the root directory of the docker image
+          changed_image_paths=$(
+              find . \
+                  -name Dockerfile \
+                  -not -path './.git/*' \
+                  -printf '%h\n' |
+              sed 's|^\./||' |
+              while read -r dir; do
+                  grep -q "^$dir/" <<< "$changed" && echo "$dir";
+              done |
+              sort -u |
+              jq -Rc -s 'split("\n") | map(select(length > 0))'
+          )
+
+          # each unique path to image directory changed needs a dev images built
+          echo "image_paths=$changed_image_paths" >> "$GITHUB_OUTPUT"
+
+          printf '%s\n' "$changed_image_paths"
+
+  # version.txt must be bumped, must go up, and must not already be tagged.
+  version:
+    needs: detect
+    if: needs.detect.outputs.image_paths != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_path: ${{ fromJSON(needs.detect.outputs.image_paths) }}
+    steps:
+      # https://github.com/actions/checkout/releases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: "Check Version Update"
+        env:
+          IMAGE_PATH: ${{ matrix.image_path }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+
+          new=$(tr -d '[:space:]' < "$IMAGE_PATH/version.txt")
+          tag="$(basename "$IMAGE_PATH")-$new"
+
+          if [[ ! "$new" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::$IMAGE_PATH/version.txt is '$new', want MAJOR.MINOR.PATCH"
+              exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+              echo "::error::$tag already exists: bump $IMAGE_PATH/version.txt first"
+              exit 1
+          fi
+
+          # A image directory that didn't exist on the base branch is new, so there's
+          # nothing to compare against.
+          if ! git cat-file -e "$BASE:$IMAGE_PATH/version.txt" 2> /dev/null; then
+              echo "$IMAGE_PATH is new at $new"
+              exit 0
+          fi
+
+          old=$(git show "$BASE:$IMAGE_PATH/version.txt" | tr -d '[:space:]')
+
+          if [[ "$old" == "$new" ]]; then
+              echo "::error::$IMAGE_PATH changed but version.txt is still $old"
+              exit 1
+          fi
+
+          lowest=$(printf '%s\n%s\n' "$old" "$new" | sort -V | head -1)
+
+          if [[ "$lowest" != "$old" ]]; then
+              echo "::error::$IMAGE_PATH version went backwards: $old -> $new"
+              exit 1
+          fi
+
+          echo "$IMAGE_PATH: $old -> $new" >> "$GITHUB_STEP_SUMMARY"
+
+  # Build + push a dev image — trusted authors only.
+  # Tag format: <version>dev-<short sha>, e.g. 1.0.0dev-ase241f
+  dev-image:
+    needs: [detect, version]
+    # The `env` context isn't available in a job-level `if`, so the trusted-bot
+    # list has to be inline.
+    if: >-
+      ${{ needs.detect.outputs.image_paths != '[]' &&
+          (contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) ||
+           contains(fromJSON('["dependabot[bot]"]'), github.event.pull_request.user.login)) }}
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_path: ${{ fromJSON(needs.detect.outputs.image_paths) }}
+    steps:
+      - name: Maximize build space # free up space for building images
+        uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          build-mount-path: "/var/lib/docker/"
+
+      - name: Restart docker # restart the docker service
+        run: sudo service docker restart
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Login to DockerHub # increase pull rate limit
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Harbor Staging
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.STAGING_HARBOR_USERNAME }}
+          password: ${{ secrets.STAGING_HARBOR_TOKEN }}
+
+      - env:
+          COMPONENT: ${{ matrix.component }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH: "true"
+          BUILD_CACHE: "1"
+        run: bash .github/scripts/build-dev-image.sh "$COMPONENT" "$HEAD_SHA"
