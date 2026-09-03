@@ -7,10 +7,12 @@ from typing import Dict, Callable
 
 
 def dispatch_command():
-    from cloudMonitoring.collect_vm_stats import main as vm_stats_main
-    from cloudMonitoring.limits_to_influx import main as project_stats_main
-    from cloudMonitoring.slottifier import main as slottifier_main
-    from cloudMonitoring.service_status_to_influx import main as service_stats_main
+    """dispatches cloud monitoring jobs"""
+    # # pylint: disable=import-outside-toplevel
+    from cloudmon.collect_vm_stats import main as vm_stats_main
+    from cloudmon.limits_to_influx import main as project_stats_main
+    from cloudmon.slottifier import main as slottifier_main
+    from cloudmon.service_status_to_influx import main as service_stats_main
 
     # Command registry - maps command names to their main functions
     commands: Dict[str, Callable] = {

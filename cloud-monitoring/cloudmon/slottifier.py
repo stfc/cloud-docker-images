@@ -1,9 +1,10 @@
 import sys
 from typing import List, Dict
 import openstack
-from cloudMonitoring.structs.slottifier_entry import SlottifierEntry
-from cloudMonitoring.utils import parse_args, run_scrape
 from openstackquery import HypervisorQuery
+
+from cloudmon.structs.slottifier_entry import SlottifierEntry
+from cloudmon.utils import parse_args, run_scrape
 
 
 def get_hv_info(hypervisor: Dict, aggregate_info: Dict, service_info: Dict) -> Dict:

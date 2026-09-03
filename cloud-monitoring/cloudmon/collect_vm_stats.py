@@ -2,7 +2,7 @@ import sys
 from typing import List, Dict, Optional
 
 from openstack import connect
-from cloudMonitoring.utils import run_scrape, parse_args
+from cloudmon.utils import run_scrape, parse_args
 
 
 def server_obj_to_len(server_obj) -> int:

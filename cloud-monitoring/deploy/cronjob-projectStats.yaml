@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: cloudMonitoring-project-stats
+  name: cloudmon-project-stats
 spec:
-  schedule: "0 * * * *"  # every hour
+  schedule: "0 * * * *" # every hour
   jobTemplate:
     spec:
       template:

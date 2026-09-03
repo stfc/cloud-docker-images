@@ -42,7 +42,7 @@ You can build the python package
 ```
 cd cloud-monitoring
 pip install .
-python -m cloudMonitoring slottifier /tmp/monitoring.conf
+python -m cloudmon slottifier /tmp/monitoring.conf
 ```
 
 ## Local Docker Image
@@ -65,7 +65,7 @@ There are currently 4 different scripts that you can run:
 
 ## Slottifier
 
-`python -m cloudMonitoring slottifier /tmp/monitoring.conf`
+`python -m cloudmon slottifier /tmp/monitoring.conf`
 
 This script collects slots available for each flavor.
 This aims to provide an rough estimate to show what flavor VMs are most available for them to create
@@ -84,19 +84,19 @@ NOTE: this is an estimation - it makes the assumption that available CPU and RAM
 
 ## Service Stats
 
-`python -m cloudMonitoring project-stats /tmp/monitoring.conf`
+`python -m cloudmon project-stats /tmp/monitoring.conf`
 
 This script collects various quota limits and usage for all openstack projects
 
 ## Service Stats
 
-`python -m cloudMonistoring service-stats /tmp/monitoring.conf`
+`python -m cloudmon service-stats /tmp/monitoring.conf`
 
 This script collects various service statuses, usages and limits for all hypervisors
 
 ## VM States
 
-`python -m cloudMonitoring vm-states /tmp/monitoring.conf`
+`python -m cloudmon vm-states /tmp/monitoring.conf`
 
 This script is used to total the number of virtual machines in running, shutoff, errored and build states
 

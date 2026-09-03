@@ -14,8 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-22.04','ubuntu-latest' ]
-        python-version: [ "3.12", "3.x" ]
+        os: ["ubuntu-22.04", "ubuntu-latest"]
+        python-version: ["3.12", "3.x"]
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -26,7 +26,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: | 
+        run: |
           cd cloud-monitoring
           python -m pip install --upgrade pip
           # Install the package with all optional dependencies for testing
@@ -35,7 +35,7 @@ jobs:
       - name: Check code formatting with Black
         run: |
           cd cloud-monitoring
-          black --check --diff cloudMonitoring/ tests/
+          black --check --diff cloudmon/ tests/
 
       - name: Analyse with pylint
         run: |
@@ -93,13 +93,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          fetch-depth: 0  # Needed for tags
+          fetch-depth: 0 # Needed for tags
 
       - name: Check if relevant files changed
         id: changes
         run: |
           # check if any python package files have been changed
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} |  grep -E '^cloud-monitoring/(cloudMonitoring/.*|tests/.*|pyproject\.toml)$' || true)
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} |  grep -E '^cloud-monitoring/(cloudmon/.*|tests/.*|pyproject\.toml)$' || true)
           if [ -z "$CHANGED" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else

@@ -4,7 +4,7 @@ import openstack
 from openstack.compute.v2.service import Service
 from openstack.network.v2.agent import Agent
 from openstackquery import HypervisorQuery
-from cloudMonitoring.utils import run_scrape, parse_args
+from cloudmon.utils import run_scrape, parse_args
 
 
 def get_hypervisor_properties(hypervisor: Dict) -> Dict:
@@ -20,7 +20,8 @@ def get_hypervisor_properties(hypervisor: Dict) -> Dict:
             "aggregate": "no-aggregate",
             "memorymax": hypervisor["memory_mb_size"],
             "memoryused": hypervisor["memory_mb_used"],
-            "memoryavailable": hypervisor["memory_mb_size"] - hypervisor["memory_mb_used"],
+            "memoryavailable": hypervisor["memory_mb_size"]
+            - hypervisor["memory_mb_used"],
             "memperc": round(
                 (hypervisor["memory_mb_used"] / hypervisor["memory_mb_size"]) * 100
             ),

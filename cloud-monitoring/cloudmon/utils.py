@@ -65,8 +65,8 @@ def parse_args(inp_args, description: str = "scrape metrics script") -> Dict:
         "config_filepath",
         type=Path,
         help="Path to monitoring config file",
-        nargs='?',
-        default=Path(os.getcwd()) / "monitoring.conf"
+        nargs="?",
+        default=Path(os.getcwd()) / "monitoring.conf",
     )
     try:
         args = parser.parse_args(inp_args)

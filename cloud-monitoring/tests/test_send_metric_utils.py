@@ -4,7 +4,7 @@ from unittest.mock import patch, call, NonCallableMock, MagicMock
 
 import pytest
 
-from cloudMonitoring.utils import (
+from cloudmon.utils import (
     read_config_file,
     post_to_influxdb,
     parse_args,
@@ -12,7 +12,7 @@ from cloudMonitoring.utils import (
 )
 
 
-@patch("cloudMonitoring.utils.ConfigParser")
+@patch("cloudmon.utils.ConfigParser")
 def test_read_config_file_valid(mock_config_parser):
     """
     tests read_config_file function when given a valid config file
@@ -39,7 +39,7 @@ def test_read_config_file_valid(mock_config_parser):
     }
 
 
-@patch("cloudMonitoring.utils.ConfigParser")
+@patch("cloudmon.utils.ConfigParser")
 def test_read_config_file_empty(mock_config_parser):
     """
     tests read_config_file function when given a emtpy config file
@@ -49,7 +49,7 @@ def test_read_config_file_empty(mock_config_parser):
         read_config_file(NonCallableMock())
 
 
-@patch("cloudMonitoring.utils.requests")
+@patch("cloudmon.utils.requests")
 def test_post_to_influxdb_valid(mock_requests):
     """
     tests post_to_influxdb function uses requests.post to post data correctly
@@ -71,7 +71,7 @@ def test_post_to_influxdb_valid(mock_requests):
     mock_response.raise_for_status.assert_called_once()
 
 
-@patch("cloudMonitoring.utils.requests")
+@patch("cloudmon.utils.requests")
 def test_post_to_influxdb_empty_string(mock_requests):
     """
     tests post_to_influxdb function when datastring is empty, should do nothing
@@ -82,7 +82,7 @@ def test_post_to_influxdb_empty_string(mock_requests):
     mock_requests.post.assert_not_called()
 
 
-@patch("cloudMonitoring.utils.read_config_file")
+@patch("cloudmon.utils.read_config_file")
 def test_parse_args_valid_args(mock_read_config_file):
     """
     tests parse_args function with a valid filepath
@@ -110,7 +110,7 @@ def test_parse_args_filepath_invalid_dir_fp():
         parse_args(["."])
 
 
-@patch("cloudMonitoring.utils.read_config_file")
+@patch("cloudmon.utils.read_config_file")
 def test_parse_args_filepath_read_config_fails(mock_read_config_file):
     """
     tests parse_args function fails when read_config_file returns config error
@@ -129,7 +129,7 @@ def test_parse_args_filepath_read_config_fails(mock_read_config_file):
     mock_read_config_file.assert_called_once_with(config_file)
 
 
-@patch("cloudMonitoring.utils.post_to_influxdb")
+@patch("cloudmon.utils.post_to_influxdb")
 def test_run_scrape(mock_post_to_influxdb):
     """
     Tests run_scrape function.

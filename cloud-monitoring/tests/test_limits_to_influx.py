@@ -1,5 +1,7 @@
 from unittest.mock import patch, call, NonCallableMock
-from cloudMonitoring.limits_to_influx import (
+import pytest
+
+from cloudmon.limits_to_influx import (
     convert_to_data_string,
     get_limit_prop_string,
     extract_limits,
@@ -7,7 +9,6 @@ from cloudMonitoring.limits_to_influx import (
     get_all_limits,
     main,
 )
-import pytest
 
 
 def test_convert_to_data_string_no_items():
@@ -17,7 +18,7 @@ def test_convert_to_data_string_no_items():
     assert convert_to_data_string(NonCallableMock(), {}) == ""
 
 
-@patch("cloudMonitoring.limits_to_influx.get_limit_prop_string")
+@patch("cloudmon.limits_to_influx.get_limit_prop_string")
 def test_convert_to_data_string_one_item(mock_get_limit_prop_string):
     """
     Tests convert_to_data_string works with single entry in dict for limit_details
@@ -32,7 +33,7 @@ def test_convert_to_data_string_one_item(mock_get_limit_prop_string):
     mock_get_limit_prop_string.assert_called_once_with(mock_project_details)
 
 
-@patch("cloudMonitoring.limits_to_influx.get_limit_prop_string")
+@patch("cloudmon.limits_to_influx.get_limit_prop_string")
 def test_convert_to_data_string_multi_item(mock_get_limit_prop_string):
     """
     Tests convert_to_data_string works with multiple entries in dict for limit_details
@@ -126,8 +127,8 @@ def test_extract_limits_valid():
     }
 
 
-@patch("cloudMonitoring.limits_to_influx.extract_limits")
-@patch("cloudMonitoring.limits_to_influx.openstack")
+@patch("cloudmon.limits_to_influx.extract_limits")
+@patch("cloudmon.limits_to_influx.openstack")
 def test_get_limits_for_project(mock_openstack, mock_extract_limits):
     """
     tests get_limits_for_project gets the limits for a project by calling appropriate functions
@@ -149,9 +150,9 @@ def test_get_limits_for_project(mock_openstack, mock_extract_limits):
     assert res == {"lim1": "val1", "lim2": "val2"}
 
 
-@patch("cloudMonitoring.limits_to_influx.openstack")
-@patch("cloudMonitoring.limits_to_influx.get_limits_for_project")
-@patch("cloudMonitoring.limits_to_influx.convert_to_data_string")
+@patch("cloudmon.limits_to_influx.openstack")
+@patch("cloudmon.limits_to_influx.get_limits_for_project")
+@patch("cloudmon.limits_to_influx.convert_to_data_string")
 def test_get_all_limits(
     mock_convert_to_data_string, mock_get_limits_for_project, mock_openstack
 ):
@@ -187,8 +188,8 @@ def test_get_all_limits(
     assert res == mock_convert_to_data_string.return_value
 
 
-@patch("cloudMonitoring.limits_to_influx.run_scrape")
-@patch("cloudMonitoring.limits_to_influx.parse_args")
+@patch("cloudmon.limits_to_influx.run_scrape")
+@patch("cloudmon.limits_to_influx.parse_args")
 def test_main(mock_parse_args, mock_run_scrape):
     """
     tests main function calls run_scrape utility function properly
