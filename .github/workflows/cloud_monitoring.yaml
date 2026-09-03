@@ -141,7 +141,7 @@ jobs:
 
       - name: Bump version (patch)
         if: steps.check_bump.outputs.same == 'true'
-        uses: callowayproject/bump-my-version@e6ecdc3e573698766cd6c2112faeda50bcc2e56a
+        uses: callowayproject/bump-my-version@3842e1f4911f242ffde0e08488925ed7933debe7
         id: bump
         with:
           args: patch
