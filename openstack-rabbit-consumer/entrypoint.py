@@ -4,6 +4,7 @@
 """
 Prepares the logging and initiates the consumers.
 """
+
 import logging
 import logging.handlers
 import os
