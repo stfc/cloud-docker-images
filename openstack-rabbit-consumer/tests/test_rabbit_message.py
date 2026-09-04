@@ -3,6 +3,7 @@
 """
 Tests rabbit messages are consumed correctly from the queue
 """
+
 import json
 from typing import Dict
 

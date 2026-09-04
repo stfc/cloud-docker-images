@@ -4,6 +4,7 @@
 Tests that we perform the correct REST requests against
 the Aquilon API
 """
+
 from unittest import mock
 from unittest.mock import patch, call, NonCallableMock
 

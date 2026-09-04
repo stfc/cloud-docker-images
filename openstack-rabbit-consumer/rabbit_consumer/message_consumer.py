@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2023 United Kingdom Research and Innovation
 """
-This file manages how rabbit messages stating AQ VM creation and deletion 
+This file manages how rabbit messages stating AQ VM creation and deletion
 should be handled and processed between the consumer and Aquilon
 """
+
 import json
 import logging
 import os
@@ -300,11 +301,17 @@ def initiate_consumer() -> None:
             logger.debug("Connected to RabbitMQ")
 
             # Durable indicates that the queue will survive a broker restart
-            queue = rabbitpy.Queue(channel, name=os.getenv(key="CONSUMER_QUEUE", default="ral.info"), durable=True)
+            queue = rabbitpy.Queue(
+                channel,
+                name=os.getenv(key="CONSUMER_QUEUE", default="ral.info"),
+                durable=True,
+            )
             for exchange in exchanges:
                 logger.debug("Binding to exchange: %s", exchange)
-                queue.bind(exchange, routing_key=os.getenv(key="CONSUMER_QUEUE", default="ral.info"))
-
+                queue.bind(
+                    exchange,
+                    routing_key=os.getenv(key="CONSUMER_QUEUE", default="ral.info"),
+                )
 
             # Consume the messages from generator
             message: rabbitpy.Message

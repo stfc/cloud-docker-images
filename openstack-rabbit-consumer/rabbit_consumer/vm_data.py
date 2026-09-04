@@ -3,6 +3,7 @@
 """
 This file has a dataclass for creating VM data objects from messages
 """
+
 from dataclasses import dataclass
 
 from rabbit_consumer.rabbit_message import RabbitMessage

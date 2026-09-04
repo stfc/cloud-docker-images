@@ -4,6 +4,7 @@
 Tests that the Openstack API functions are invoked
 as expected with the correct params
 """
+
 from unittest.mock import NonCallableMock, patch
 
 # noinspection PyUnresolvedReferences
