@@ -1,0 +1,109 @@
+name: Creata a Release Image
+
+on:
+  push:
+    branches:
+      - master
+
+# ─────────────────────────────────────────────
+# Keep these in sync with pr.yml
+# ─────────────────────────────────────────────
+env:
+  REGISTRY: harbor.stfc.ac.uk
+  IMAGE_NAMESPACE: stfc-cloud
+
+permissions:
+  contents: write # needed to push tags
+  packages: write # needed to push images
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      image_paths: ${{ steps.detect.outputs.image_paths }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: "Find All Charts"
+        id: detect
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+
+          image_paths=$(
+              find . \
+                  -name Dockerfile \
+                  -not -path './.git/*' \
+                  -printf '%h\n' |
+              sed 's|^\./||' |
+              sort -u |
+              jq -Rc -s 'split("\n") | map(select(length > 0))'
+          )
+
+          echo "image_paths=$image_paths" >> "$GITHUB_OUTPUT"
+
+          echo "$image_paths"
+
+  release:
+    needs: detect
+    if: >-
+      ${{ needs.detect.outputs.image_paths != '[]'}}
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1 # tag pushes serialise more cleanly
+      matrix:
+        component: ${{ fromJSON(needs.detect.outputs.image_paths) }}
+
+    steps:
+      - name: Maximize build space # free up space for building images
+        uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          build-mount-path: "/var/lib/docker/"
+
+      - name: Restart docker # restart the docker service
+        run: sudo service docker restart
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Login to DockerHub # increase pull rate limit
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Harbor Staging
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.STAGING_HARBOR_USERNAME }}
+          password: ${{ secrets.STAGING_HARBOR_TOKEN }}
+
+      # No-ops if this version is already tagged.
+      - id: release
+        env:
+          COMPONENT: ${{ matrix.component }}
+          PUSH: "true"
+          BUILD_CACHE: "1"
+        run: bash .github/scripts/build-release-image.sh "$COMPONENT"
+
+      # Tag last, so a failed build doesn't leave a tag behind.
+      - if: steps.release.outputs.skip == 'false'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"

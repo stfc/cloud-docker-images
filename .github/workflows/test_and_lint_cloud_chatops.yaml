@@ -1,0 +1,63 @@
+name: Cloud ChatOps Lint & Test
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/cloud_chatops.yaml"
+      - "cloud-chatops/**"
+
+jobs:
+  test_and_lint:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-22.04", "ubuntu-latest"]
+        python-version: ["3.12", "3.x"]
+    steps:
+      # https://github.com/actions/checkout/releases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python ${{ matrix.python-version }}
+        # https://github.com/actions/setup-python/releases
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          cd cloud-chatops
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check code formatting with Black
+        run: |
+          cd cloud-chatops/
+          black --check --diff chatops/ tests/
+
+      - name: Analyse with pylint
+        run: |
+          cd cloud-chatops
+          pylint . --recursive=true --rcfile=.pylintrc
+
+      - name: Run tests
+        run: |
+          cd cloud-chatops
+          python3 -m pytest tests
+
+      - name: Run tests and collect coverage
+        run: |
+          cd cloud-chatops
+          python3 -m pytest tests --cov-report xml:coverage.xml --cov
+
+      - name: Upload coverage to Codecov
+        # https://github.com/codecov/codecov-action/releases
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: cloud-chatops/coverage.xml

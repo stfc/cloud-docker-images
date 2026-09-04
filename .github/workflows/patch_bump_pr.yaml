@@ -1,0 +1,86 @@
+name: Schedule Image Rebuild
+
+# This action simply increments the patch version for
+# all docker images in this repo and opens a new PR
+
+# This is so that we update our image dependencies periodically
+# currently set for every month
+
+on:
+  schedule:
+    - cron: "0 10 1 * *" # First day of each month at 10.00am
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to bump versions
+  packages: write # needed to make branches/PRs
+
+env:
+  author: "${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>"
+  committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.detect.outputs.images }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        name: "Increment patch version for every image in repo"
+        run: |
+          set -euo pipefail
+          image_paths=$(find . -name Dockerfile -printf '%h\n' | sed 's|^\./||' | sort -u  )
+          echo "images=$(jq -Rc -s 'split("\n") | map(select(length > 0))' <<< "$image_paths")" \
+            >> "$GITHUB_OUTPUT"
+
+  bump-chart:
+    runs-on: ubuntu-latest
+    needs: detect
+    strategy:
+      matrix:
+        image: ${{ fromJSON(needs.detect.outputs.images) }}
+    steps:
+      - name: "Setup Github Token"
+        # https://github.com/actions/create-github-app-token/releases
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 #v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+        # increments ONLY the patch version using the version_incrememnt.sh script and commits the version.txt file to master
+      - name: Increment Version
+        env:
+          VERSION_FILEPATH: ./${{ matrix.image }}/version.txt
+        run: bash ${{ github.workspace }}/.github/workflows/scripts/bump_patch_version.sh "$VERSION_FILEPATH"
+
+      - name: "Create Pull Request for a patch bump"
+        id: patch-bump-pr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        env:
+          pr-title: "Patch bump for ${{ matrix.image }} image"
+          branch: "${{ matrix.image }}-patch-bump"
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: ${{ env.pr-title }}
+          author: ${{ env.author }}
+          committer: ${{ env.committer }}
+          branch: ${{ env.branch }}
+          delete-branch: true
+          title: ${{ env.pr-title }}
+          labels: |
+            automated
+            dependency-update
+            patch
+          body: |
+            Automated PR to bump the patch version for ${{ metrix.image }}
+            Forces a new build of the image to update dependencies once merged
+
+            **Please test using the dev chart before merging**
+            ---
