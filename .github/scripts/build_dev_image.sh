@@ -22,7 +22,7 @@
 
 set -euo pipefail
 
-# shellcheck source=.github/scripts/_common.sh
+# shellcheck source=.github/scripts/utils.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # shellcheck source=.github/scripts/build_image.sh

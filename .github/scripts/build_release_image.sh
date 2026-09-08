@@ -23,7 +23,7 @@ set -euo pipefail
 #   REGISTRY=harbor.stfc.ac.uk PUSH=false IMAGE_NAMESPACE=stfc-cloud \
 #     .github/scripts/build-release-image.sh service-a
 
-# shellcheck source=.github/scripts/utils
+# shellcheck source=.github/scripts/utils.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # shellcheck source=.github/scripts/build_image.sh
