@@ -37,7 +37,7 @@ jobs:
           echo "images=$(jq -Rc -s 'split("\n") | map(select(length > 0))' <<< "$image_paths")" \
             >> "$GITHUB_OUTPUT"
 
-  bump-chart:
+  bump-version:
     runs-on: ubuntu-latest
     needs: detect
     strategy:
@@ -82,5 +82,5 @@ jobs:
             Automated PR to bump the patch version for ${{ metrix.image }}
             Forces a new build of the image to update dependencies once merged
 
-            **Please test using the dev chart before merging**
+            **Please test using the dev image before merging**
             ---
