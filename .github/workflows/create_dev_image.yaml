@@ -30,28 +30,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-
-          # find changed files
-          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
-
-          # for each changed file, find the root directory of the docker image
-          changed_image_paths=$(
-              find . \
-                  -name Dockerfile \
-                  -not -path './.git/*' \
-                  -printf '%h\n' |
-              sed 's|^\./||' |
-              while read -r dir; do
-                  grep -q "^$dir/" <<< "$changed" && echo "$dir";
-              done |
-              sort -u |
-              jq -Rc -s 'split("\n") | map(select(length > 0))'
-          )
-
-          # each unique path to image directory changed needs a dev images built
+          # convert image paths into json
+          changed_image_paths=$(.github/scripts/detect_changed_images.sh "$BASE_SHA" "$HEAD_SHA" | jq -Rsc 'split("\n") | map(select(length > 0))')
+          printf 'changed: %s\n' "$changed_image_paths"
           echo "image_paths=$changed_image_paths" >> "$GITHUB_OUTPUT"
-
-          printf '%s\n' "$changed_image_paths"
 
   # version.txt must be bumped, must go up, and must not already be tagged.
   version:
@@ -73,42 +55,7 @@ jobs:
           IMAGE_PATH: ${{ matrix.image_path }}
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-
-          new=$(tr -d '[:space:]' < "$IMAGE_PATH/version.txt")
-          tag="$(basename "$IMAGE_PATH")-$new"
-
-          if [[ ! "$new" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "::error::$IMAGE_PATH/version.txt is '$new', want MAJOR.MINOR.PATCH"
-              exit 1
-          fi
-
-          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
-              echo "::error::$tag already exists: bump $IMAGE_PATH/version.txt first"
-              exit 1
-          fi
-
-          # A image directory that didn't exist on the base branch is new, so there's
-          # nothing to compare against.
-          if ! git cat-file -e "$BASE:$IMAGE_PATH/version.txt" 2> /dev/null; then
-              echo "$IMAGE_PATH is new at $new"
-              exit 0
-          fi
-
-          old=$(git show "$BASE:$IMAGE_PATH/version.txt" | tr -d '[:space:]')
-
-          if [[ "$old" == "$new" ]]; then
-              echo "::error::$IMAGE_PATH changed but version.txt is still $old"
-              exit 1
-          fi
-
-          lowest=$(printf '%s\n%s\n' "$old" "$new" | sort -V | head -1)
-
-          if [[ "$lowest" != "$old" ]]; then
-              echo "::error::$IMAGE_PATH version went backwards: $old -> $new"
-              exit 1
-          fi
-
-          echo "$IMAGE_PATH: $old -> $new" >> "$GITHUB_STEP_SUMMARY"
+          .github/scripts/validate_version.sh "$IMAGE_PATH" "$BASE"
 
   # Build + push a dev image — trusted authors only.
   # Tag format: <version>dev-<short sha>, e.g. 1.0.0dev-ase241f
