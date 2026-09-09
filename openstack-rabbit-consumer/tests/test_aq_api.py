@@ -69,10 +69,7 @@ def test_setup_requests(verify_kerb, adapter, retry, requests):
     response.status_code = 200
 
     setup_requests(NonCallableMock(), NonCallableMock(), NonCallableMock())
-    assert (
-        session.verify
-        == "/etc/grid-security/certificates/aquilon-gridpp-rl-ac-uk-chain.pem"
-    )
+    assert session.verify == "/etc/grid-security/certificates/UKeScienceRoot-2026.pem"
 
     verify_kerb.assert_called_once()
     retry.assert_called_once_with(total=5, backoff_factor=0.1, status_forcelist=[503])
@@ -95,10 +92,7 @@ def test_setup_requests_throws_for_failed(verify_kerb, adapter, retry, requests)
     with pytest.raises(ConnectionError):
         setup_requests(NonCallableMock(), NonCallableMock(), NonCallableMock())
 
-    assert (
-        session.verify
-        == "/etc/grid-security/certificates/aquilon-gridpp-rl-ac-uk-chain.pem"
-    )
+    assert session.verify == "/etc/grid-security/certificates/UKeScienceRoot-2026.pem"
 
     verify_kerb.assert_called_once()
     retry.assert_called_once_with(total=5, backoff_factor=0.1, status_forcelist=[503])
