@@ -62,7 +62,7 @@ def test_post_to_influxdb_valid(mock_requests):
 
     post_to_influxdb(mock_data_string, mock_host, mock_db_name, (mock_user, mock_pass))
     mock_requests.post.assert_called_once_with(
-        "http://localhost:8086/write?db=cloud&precision=s",
+        "https://localhost:8086/write?db=cloud&precision=s",
         data=mock_data_string,
         auth=(mock_user, mock_pass),
         timeout=60,
