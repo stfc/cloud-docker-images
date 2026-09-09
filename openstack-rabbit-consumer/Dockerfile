@@ -2,10 +2,17 @@ FROM python:3.10
 
 WORKDIR /usr/src/app
 
+RUN wget -q -O - \
+    https://repository.egi.eu/sw/production/cas/1/current/GPG-KEY-EUGridPMA-RPM-4 \
+    | gpg --dearmor -o /etc/apt/keyrings/GPG-KEY-EUGridPMA-RPM-4.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/GPG-KEY-EUGridPMA-RPM-4.gpg] http://repository.egi.eu/sw/production/cas/1/current egi-igtf core" > /etc/apt/sources.list.d/egi-trustanchors.list
+
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
     krb5-user \
+    ca-ukescienceroot-2026 \
+    ca-ukescienceca-3b \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
