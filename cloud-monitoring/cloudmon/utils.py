@@ -46,7 +46,7 @@ def post_to_influxdb(
     if not data_string:
         return
 
-    url = f"http://{host}/write?db={db_name}&precision=s"
+    url = f"https://{host}/write?db={db_name}&precision=s"
     response = requests.post(url, data=data_string, auth=auth, timeout=60)
     response.raise_for_status()
 
