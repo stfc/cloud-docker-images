@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Signing in</title>
+</head>
+
+<body>
+    <main>
+        <p id="message">Setting up your session... Redirecting when done...</p>
+        <p id="detail"></p>
+    </main>
+
+    <script>
+        (function () {
+            "use strict";
+
+            var base = window.location.origin;
+            var msgEl = document.getElementById("message");
+            var detailEl = document.getElementById("detail");
+
+            function fail(message, detail) {
+                msgEl.className = "";
+                msgEl.textContent = message;
+                detailEl.textContent = detail || "";
+            }
+
+            // ---------------------------------------------------------------------
+            // Loop guard
+            // ---------------------------------------------------------------------
+            // nginx sends every cookie-less request here. If the cookie cannot be set
+            // (third-party cookie blocking, or other issues) 
+            // the browser would bounce between here and / forever.
+            // Block after three attempts, then stop and say why.
+            var TRIES_KEY = "st2AuthTries";
+            var tries = 0;
+            try { tries = parseInt(sessionStorage.getItem(TRIES_KEY) || "0", 10) || 0; } catch (e) { }
+
+            if (tries > 2) {
+                try { sessionStorage.removeItem(TRIES_KEY); } catch (e) { }
+                return fail(
+                    "Sign-in is looping",
+                    "The session cookie is not sticking. Enable cookies for this site, then reload."
+                );
+            }
+            try { sessionStorage.setItem(TRIES_KEY, String(tries + 1)); } catch (e) { }
+
+            // Exchange the OIDC session for a StackStorm token
+            // nginx maps oauth2-proxy's X-Forwarded-User onto REMOTE_USER header for st2auth proxy mode
+            var http = new XMLHttpRequest();
+            http.open("POST", base + "/auth/v1/tokens", true);
+            http.setRequestHeader("Content-Type", "application/json");
+            http.withCredentials = true;
+
+            http.onload = function () {
+
+                if (http.status === 401 || http.status === 403) {
+                    window.location.reload();
+                    return;
+                }
+
+                var result;
+                try {
+                    result = JSON.parse(http.responseText);
+                } catch (e) {
+                    return fail(
+                        "The server sent an unexpected response",
+                        "Received HTTP " + http.status + " with a non-JSON body. Check the nginx and st2auth logs."
+                    );
+                }
+
+                if (http.status !== 201) {
+                    // faultstring is StackStorm's standard error key, and it is what the
+                    // @authError fallback in nginx synthesises when st2auth is unreachable.
+                    return fail(
+                        "Could not get an access token",
+                        result.faultstring || ("The auth service returned HTTP " + http.status + ".")
+                    );
+                }
+
+
+                // Hand the token to st2web in the shape it expects
+                try {
+                    window.localStorage.setItem("st2Session", JSON.stringify({
+                        server: {
+                            api: base + "/api",
+                            auth: base + "/auth",
+                            stream: base + "/stream",
+                            token: null
+                        },
+                        token: result
+                    }));
+                } catch (e) {
+                    return fail(
+                        "Cannot save the session",
+                        "Browser storage is unavailable. Leave private browsing or allow site data, then reload."
+                    );
+                }
+
+                // Marker cookie, scoped to the token's own lifetime
+                var ttl = 3600;
+                if (result.expiry) {
+                    ttl = Math.floor((new Date(result.expiry).getTime() - Date.now()) / 1000) - 60;
+                }
+                if (!(ttl > 0)) {
+                    return fail(
+                        "The token has already expired",
+                        "Check for clock skew between this machine and the StackStorm host."
+                    );
+                }
+
+                document.cookie = "auth-token=1; path=/; max-age=" + ttl + "; samesite=lax" +
+                    (window.location.protocol === "https:" ? "; secure" : "");
+
+                try { sessionStorage.removeItem(TRIES_KEY); } catch (e) { }
+
+                window.location.replace(base + "/index.html");
+            };
+
+            http.onerror = function () {
+                fail(
+                    "Cannot reach the auth service",
+                    "The network request failed before a response arrived. Check that nginx and st2auth are running."
+                );
+            };
+
+            http.ontimeout = function () {
+                fail("The auth service did not respond in time", "Try reloading in a moment.");
+            };
+
+            http.timeout = 20000;
+            http.send(JSON.stringify({}));
+        })();
+    </script>
+</body>
+
+</html>
