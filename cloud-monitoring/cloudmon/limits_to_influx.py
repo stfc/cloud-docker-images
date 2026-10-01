@@ -57,13 +57,13 @@ def extract_limits(limits_dict) -> Dict:
         "total_ram_used": "totalRAMUsed",
         "instances_used": "totalInstancesUsed",
         "security_groups": "maxSecurityGroups",
-        "floating_ips_used": "totalFloatingIpsUsed",
         "total_cores": "maxTotalCores",
         "server_group_members": "maxServerGroupMembers",
-        "floating_ips": "maxTotalFloatingIps",
         "security_groups_used": "totalSecurityGroupsUsed",
         "instances": "maxTotalInstances",
         "total_ram": "maxTotalRAMSize",
+        "total_floating_ips": "floating-ips",
+        "total_volumes": "volumes",
     }
     parsed_limits = {}
     for key, val in mappings.items():
@@ -85,7 +85,8 @@ def get_limits_for_project(instance: str, project_id) -> Dict:
     conn = openstack.connect(instance)
     project_details = {
         **extract_limits(conn.get_compute_limits(project_id)),
-        **conn.get_volume_limits(project_id)["absolute"],
+        **conn.get_compute_quotas(project_id),
+        **conn.get_volume_quotas(project_id),
     }
     return project_details
 
@@ -124,6 +125,7 @@ def main(user_args: List):
     """
     monitoring_args = parse_args(user_args, description="Get All Project Limits")
     run_scrape(monitoring_args, get_all_limits)
+    
 
 
 if __name__ == "__main__":
