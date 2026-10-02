@@ -16,26 +16,23 @@ If adding source-code - please a new CI github action for performing tests and l
 Docker images are built and pushed to https://harbor.stfc.ac.uk by CI jobs
 
 
-`.github/workflows/create_dev_image.yml` runs when a PR is created and will build and push a dev image following the format: `<image-name>-dev-<version>-<github commit sha>` - e.g. `cloud-monitoring-dev-1.0.0-ase34e1`
+`.github/workflows/create_dev_image.yml` runs when a PR is created and will build and push a dev image following the format: `<image-name>-dev.<version>-<github commit sha>` - e.g. `cloud-monitoring-dev.1.0.0-ase34e1`
 
 `.github/workflows/create_release_image.yml` runs when the PR is merged. A new version - specified in `version.txt` is required to be bumped before merging. Once merged - a new image with that version will be built and pushed to harbor
 
-both scripts can be invoked locally by utilising `.github/scripts/build_dev_image.sh` and `.github/scripts/build_release_iamge.sh` repectively - see script file for details on how to use it.
-
-In general, they can be invoked like so:
+To manually build and push images, you can run:
 
 ```sh
-# dev image: <version>dev-<short sha>, sha defaults to HEAD
-REGISTRY=ghcr.io IMAGE_NAMESPACE=my-org ./.github/scripts/build-dev-image.sh cloud-monitoring
+VERSION=$(cat cloud-monitoring/version.txt) 
 
-# release image: :<version> and :latest
-REGISTRY=ghcr.io IMAGE_NAMESPACE=my-org ./.github/scripts/build-release-image.sh cloud-monitoring
+# docker build <repo>/<image-namespace>/<image>:$VERSION
+docker build harbor.stfc.ac.uk/stfc-cloud/cloud-monitoring:$VERSION --push
+
+# for a dev image
+docker build harbor.stfc.ac.uk/stfc-cloud-staging/cloud-monitoring:$VERSION-dev.1 --push
 ```
 
 ## Linting and Testing
 
 Currently linting and testing CI actions are prefixed with `test_and_lint*`. Since each image is built slightly differently, we have separate CI actions for each. These CI jobs do not build images and are run when a PR is opened
 
-## Regular version bumps
-
-Each month, we bump the minor version of all our docker images and open a pull request - this forces a new docker image to be built with updated dependencies.     

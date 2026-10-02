@@ -92,16 +92,51 @@ jobs:
           username: ${{ secrets.STAGING_HARBOR_USERNAME }}
           password: ${{ secrets.STAGING_HARBOR_TOKEN }}
 
-      # No-ops if this version is already tagged.
-      - id: release
-        env:
-          IMAGE_PATH: ${{ matrix.image_path }}
-          PUSH: "true"
-          BUILD_CACHE: "1"
-        run: bash .github/scripts/build_release_image.sh "$IMAGE_PATH"
+      - name: Set image tag
+        id: image
+        shell: bash
+        run: |
+          image_path="${{ matrix.image_path }}"
+          image_name="$(basename "$image_path")"
+          version="$(cat "$image_path/version.txt")"
+
+          echo "name=${image_name}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${image_name}:${version}" >> "$GITHUB_OUTPUT"
+          echo "cache_ref="${image}:buildcache" >> "$GITHUB_OUTPUT""
+
+      # if image already exists with the same version, don't build
+      - name: Check image tag does not exist
+        id: check
+        shell: bash
+        run: |
+          image="${{ steps.image.outputs.image }}"
+          tag="${{ steps.image.outputs.version_tag }}"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          if docker manifest inspect "${image}:${tag}" >/dev/null 2>&1; then
+            echo "::error::Image ${image}:${tag} already exists, not building
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Image ${image}:${tag} does not exist; continuing"
+
+      - if: steps.check.outputs.skip == 'false'
+        name: Build and push
+        # https://github.com/docker/build-push-action/releases
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ steps.image.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ steps.image.outputs.name }}:latest
+          cache-from: type=registry,ref=${{ steps.image.outputs.cache_ref }}
+          cache-to: type=registry,ref=${{ steps.image.outputs.cache_ref }},mode=max
+          context: "{{ matrix.image_path }}"
+          file: ${{ matrix.image_path }}/Dockerfile
 
       # Tag last, so a failed build doesn't leave a tag behind.
-      - if: steps.release.outputs.skip == 'false'
+      - if: steps.check.outputs.skip == 'false'
         env:
           TAG: ${{ steps.release.outputs.tag }}
         run: |

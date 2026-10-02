@@ -16,6 +16,11 @@ while read -r dir; do
 
     # Check whether anything in the image directory changed
     if grep -q "^$dir/" <<< "$changed"; then
+        # version.txt must also have changed
+        if ! grep -q "^$dir/version.txt$" <<< "$changed"; then
+            echo "ERROR: $dir has changed, but version.txt was not changed - bump the version!" >&2
+            exit 1
+        fi
         echo "$dir"
     fi
 done |
