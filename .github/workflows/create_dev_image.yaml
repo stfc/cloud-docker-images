@@ -38,7 +38,7 @@ jobs:
   # Build + push a dev image — only works when harbor secret exists
   # Tag format: <version>dev-<short sha>, e.g. 1.0.0dev-ase241f
   dev-image:
-    needs: [detect, version]
+    needs: [detect]
     # The `env` context isn't available in a job-level `if`, so the trusted-bot
     # list has to be inline.
 
