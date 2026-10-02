@@ -48,20 +48,24 @@ jobs:
       matrix:
         image_path: ${{ fromJSON(needs.detect.outputs.image_paths) }}
     steps:
+      # https://github.com/actions/checkout/releases
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+      # https://github.com/docker/setup-buildx-action/releases
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.4.1
 
       - name: Login to DockerHub # increase pull rate limit
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        # https://github.com/docker/login-action/releases
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to Harbor
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        # https://github.com/docker/login-action/releases
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.STAGING_HARBOR_USERNAME }}
@@ -81,6 +85,7 @@ jobs:
           echo "cache_ref="${image}:buildcache" >> "$GITHUB_OUTPUT""
 
       - name: Maximize build space # free up space for building images
+        # https://github.com/easimon/maximize-build-space/releases
         uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
         with:
           root-reserve-mb: 512
@@ -96,7 +101,7 @@ jobs:
 
       - name: Build and push
         # https://github.com/docker/build-push-action/releases
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.4.0
         with:
           push: true
           tags: |
