@@ -1,0 +1,112 @@
+name: Create a Dev Image
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: harbor.stfc.ac.uk
+  IMAGE_NAMESPACE: stfc-cloud-staging
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      image_paths: ${{ steps.detect.outputs.image_paths }}
+    steps:
+      # https://github.com/actions/checkout/releases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # convert image paths into json
+          changed_image_paths=$(.github/scripts/detect_changed_images.sh "$BASE_SHA" "$HEAD_SHA" | jq -Rsc 'split("\n") | map(select(length > 0))')
+          printf 'changed: %s\n' "$changed_image_paths"
+          echo "image_paths=$changed_image_paths" >> "$GITHUB_OUTPUT"
+
+  # Build + push a dev image — only works when harbor secret exists
+  # Tag format: <version>dev-<short sha>, e.g. 1.0.0dev-ase241f
+  dev-image:
+    needs: [detect]
+    # The `env` context isn't available in a job-level `if`, so the trusted-bot
+    # list has to be inline.
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_path: ${{ fromJSON(needs.detect.outputs.image_paths) }}
+    steps:
+      # https://github.com/actions/checkout/releases
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # https://github.com/docker/setup-buildx-action/releases
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.4.1
+
+      - name: Login to DockerHub # increase pull rate limit
+        # https://github.com/docker/login-action/releases
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Harbor
+        # https://github.com/docker/login-action/releases
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.STAGING_HARBOR_USERNAME }}
+          password: ${{ secrets.STAGING_HARBOR_TOKEN }}
+
+      - name: Set image tag
+        id: image
+        shell: bash
+        run: |
+          image_path="${{ matrix.image_path }}"
+          image_name="$(basename "$image_path")"
+          version="$(cat "$image_path/version.txt")"
+
+          echo "name=${image_name}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${image_name}:${version}-dev.${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          echo "cache_ref="${image}:buildcache" >> "$GITHUB_OUTPUT""
+
+      - name: Maximize build space # free up space for building images
+        # https://github.com/easimon/maximize-build-space/releases
+        uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          build-mount-path: "/var/lib/docker/"
+
+      - name: Restart docker # restart the docker service
+        run: sudo service docker restart
+
+      - name: Build and push
+        # https://github.com/docker/build-push-action/releases
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.4.0
+        with:
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ steps.image.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.image.outputs.cache_ref }}
+          cache-to: type=registry,ref=${{ steps.image.outputs.cache_ref }},mode=max
+          context: "{{ matrix.image_path }}"
+          file: ${{ matrix.image_path }}/Dockerfile
