@@ -93,7 +93,7 @@ jobs:
           echo "name=${image_name}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "tag=${image_name}:${version}" >> "$GITHUB_OUTPUT"
-          echo "cache_ref=${image_name}:buildcache" >> "$GITHUB_OUTPUT"
+          echo "cache_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${image_name}:buildcache" >> "$GITHUB_OUTPUT"
 
       # if image already exists with the same version, don't build
       - name: Check image tag does not exist

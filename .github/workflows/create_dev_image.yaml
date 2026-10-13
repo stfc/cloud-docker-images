@@ -82,7 +82,7 @@ jobs:
           echo "name=${image_name}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "tag=${image_name}:${version}-dev.${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
-          echo "cache_ref=${image_name}:buildcache" >> "$GITHUB_OUTPUT"
+          echo "cache_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${image_name}:buildcache" >> "$GITHUB_OUTPUT"
 
       - name: Maximize build space # free up space for building images
         # https://github.com/easimon/maximize-build-space/releases
