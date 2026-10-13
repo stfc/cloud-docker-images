@@ -139,8 +139,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ steps.image.outputs.name }}:latest
           cache-from: type=registry,ref=${{ steps.image.outputs.cache_ref }}
           cache-to: type=registry,ref=${{ steps.image.outputs.cache_ref }},mode=max
-          context: "{{ matrix.image_path }}"
-          file: ${{ matrix.image_path }}/Dockerfile
+          context: "{{defaultContext}}:${{ matrix.image_path }}"
 
       # Tag last, so a failed build doesn't leave a tag behind.
       - if: steps.check.outputs.skip == 'false'

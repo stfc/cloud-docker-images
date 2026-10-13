@@ -108,5 +108,4 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ steps.image.outputs.tag }}
           cache-from: type=registry,ref=${{ steps.image.outputs.cache_ref }}
           cache-to: type=registry,ref=${{ steps.image.outputs.cache_ref }},mode=max
-          context: "{{ matrix.image_path }}"
-          file: ${{ matrix.image_path }}/Dockerfile
+          context: "{{defaultContext}}:${{ matrix.image_path }}"
