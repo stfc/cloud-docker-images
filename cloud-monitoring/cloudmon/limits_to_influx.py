@@ -37,43 +37,6 @@ def get_limit_prop_string(limit_details):
     return ",".join(limit_strings)
 
 
-def extract_limits(limits_dict) -> Dict:
-    """
-    helper function to get info from
-    :param limits_dict: a dictionary of project limits to extract useful properties from
-    :return: a dictionary of useful properties with keys that match expected keys in influxdb
-    """
-    # the keys need changing to match legacy data when we used the openstack-cli
-    mappings = {
-        "server_meta": "maxServerMeta",
-        "personality": "maxPersonality",
-        "server_groups_used": "totalServerGroupsUsed",
-        "image_meta": "maxImageMeta",
-        "personality_size": "maxPersonalitySize",
-        "keypairs": "maxTotalKeypairs",
-        "security_group_rules": "maxSecurityGroupRules",
-        "server_groups": "maxServerGroups",
-        "total_cores_used": "totalCoresUsed",
-        "total_ram_used": "totalRAMUsed",
-        "instances_used": "totalInstancesUsed",
-        "security_groups": "maxSecurityGroups",
-        "floating_ips_used": "totalFloatingIpsUsed",
-        "total_cores": "maxTotalCores",
-        "server_group_members": "maxServerGroupMembers",
-        "floating_ips": "maxTotalFloatingIps",
-        "security_groups_used": "totalSecurityGroupsUsed",
-        "instances": "maxTotalInstances",
-        "total_ram": "maxTotalRAMSize",
-    }
-    parsed_limits = {}
-    for key, val in mappings.items():
-        try:
-            parsed_limits[val] = limits_dict[key]
-        except KeyError as exp:
-            raise RuntimeError(f"could not find {key} in project limits") from exp
-    return parsed_limits
-
-
 def get_limits_for_project(instance: str, project_id) -> Dict:
     """
     Get limits for a project. This is currently using openstack-cli
@@ -83,11 +46,23 @@ def get_limits_for_project(instance: str, project_id) -> Dict:
     :return: a set of limit properties for project we want
     """
     conn = openstack.connect(instance)
-    project_details = {
-        **extract_limits(conn.get_compute_limits(project_id)),
-        **conn.get_volume_limits(project_id)["absolute"],
+
+    # Nova (Compute)
+    nova_limits = conn.compute.get_limits(project=project_id).absolute
+    # Cinder (Volumes)
+    cinder_limits = conn.block_storage.get_limits(project=project_id).absolute
+    # Neutron (Network)
+    neutron_quotas = conn.network.get_quota(quota=project_id, details=True)
+
+    return {
+        **nova_limits,
+        **cinder_limits,
+        # get floating ip limits from neutron
+        **{
+            "floating_ips": neutron_quotas.floating_ips.get("limit", -1),
+            "floating_ips_used": neutron_quotas.floating_ips.get("used", 0)
+        }
     }
-    return project_details
 
 
 def is_valid_project(project: Project) -> bool:
