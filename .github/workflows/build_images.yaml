@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "exporters/**"
+      - "rocky-source/grafana/**"
       - ".github/workflows/codeql.yaml"
       - ".github/workflows/build_images.yaml"
   schedule: [ { cron: "14 14 * * TUE" } ] # Every Tuesday at 14:14
